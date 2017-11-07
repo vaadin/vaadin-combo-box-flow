@@ -33,6 +33,7 @@ import com.vaadin.ui.html.Div;
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
 public class ComboBoxView extends DemoView {
 
+    // this main method might be still needed, there will be a decision on it
     public static void main(String... args) throws Exception {
         new ComponentDemoServer().startServer();
     }
