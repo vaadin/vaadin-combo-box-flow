@@ -15,12 +15,26 @@
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
-    
+
     <scm>
         <connection>scm:https:https://github.com/vaadin/vaadin-combo-box-flow.git</connection>
         <developerConnection>scm:git:git@github.com:vaadin/vaadin-combo-box-flow.git</developerConnection>
         <url>https://github.com/vaadin/vaadin-combo-box-flow/</url>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>flow</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow/</url>
+        </repository>
+        <repository>
+            <id>flow-snapshots</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -37,6 +51,11 @@
             <artifactId>flow-html-components</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
 
         <!-- Dependencies for the demo -->
         <dependency>
@@ -50,12 +69,6 @@
             <artifactId>flow-components</artifactId>
             <version>${flow.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>com.vaadin</groupId>
-            <artifactId>flow-data</artifactId>
-            <version>${flow.version}</version>
-            <scope>test</scope>
-        </dependency>     
+        </dependency>          
     </dependencies>
 </project>
