@@ -27,7 +27,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("combo-box-text")
+@TestPath("combo-box-test")
 public class ComboBoxPageIT extends AbstractComponentIT {
 
     @Before
