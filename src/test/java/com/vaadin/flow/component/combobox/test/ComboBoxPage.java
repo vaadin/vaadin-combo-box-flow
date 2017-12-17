@@ -17,12 +17,13 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.stream.Stream;
 
-import com.vaadin.data.provider.DataProvider;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.router.Route;
+import com.vaadin.flow.component.combobox.test.ComboBoxPage.Title;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.router.Route;
 import com.vaadin.ui.button.Button;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.Label;
 
 /**
  * Test view for {@link ComboBox}.
