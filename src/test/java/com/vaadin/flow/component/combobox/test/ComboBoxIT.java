@@ -26,7 +26,6 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.combobox.demo.ComboBoxView;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
 
-
 /**
  * Integration tests for the {@link ComboBoxView}.
  */

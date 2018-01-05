@@ -37,6 +37,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.renderer.TemplateRendererUtil;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -146,15 +147,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      *            ComboBox, not <code>null</code>
      */
     public void setItemRenderer(TemplateRenderer<T> renderer) {
-        Objects.requireNonNull(renderer, "The renderer must not be null");
+        Objects.requireNonNull(renderer, "The renderer can not be null");
 
         if (renderer instanceof ComponentTemplateRenderer) {
             throw new IllegalArgumentException(
                     "ComponentTemplateRenderers are not supported yet");
         }
-
         this.renderer = renderer;
         template.setProperty("innerHTML", renderer.getTemplate());
+
+        TemplateRendererUtil.registerEventHandlers(renderer, template,
+                getElement(), key -> keyMapper.get(key));
+        refresh();
     }
 
     @Override
@@ -217,7 +221,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
         Objects.requireNonNull(itemLabelGenerator,
-                "Item label generators must not be null");
+                "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
         refresh();
     }
