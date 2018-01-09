@@ -58,8 +58,8 @@
         </dependency>   
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0.alpha2</version>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <version>1.0.0.alpha6</version>
             <scope>test</scope>
         </dependency>       
     </dependencies>
