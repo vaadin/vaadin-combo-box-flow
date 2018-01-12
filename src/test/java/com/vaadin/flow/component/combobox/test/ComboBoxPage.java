@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -61,13 +62,8 @@ public class ComboBoxPage extends Div {
         comboBox.setValue("foo");
 
         NativeButton changeSelectedItem = new NativeButton(
-                "Changed selected item", evt -> {
-                    if ("bar".equals(comboBox.getValue())) {
-                        comboBox.setValue("foo");
-                    } else {
-                        comboBox.setValue("bar");
-                    }
-                });
+                "Changed selected item", evt -> comboBox.setValue(
+                        "bar".equals(comboBox.getValue()) ? "foo" : "bar"));
         changeSelectedItem.setId("toggle-selected-item");
 
         add(comboBox, changeSelectedItem);
@@ -132,12 +128,8 @@ public class ComboBoxPage extends Div {
     }
 
     private void handleSelection(ComboBox<Title> titles) {
-        Title title = titles.getValue();
-        if (title != null) {
-            selectedTitle.setText(title.name());
-        } else {
-            selectedTitle.setText("");
-        }
+        selectedTitle.setText(Optional.ofNullable(titles.getValue())
+                .map(Enum::name).orElse(""));
     }
 
     @Override

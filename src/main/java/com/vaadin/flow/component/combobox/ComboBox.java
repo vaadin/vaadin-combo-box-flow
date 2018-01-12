@@ -74,7 +74,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
-    private Element template;
+    private final Element template;
     private TemplateRenderer<T> renderer;
 
     private List<T> itemsFromDataProvider = Collections.emptyList();
@@ -166,35 +166,35 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     public void setItemRenderer(TemplateRenderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer can not be null");
 
-        if (rendererRegistration != null) {
-            rendererRegistration.remove();
-            rendererRegistration = null;
-        }
-
-        if (componentRendererRegistration != null) {
-            componentRendererRegistration.remove();
-            componentRendererRegistration = null;
-        }
-
+        unregister(componentRendererRegistration);
+        componentRendererRegistration = null;
         if (renderer instanceof ComponentTemplateRenderer) {
-            ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
             componentRendererRegistration = setupItemComponentRenderer(this,
-                    componentRenderer);
+                    (ComponentTemplateRenderer<? extends Component, T>) renderer);
         }
         this.renderer = renderer;
         template.setProperty("innerHTML", renderer.getTemplate());
 
         TemplateRendererUtil.registerEventHandlers(renderer, template,
-                getElement(), key -> keyMapper.get(key));
+                getElement(), keyMapper::get);
 
-        rendererRegistration = dataGenerator.addDataGenerator((item, json) -> {
-            Map<String, ValueProvider<T, ?>> valueProviders = renderer
-                    .getValueProviders();
-            valueProviders.forEach((property, provider) -> json.put(property,
-                    JsonSerializer.toJson(provider.apply(item))));
-        });
-
+        unregister(rendererRegistration);
+        rendererRegistration = dataGenerator
+                .addDataGenerator((item, json) -> applyValueProviders(item,
+                        json, renderer.getValueProviders()));
         refresh();
+    }
+
+    private void unregister(Registration registration) {
+        if (registration != null) {
+            registration.remove();
+        }
+    }
+
+    private void applyValueProviders(T item, JsonObject json,
+            Map<String, ValueProvider<T, ?>> valueProviders) {
+        valueProviders.forEach((property, provider) -> json.put(property,
+                JsonSerializer.toJson(provider.apply(item))));
     }
 
     @Override
@@ -299,8 +299,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
             }
             return;
         }
-        int index = itemsFromDataProvider.indexOf(value);
-        if (index < 0) {
+        if (itemsFromDataProvider.indexOf(value) < 0) {
             throw new IllegalArgumentException(
                     "The provided value is not part of ComboBox: " + value);
         }
