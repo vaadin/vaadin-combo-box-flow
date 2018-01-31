@@ -407,7 +407,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * 
-     * @return the {@code preventInvalidInput} proterty of the combobox
+     * @return the {@code preventInvalidInput} property of the combobox
      */
     public boolean isPreventInvalidInput() {
         return isPreventInvalidInputBoolean();
@@ -452,7 +452,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     /**
      * Gets the placeholder of the combobox.
      * 
-     * @return the {@code placeholder} proterty of the combobox
+     * @return the {@code placeholder} property of the combobox
      */
     public String getPlaceholder() {
         return getPlaceholderString();
@@ -466,7 +466,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     /**
      * Gets the valid input pattern
      * 
-     * @return the {@code pattern} proterty of the combobox
+     * @return the {@code pattern} property of the combobox
      */
     public String getPattern() {
         return getPatternString();
