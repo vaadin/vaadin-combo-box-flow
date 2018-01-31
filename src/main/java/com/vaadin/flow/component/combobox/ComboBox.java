@@ -438,7 +438,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     /**
      * Gets the label of the combobox.
      * 
-     * @return the {@code label} proterty of the combobox
+     * @return the {@code label} property of the combobox
      */
     public String getLabel() {
         return getLabelString();
