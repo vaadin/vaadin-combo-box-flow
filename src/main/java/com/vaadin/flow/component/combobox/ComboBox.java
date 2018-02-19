@@ -475,14 +475,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     @Override
     public T getValue() {
-        Serializable property = getElement()
-                .getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME);
-        if (property instanceof JsonObject) {
-            JsonObject selected = (JsonObject) property;
-            assert selected.hasKey(KEY_PROPERTY);
-            return keyMapper.get(selected.getString(KEY_PROPERTY));
-        }
-        return getEmptyValue();
+        return getValue(
+                getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
     }
 
     @Override
@@ -492,8 +486,23 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     }
 
     @Override
-    public String getClientValuePropertyName() {
-        return SELECTED_ITEM_PROPERTY_NAME;
+    public Registration addValueChangeListener(
+            ValueChangeListener<ComboBox<T>, T> listener) {
+        return get().getElement().addPropertyChangeListener(
+                SELECTED_ITEM_PROPERTY_NAME,
+                event -> listener
+                        .onComponentEvent(new HasValue.ValueChangeEvent<>(get(),
+                                this, getValue(event.getOldValue()),
+                                event.isUserOriginated())));
+    }
+
+    private T getValue(Serializable value) {
+        if (value instanceof JsonObject) {
+            JsonObject selected = (JsonObject) value;
+            assert selected.hasKey(KEY_PROPERTY);
+            return keyMapper.get(selected.getString(KEY_PROPERTY));
+        }
+        return getEmptyValue();
     }
 
     private JsonArray generateJson(Stream<T> data) {
