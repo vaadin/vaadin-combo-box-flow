@@ -488,7 +488,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     @Override
     public Registration addValueChangeListener(
             ValueChangeListener<ComboBox<T>, T> listener) {
-        return get().getElement().addPropertyChangeListener(
+        return getElement().addPropertyChangeListener(
                 SELECTED_ITEM_PROPERTY_NAME,
                 event -> listener
                         .onComponentEvent(new HasValue.ValueChangeEvent<>(get(),
