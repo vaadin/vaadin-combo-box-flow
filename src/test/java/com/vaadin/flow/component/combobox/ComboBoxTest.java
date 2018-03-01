@@ -163,7 +163,7 @@ public class ComboBoxTest {
     @Test
     public void ensureComboBoxIsFocusable() {
         Assert.assertTrue("ComboBox should be focusable",
-                new ComboBox<>() instanceof Focusable);
+                Focusable.class.isAssignableFrom(ComboBox.class));
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
