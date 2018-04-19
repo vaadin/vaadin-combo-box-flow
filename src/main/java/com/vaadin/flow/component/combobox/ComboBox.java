@@ -459,6 +459,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
+        setAllowCustomValue(true);
         return super.addCustomValueSetListener(listener);
     }
 

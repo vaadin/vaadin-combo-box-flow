@@ -176,6 +176,12 @@ public class ComboBoxTest {
         Assert.assertFalse(comboBox.isEnabled());
     }
 
+    public void shouldHaveNewItemsEnabledIfAListenerIsAdded() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.addCustomValueSetListener(e->{});
+        Assert.assertTrue(comboBox.isAllowCustomValue());
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);
