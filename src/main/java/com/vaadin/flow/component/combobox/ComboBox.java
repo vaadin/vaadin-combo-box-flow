@@ -456,6 +456,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
                 getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
     }
 
+    /**
+     * Adds a listener for CustomValueSetEvent which is fired when user
+     * types in a value that don't already exist in the ComboBox.
+     *
+     * <p>As a side effect makes the ComboBox allow custom values.</p>
+     *
+     * @param listener
+     *            the listener to be notified when a new value is filled
+     * @return a {@link Registration} for removing the event listener
+     */
     @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {

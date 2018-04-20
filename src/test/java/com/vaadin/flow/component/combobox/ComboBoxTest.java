@@ -176,6 +176,7 @@ public class ComboBoxTest {
         Assert.assertFalse(comboBox.isEnabled());
     }
 
+    @Test
     public void shouldHaveNewItemsEnabledIfAListenerIsAdded() {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.addCustomValueSetListener(e->{});
