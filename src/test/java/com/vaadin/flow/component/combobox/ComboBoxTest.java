@@ -32,7 +32,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
-
+import com.vaadin.flow.shared.Registration;
 
 public class ComboBoxTest {
 
@@ -160,7 +160,8 @@ public class ComboBoxTest {
         Assert.assertEquals(Category.CATEGORY_2, selected.get());
     }
 
-    // Ensure https://github.com/vaadin/vaadin-combo-box-flow/issues/36 does not reoccur
+    // Ensure https://github.com/vaadin/vaadin-combo-box-flow/issues/36 does not
+    // reoccur
     @Test
     public void ensureComboBoxIsFocusable() {
         Assert.assertTrue("ComboBox should be focusable",
@@ -177,10 +178,66 @@ public class ComboBoxTest {
     }
 
     @Test
-    public void shouldHaveNewItemsEnabledIfAListenerIsAdded() {
+    public void addCustomValueSetListener_customValueIsAllowed() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.addCustomValueSetListener(e->{});
+        comboBox.addCustomValueSetListener(e -> {
+        });
         Assert.assertTrue(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    public void addCustomValueSetListener_removeListener_customValueIsDisallowed() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Registration registration = comboBox.addCustomValueSetListener(e -> {
+        });
+        registration.remove();
+        Assert.assertFalse(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    public void addCustomValueSetListener_disableCustomValue_customValueIsDisallowed() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Registration registration = comboBox.addCustomValueSetListener(e -> {
+        });
+
+        comboBox.setAllowCustomValue(false);
+        Assert.assertFalse(comboBox.isAllowCustomValue());
+
+        // nothing has changed when the listener is removed
+        registration.remove();
+        Assert.assertFalse(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    public void addCustomValueSetListener_addTwoListeners_removeListenerSeveralTimes_customValueIsAllowed() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Registration registration = comboBox.addCustomValueSetListener(e -> {
+        });
+        comboBox.addCustomValueSetListener(e -> {
+        });
+        // remove the first listener
+        registration.remove();
+        Assert.assertTrue(comboBox.isAllowCustomValue());
+
+        // removes the fist listener one more time which is no-op
+        registration.remove();
+        Assert.assertTrue(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    public void addCustomValueSetListener_addTwoListeners_removeListeners_customValueIsDisallowed() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Registration registration1 = comboBox.addCustomValueSetListener(e -> {
+        });
+        Registration registration2 = comboBox.addCustomValueSetListener(e -> {
+        });
+        // remove the first listener
+        registration1.remove();
+        Assert.assertTrue(comboBox.isAllowCustomValue());
+
+        // removes the second listener
+        registration2.remove();
+        Assert.assertFalse(comboBox.isAllowCustomValue());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

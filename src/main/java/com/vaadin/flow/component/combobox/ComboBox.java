@@ -77,6 +77,31 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     private List<T> temporaryFilteredItems;
 
+    private int customValueListenersCount;
+
+    private class CustomValueRegistraton implements Registration {
+
+        private Registration delegate;
+
+        private CustomValueRegistraton(Registration delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void remove() {
+            if (delegate != null) {
+                delegate.remove();
+                customValueListenersCount--;
+
+                if (customValueListenersCount == 0) {
+                    setAllowCustomValue(false);
+                }
+                delegate = null;
+            }
+        }
+
+    }
+
     /**
      * Default constructor. Creates an empty combo box.
      *
@@ -457,10 +482,22 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     }
 
     /**
-     * Adds a listener for CustomValueSetEvent which is fired when user
-     * types in a value that don't already exist in the ComboBox.
+     * Adds a listener for CustomValueSetEvent which is fired when user types in
+     * a value that don't already exist in the ComboBox.
      *
-     * <p>As a side effect makes the ComboBox allow custom values.</p>
+     * <p>
+     * As a side effect makes the ComboBox allow custom values. If you don't
+     * want to allow a user to add new values to the list once the listener is
+     * added please disable it explicitly via the
+     * {@link #setAllowCustomValue(boolean)} method.
+     * </p>
+     *
+     * <p>
+     * The custom value becomes disallowed automatically once the last custom
+     * value set listener is removed.
+     * </p>
+     *
+     * @see #setAllowCustomValue(boolean)
      *
      * @param listener
      *            the listener to be notified when a new value is filled
@@ -470,7 +507,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
         setAllowCustomValue(true);
-        return super.addCustomValueSetListener(listener);
+        customValueListenersCount++;
+        Registration registration = super.addCustomValueSetListener(listener);
+        return new CustomValueRegistraton(registration);
     }
 
     @Override
@@ -553,4 +592,5 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         super.onEnabledStateChanged(enabled);
         refresh();
     }
+
 }
