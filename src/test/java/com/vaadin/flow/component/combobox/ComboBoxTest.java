@@ -25,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.UI;
@@ -151,7 +152,7 @@ public class ComboBoxTest {
         combo.setItems(Category.values());
 
         AtomicReference<Category> selected = new AtomicReference<>();
-        ValueChangeListener<ComboBox<Category>, Category> listener = event -> selected
+        ValueChangeListener<ComponentValueChangeEvent<ComboBox<Category>, Category>> listener = event -> selected
                 .set(combo.getValue());
         combo.addValueChangeListener(listener);
 
