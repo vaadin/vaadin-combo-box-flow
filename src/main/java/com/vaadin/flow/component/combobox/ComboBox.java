@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -56,13 +55,12 @@ import elemental.json.JsonValue;
  * @param <T>
  *            the type of the items to be inserted in the combo box
  */
-public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
-        HasSize, HasValidation, HasValue<ComboBox<T>, T>, HasDataProvider<T> {
+public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
+        implements HasSize, HasValidation, HasDataProvider<T> {
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
 
-    private T oldValue;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
@@ -76,6 +74,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private boolean refreshScheduled;
 
     private List<T> temporaryFilteredItems;
+
 
     private int customValueListenersCount;
 
@@ -99,7 +98,27 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
                 delegate = null;
             }
         }
+    }
 
+
+    private static <T> T presentationToModel(ComboBox<T> comboBox,
+            JsonValue presentation) {
+        return comboBox.getValue(presentation);
+    }
+
+    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
+            T model) {
+
+        if (model == null) {
+            return Json.createNull();
+        }
+        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
+        if (updatedIndex < 0) {
+            throw new IllegalArgumentException(
+                    "The provided value is not part of ComboBox: " + model);
+        }
+        return comboBox
+                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
     }
 
     /**
@@ -107,15 +126,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      *
      */
     public ComboBox() {
-        getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME,
-                "selected-item-changed");
+        super(null, null, JsonValue.class, ComboBox::presentationToModel,
+                ComboBox::modelToPresentation);
         getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME, "change");
-
-        getElement().addEventListener("selected-item-changed", event -> {
-            fireEvent(new HasValue.ValueChangeEvent<>(this, this, oldValue,
-                    true));
-            oldValue = getValue();
-        });
 
         setItemValuePath(KEY_PROPERTY);
 
@@ -510,17 +523,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         customValueListenersCount++;
         Registration registration = super.addCustomValueSetListener(listener);
         return new CustomValueRegistraton(registration);
-    }
-
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<ComboBox<T>, T> listener) {
-        return getElement().addPropertyChangeListener(
-                SELECTED_ITEM_PROPERTY_NAME,
-                event -> listener
-                        .onComponentEvent(new HasValue.ValueChangeEvent<>(this,
-                                this, getValue(event.getOldValue()),
-                                event.isUserOriginated())));
     }
 
     private T getValue(Serializable value) {
