@@ -68,10 +68,9 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
     
         <profiles>
