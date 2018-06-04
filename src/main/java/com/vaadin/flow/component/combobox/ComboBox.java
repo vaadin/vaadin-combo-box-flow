@@ -68,6 +68,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
     private Element template;
+    private T selectedItem;
 
     private List<T> itemsFromDataProvider = Collections.emptyList();
     private Registration rendererRegistration;
@@ -484,14 +485,25 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             throw new IllegalArgumentException(
                     "The provided value is not part of ComboBox: " + value);
         }
+        selectedItem = value;
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                 generateJson(itemsFromDataProvider.get(updatedIndex)));
     }
 
     @Override
     public T getValue() {
-        return getValue(
-                getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
+        return (getValue(getElement()
+                .getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME))) == null
+                        ? selectedItem
+                        : getValue(getElement()
+                                .getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
+        
+    }
+
+    @Override
+    public void setItems(Collection<T> items) {
+        selectedItem = null;
+        HasDataProvider.super.setItems(items);
     }
 
     /**
