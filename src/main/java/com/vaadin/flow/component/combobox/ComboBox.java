@@ -492,7 +492,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public T getValue() {
         return getValue(
                 getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
-        
     }
 
     /**
