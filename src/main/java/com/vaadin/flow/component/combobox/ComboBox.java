@@ -71,11 +71,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
     private Element template;
 
-    private List<T> itemsFromDataProvider = Collections.emptyList();
+    private ArrayList<T> itemsFromDataProvider = new ArrayList(0);
     private Registration rendererRegistration;
     private boolean refreshScheduled;
 
-    private List<T> temporaryFilteredItems;
+    private ArrayList<T> temporaryFilteredItems;
 
     private int customValueListenersCount;
 
@@ -103,29 +103,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
     }
 
-    private static <T> T presentationToModel(ComboBox<T> comboBox,
-            JsonValue presentation) {
-        return comboBox.getValue(presentation);
-    }
-
-    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
-            T model) {
-
-        if (model == null) {
-            return Json.createNull();
-        }
-        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
-        if (updatedIndex < 0) {
-            throw new IllegalArgumentException(
-                    "The provided value is not part of ComboBox: " + model);
-        }
-        return comboBox
-                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
-    }
-
     /**
      * Default constructor. Creates an empty combo box.
-     *
      */
     public ComboBox() {
         super(null, null, JsonValue.class, ComboBox::presentationToModel,
@@ -181,6 +160,26 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(items);
     }
 
+    private static <T> T presentationToModel(ComboBox<T> comboBox,
+            JsonValue presentation) {
+        return comboBox.getValue(presentation);
+    }
+
+    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
+            T model) {
+
+        if (model == null) {
+            return Json.createNull();
+        }
+        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
+        if (updatedIndex < 0) {
+            throw new IllegalArgumentException(
+                    "The provided value is not part of ComboBox: " + model);
+        }
+        return comboBox
+                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
+    }
+
     /**
      * Sets the TemplateRenderer responsible to render the individual items in
      * the list of possible choices of the ComboBox. It doesn't affect how the
@@ -203,9 +202,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             rendering = renderer.render(getElement(), keyMapper, template);
         }
 
-        rendering.getDataGenerator().ifPresent(generator -> {
-            rendererRegistration = dataGenerator.addDataGenerator(generator);
-        });
+        rendering.getDataGenerator().ifPresent(
+                generator -> rendererRegistration = dataGenerator
+                        .addDataGenerator(generator));
         if (refreshScheduled) {
             // We have changed the renderer, but already run the rendering.
             // Request re-render for all items.
