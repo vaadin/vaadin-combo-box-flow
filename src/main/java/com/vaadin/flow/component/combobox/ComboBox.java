@@ -71,7 +71,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
     private Element template;
 
-    private ArrayList<T> itemsFromDataProvider = new ArrayList(0);
+    private transient List<T> itemsFromDataProvider = Collections.emptyList();
     private Registration rendererRegistration;
     private boolean refreshScheduled;
 
