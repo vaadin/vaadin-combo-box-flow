@@ -206,6 +206,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         rendering.getDataGenerator().ifPresent(generator -> {
             rendererRegistration = dataGenerator.addDataGenerator(generator);
         });
+        if (refreshScheduled) {
+            // We have changed the renderer, but already run the rendering.
+            // Request re-render for all items.
+            refreshScheduled = false;
+            refresh();
+        }
     }
 
     private void unregister(Registration registration) {
