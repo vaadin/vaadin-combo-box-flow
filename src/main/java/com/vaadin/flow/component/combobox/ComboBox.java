@@ -205,10 +205,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         rendering.getDataGenerator().ifPresent(
                 generator -> rendererRegistration = dataGenerator
                         .addDataGenerator(generator));
-
-        // We have changed the renderer, but already run the rendering.
-        // Request re-render for all items.
-        refresh(true);
     }
 
     private void unregister(Registration registration) {
@@ -544,8 +540,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private JsonArray generateJson(Stream<T> data) {
         JsonArray array = Json.createArray();
-        data.map(this::generateJson)
+        runBeforeClientResponse(ui -> {
+            data.map(this::generateJson)
                 .forEachOrdered(json -> array.set(array.length(), json));
+        });
         return array;
     }
 
@@ -577,11 +575,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void refreshDataProvider() {
         itemsFromDataProvider = dataProvider.fetch(new Query<>())
                 .collect(Collectors.toList());
-        refresh();
-    }
-
-    private void refresh(boolean refresh) {
-        refreshScheduled = !refresh;
         refresh();
     }
 
