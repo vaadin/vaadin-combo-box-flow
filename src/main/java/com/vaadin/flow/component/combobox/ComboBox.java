@@ -73,7 +73,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private transient List<T> itemsFromDataProvider = Collections.emptyList();
     private Registration rendererRegistration;
-    private boolean refreshScheduled;
 
     private ArrayList<T> temporaryFilteredItems;
 
@@ -602,7 +601,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                  * based on new keyMapper.
                  */
                 setValue(value);
-                refreshScheduled = false;
+                refreshJob = null;
             }
 
         };
