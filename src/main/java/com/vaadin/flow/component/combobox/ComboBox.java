@@ -81,6 +81,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private Registration dataProviderListenerRegistration;
 
+    private SerializableConsumer<UI> refreshJob;
+
     private class CustomValueRegistraton implements Registration {
 
         private Registration delegate;
@@ -201,10 +203,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         } else {
             rendering = renderer.render(getElement(), keyMapper, template);
         }
-
-        rendering.getDataGenerator().ifPresent(
-                generator -> rendererRegistration = dataGenerator
+        rendering.getDataGenerator()
+                .ifPresent(generator -> rendererRegistration = dataGenerator
                         .addDataGenerator(generator));
+        if (refreshJob != null) {
+            refreshJob = null;
+            refresh();
+        }
     }
 
     private void unregister(Registration registration) {
@@ -540,10 +545,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private JsonArray generateJson(Stream<T> data) {
         JsonArray array = Json.createArray();
-        runBeforeClientResponse(ui -> {
-            data.map(this::generateJson)
+        data.map(this::generateJson)
                 .forEachOrdered(json -> array.set(array.length(), json));
-        });
         return array;
     }
 
@@ -579,23 +582,31 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void refresh() {
-        if (refreshScheduled) {
+        if (refreshJob != null) {
             return;
         }
-        refreshScheduled = true;
-        runBeforeClientResponse(ui -> {
-            T value = getValue();
-            keyMapper.removeAll();
-            JsonArray array = generateJson(itemsFromDataProvider.stream());
-            setItems(array);
-            /*
-             * The value is stored as a JsonObject with a key in keyMapper.
-             * Since keyMapper is reset we have to regenerate the JsonObject
-             * based on new keyMapper.
-             */
-            setValue(value);
-            refreshScheduled = false;
-        });
+        refreshJob = new SerializableConsumer<UI>() {
+
+            @Override
+            public void accept(UI ui) {
+                if (refreshJob != this) {
+                    return;
+                }
+                T value = getValue();
+                keyMapper.removeAll();
+                JsonArray array = generateJson(itemsFromDataProvider.stream());
+                setItems(array);
+                /*
+                 * The value is stored as a JsonObject with a key in keyMapper.
+                 * Since keyMapper is reset we have to regenerate the JsonObject
+                 * based on new keyMapper.
+                 */
+                setValue(value);
+                refreshScheduled = false;
+            }
+
+        };
+        runBeforeClientResponse(refreshJob);
 
     }
 
