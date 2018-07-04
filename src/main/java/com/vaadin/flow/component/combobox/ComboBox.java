@@ -205,10 +205,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         rendering.getDataGenerator()
                 .ifPresent(generator -> rendererRegistration = dataGenerator
                         .addDataGenerator(generator));
-        if (refreshJob != null) {
-            refreshJob = null;
-            refresh();
-        }
+        refresh(true);
     }
 
     private void unregister(Registration registration) {
@@ -581,6 +578,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void refresh() {
+        refresh(false);
+    }
+
+    private void refresh(boolean force) {
+        if (force) {
+            refreshJob = null;
+        }
         if (refreshJob != null) {
             return;
         }
