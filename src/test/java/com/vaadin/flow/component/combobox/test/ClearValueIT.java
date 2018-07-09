@@ -19,8 +19,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -36,35 +37,40 @@ public class ClearValueIT extends AbstractComponentIT {
 
     @Test
     public void valueIsCorrectlyCleared() {
-        testEmptyValue(ClearValuePage.COMBO_BOX_ID,
+        checkEmptyValue(ClearValuePage.COMBO_BOX_ID,
                 ClearValuePage.BUTTON_CLEAR_ID, false);
     }
 
     @Test
     public void valueIsCorrectlySetToNull() {
-        testEmptyValue(ClearValuePage.COMBO_BOX_ID,
+        Assert.assertNull(
+                "Combobox empty value is not null, add clear tests also",
+                new ComboBox<>().getEmptyValue());
+        checkEmptyValue(ClearValuePage.COMBO_BOX_ID,
                 ClearValuePage.BUTTON_SET_NULL_ID, false);
     }
 
     @Test
     public void valueIsCorrectlyCleared_allowCustomValue() {
-        testEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID,
+        checkEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID,
                 ClearValuePage.BUTTON_CUSTOM_VALUE_CLEAR_ID, true);
     }
 
     @Test
     public void valueIsCorrectlySetToNull_allowCustomValue() {
-        testEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID,
+        Assert.assertNull(
+                "Combobox empty value is not null, add clear tests also",
+                new ComboBox<>().getEmptyValue());
+        checkEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID,
                 ClearValuePage.BUTTON_CUSTOM_VALUE_SET_NULL_ID, true);
     }
 
-    private void testEmptyValue(String comboBoxId, String buttonId,
+    private void checkEmptyValue(String comboBoxId, String buttonId,
             boolean allowCustomValue) {
-        WebElement comboBox = findElement(By.id(comboBoxId));
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
         Assert.assertEquals(
                 "Unexpected 'value' property name for combo box with id '%s'",
-                ClearValuePage.INITIAL_VALUE,
-                getComboBoxSelectedItem(comboBox));
+                ClearValuePage.INITIAL_VALUE, comboBox.getSelectedText());
         Assert.assertEquals(String.format(
                 "Unexpected 'allowCustomValue' property name for combo box with id '%s'",
                 comboBoxId), Boolean.toString(allowCustomValue),
@@ -74,10 +80,6 @@ public class ClearValueIT extends AbstractComponentIT {
 
         Assert.assertEquals(String.format(
                 "Combo box with id '%s' should have its value empty after the test",
-                comboBoxId), "", getComboBoxSelectedItem(comboBox));
-    }
-
-    private String getComboBoxSelectedItem(WebElement comboBox) {
-        return getInShadowRoot(comboBox, By.id("input")).getAttribute("value");
+                comboBoxId), "", comboBox.getSelectedText());
     }
 }

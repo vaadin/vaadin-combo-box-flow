@@ -511,11 +511,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setValue(T value) {
-        if (value == null) {
+        if (value == null || Objects.equals(value, getEmptyValue())) {
             if (getValue() != null) {
-                getElement().setProperty(VALUE_PROPERTY_NAME, "");
-                getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                        Json.createNull());
+                cleanValueAndSelection();
             }
             return;
         }
@@ -526,6 +524,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                 generateJson(itemsFromDataProvider.get(updatedIndex)));
+    }
+
+    private void cleanValueAndSelection() {
+        getElement().setProperty(VALUE_PROPERTY_NAME, "");
+        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                Json.createNull());
     }
 
     @Override
