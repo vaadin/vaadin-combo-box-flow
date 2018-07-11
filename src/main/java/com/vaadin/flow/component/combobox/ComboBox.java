@@ -571,9 +571,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Sets representation for the null field value of the ComboBox.
+     * Sets representation string for UI display, when the ItemLabelGenerator
+     * returns null value for a given item.
      * <p>
-     * By Default, the null field value will be shown as empty string.
+     * By default, the null field value will be shown as empty string.
      * 
      * @param label
      *            the string to be set
@@ -614,7 +615,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         json.put(KEY_PROPERTY, keyMapper.key(item));
 
         String label = getItemLabelGenerator().apply(item);
-        label = (label == null) ? nullRepresentation : label;
+        if (label == null) {
+            label = nullRepresentation;
+        }
 
         json.put(ITEM_LABEL_PROPERTY, label);
         dataGenerator.generateData(item, json);
