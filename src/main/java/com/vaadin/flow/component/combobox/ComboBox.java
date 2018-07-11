@@ -82,6 +82,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration dataProviderListenerRegistration;
 
     private SerializableConsumer<UI> refreshJob;
+    private String nullRepresentation = "";
 
     private class CustomValueRegistraton implements Registration {
 
@@ -569,6 +570,29 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return new CustomValueRegistraton(registration);
     }
 
+    /**
+     * Sets representation for the null field value of the ComboBox.
+     * <p>
+     * By Default, the null field value will be shown as empty string.
+     * 
+     * @param label
+     *            the string to be set
+     */
+    public void setNullRepresentation(String label) {
+        Objects.requireNonNull(label,
+                "The null representation label should not be null.");
+        nullRepresentation = label;
+    }
+
+    /**
+     * Gets the null representation string.
+     * 
+     * @return the string represents the null field value in the ComboBox
+     */
+    public String getNullRepresentation() {
+        return nullRepresentation;
+    }
+
     private T getValue(Serializable value) {
         if (value instanceof JsonObject) {
             JsonObject selected = (JsonObject) value;
@@ -590,12 +614,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         json.put(KEY_PROPERTY, keyMapper.key(item));
 
         String label = getItemLabelGenerator().apply(item);
-        if (label == null) {
-            throw new IllegalStateException(String.format(
-                    "Got 'null' as a label value for the item '%s'. "
-                            + "'%s' instance may not return 'null' values",
-                    item, ItemLabelGenerator.class.getSimpleName()));
-        }
+        label = (label == null) ? nullRepresentation : label;
+
         json.put(ITEM_LABEL_PROPERTY, label);
         dataGenerator.generateData(item, json);
         return json;
