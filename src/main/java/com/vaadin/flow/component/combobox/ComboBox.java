@@ -62,6 +62,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
+    private static final String VALUE_PROPERTY_NAME = "value";
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
@@ -71,15 +72,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
     private Element template;
 
-    private List<T> itemsFromDataProvider = Collections.emptyList();
+    private transient List<T> itemsFromDataProvider = Collections.emptyList();
     private Registration rendererRegistration;
-    private boolean refreshScheduled;
 
-    private List<T> temporaryFilteredItems;
+    private ArrayList<T> temporaryFilteredItems;
 
     private int customValueListenersCount;
 
     private Registration dataProviderListenerRegistration;
+
+    private SerializableConsumer<UI> refreshJob;
+    private String nullRepresentation = "";
 
     private class CustomValueRegistraton implements Registration {
 
@@ -103,34 +106,35 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
     }
 
-    private static <T> T presentationToModel(ComboBox<T> comboBox,
-            JsonValue presentation) {
-        return comboBox.getValue(presentation);
-    }
+    private class RefreshJob implements SerializableConsumer<UI> {
 
-    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
-            T model) {
-
-        if (model == null) {
-            return Json.createNull();
+        @Override
+        public void accept(UI ui) {
+            if (refreshJob != this) {
+                return;
+            }
+            T value = getValue();
+            keyMapper.removeAll();
+            JsonArray array = generateJson(itemsFromDataProvider.stream());
+            setItems(array);
+            /*
+             * The value is stored as a JsonObject with a key in keyMapper.
+             * Since keyMapper is reset we have to regenerate the JsonObject
+             * based on new keyMapper.
+             */
+            setValue(value);
+            refreshJob = null;
         }
-        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
-        if (updatedIndex < 0) {
-            throw new IllegalArgumentException(
-                    "The provided value is not part of ComboBox: " + model);
-        }
-        return comboBox
-                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
     }
 
     /**
      * Default constructor. Creates an empty combo box.
-     *
      */
     public ComboBox() {
         super(null, null, JsonValue.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
         getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME, "change");
+        getElement().synchronizeProperty(VALUE_PROPERTY_NAME, "change");
 
         setItemValuePath(KEY_PROPERTY);
 
@@ -181,6 +185,26 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(items);
     }
 
+    private static <T> T presentationToModel(ComboBox<T> comboBox,
+            JsonValue presentation) {
+        return comboBox.getValue(presentation);
+    }
+
+    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
+            T model) {
+
+        if (model == null) {
+            return Json.createNull();
+        }
+        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
+        if (updatedIndex < 0) {
+            throw new IllegalArgumentException(
+                    "The provided value is not part of ComboBox: " + model);
+        }
+        return comboBox
+                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
+    }
+
     /**
      * Sets the TemplateRenderer responsible to render the individual items in
      * the list of possible choices of the ComboBox. It doesn't affect how the
@@ -202,10 +226,21 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         } else {
             rendering = renderer.render(getElement(), keyMapper, template);
         }
-
-        rendering.getDataGenerator().ifPresent(generator -> {
-            rendererRegistration = dataGenerator.addDataGenerator(generator);
-        });
+        rendering.getDataGenerator()
+                .ifPresent(generator -> rendererRegistration = dataGenerator
+                        .addDataGenerator(generator));
+        /*
+         * DataGenerator from above is created using renderer. The data
+         * generator participates in the generateJson method implementation. As
+         * a result data which is sent to the client depends on the renderer
+         * which is created here. It means that we need to regenerate the data
+         * from scratch once the renderer is set. So we call refresh to
+         * regenerate.
+         *
+         * This is extremely not obvious and I'm going to create a ticket about
+         * this "design".
+         */
+        refresh(true);
     }
 
     private void unregister(Registration registration) {
@@ -477,10 +512,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setValue(T value) {
-        if (value == null) {
+        if (value == null || Objects.equals(value, getEmptyValue())) {
             if (getValue() != null) {
-                getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                        Json.createNull());
+                cleanValueAndSelection();
             }
             return;
         }
@@ -491,6 +525,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                 generateJson(itemsFromDataProvider.get(updatedIndex)));
+    }
+
+    private void cleanValueAndSelection() {
+        getElement().setProperty(VALUE_PROPERTY_NAME, "");
+        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                Json.createNull());
     }
 
     @Override
@@ -530,6 +570,30 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return new CustomValueRegistraton(registration);
     }
 
+    /**
+     * Sets representation string for UI display, when the ItemLabelGenerator
+     * returns null value for a given item.
+     * <p>
+     * By default, the null field value will be shown as empty string.
+     * 
+     * @param label
+     *            the string to be set
+     */
+    public void setNullRepresentation(String label) {
+        Objects.requireNonNull(label,
+                "The null representation label should not be null.");
+        nullRepresentation = label;
+    }
+
+    /**
+     * Gets the null representation string.
+     * 
+     * @return the string represents the null field value in the ComboBox
+     */
+    public String getNullRepresentation() {
+        return nullRepresentation;
+    }
+
     private T getValue(Serializable value) {
         if (value instanceof JsonObject) {
             JsonObject selected = (JsonObject) value;
@@ -552,11 +616,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         String label = getItemLabelGenerator().apply(item);
         if (label == null) {
-            throw new IllegalStateException(String.format(
-                    "Got 'null' as a label value for the item '%s'. "
-                            + "'%s' instance may not return 'null' values",
-                    item, ItemLabelGenerator.class.getSimpleName()));
+            label = nullRepresentation;
         }
+
         json.put(ITEM_LABEL_PROPERTY, label);
         dataGenerator.generateData(item, json);
         return json;
@@ -578,23 +640,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void refresh() {
-        if (refreshScheduled) {
+        refresh(false);
+    }
+
+    private void refresh(boolean force) {
+        if (force) {
+            refreshJob = null;
+        }
+        if (refreshJob != null) {
             return;
         }
-        refreshScheduled = true;
-        runBeforeClientResponse(ui -> {
-            T value = getValue();
-            keyMapper.removeAll();
-            JsonArray array = generateJson(itemsFromDataProvider.stream());
-            setItems(array);
-            /*
-             * The value is stored as a JsonObject with a key in keyMapper.
-             * Since keyMapper is reset we have to regenerate the JsonObject
-             * based on new keyMapper.
-             */
-            setValue(value);
-            refreshScheduled = false;
-        });
+        refreshJob = new RefreshJob();
+        runBeforeClientResponse(refreshJob);
 
     }
 
