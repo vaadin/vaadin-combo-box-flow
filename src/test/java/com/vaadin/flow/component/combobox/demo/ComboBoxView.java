@@ -137,7 +137,6 @@ public class ComboBoxView extends DemoView {
         comboBox.setItemLabelGenerator(Song::getName);
 
         List<Song> listOfSongs = createListOfSongs();
-        listOfSongs.add(null);
         
         comboBox.setItems(listOfSongs);
         comboBox.addValueChangeListener(event -> {
