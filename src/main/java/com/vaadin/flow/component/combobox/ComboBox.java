@@ -582,7 +582,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public void setNullRepresentation(String label) {
         Objects.requireNonNull(label,
                 "The null representation should not be null.");
-        nullRepresentation = (String) label;
+        nullRepresentation = label;
     }
 
     /**
