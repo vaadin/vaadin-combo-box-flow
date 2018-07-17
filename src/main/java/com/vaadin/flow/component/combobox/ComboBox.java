@@ -616,7 +616,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         String label;
 
-        if (Objects.equals(item, getEmptyValue())) {
+        if (item == null) {
             label = nullRepresentation;
         } else {
             label = getItemLabelGenerator().apply(item);
