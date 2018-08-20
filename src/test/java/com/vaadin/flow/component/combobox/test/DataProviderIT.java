@@ -33,7 +33,7 @@ public class DataProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void testSetValueUsingId() {
+    public void setValue_ProviderHasGetIdAndValueIdExists_selectionTextShouldBeSet() {
         open();
         findElement(By.id(DataProviderPage.SET_VALUE_USING_GET_ID_BUTTON_ID))
                 .click();
@@ -45,7 +45,7 @@ public class DataProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void testSetValueUsingReference() {
+    public void setValue_ValueReferenceExists_selectionTextShouldBeSet() {
         open();
         findElement(By.id(DataProviderPage.SET_VALUE_USING_REFERENCE_BUTTON_ID))
                 .click();
@@ -57,7 +57,7 @@ public class DataProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void testSetValueUsingEquals() {
+    public void setValue_ValueEqualToAnExistingItem_selectionTextShouldBeSet() {
         open();
         findElement(By.id(DataProviderPage.SET_VALUE_USING_EQUALS_BUTTON_ID))
                 .click();

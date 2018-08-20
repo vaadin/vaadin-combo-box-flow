@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.bean.TestItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -23,7 +24,6 @@ import com.vaadin.flow.router.Route;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Route("data-provider")
 public class DataProviderPage extends Div {
@@ -47,16 +47,16 @@ public class DataProviderPage extends Div {
         });
         add(comboBoxWithGetId);
 
+        ComboBox<TestItem> comboBoxWithoutGetId = new ComboBox<>();
+        comboBoxWithoutGetId.setId(COMBO_BOX_WITHOUT_GET_ID_ID);
+        comboBoxWithoutGetId.setItems(list);
+        add(comboBoxWithoutGetId);
+
         NativeButton setValueUsingIdButton = new NativeButton(
                 "Set Value Using Id",
                 event -> comboBoxWithGetId.setValue(new TestItem(2)));
         setValueUsingIdButton.setId(SET_VALUE_USING_GET_ID_BUTTON_ID);
         add(setValueUsingIdButton);
-
-        ComboBox<TestItem> comboBoxWithoutGetId = new ComboBox<>();
-        comboBoxWithoutGetId.setId(COMBO_BOX_WITHOUT_GET_ID_ID);
-        comboBoxWithoutGetId.setItems(list);
-        add(comboBoxWithoutGetId);
 
         NativeButton setValueUsingReferenceButton = new NativeButton(
                 "Set Value Using Reference",
@@ -66,60 +66,8 @@ public class DataProviderPage extends Div {
 
         NativeButton setValueUsingEqualsButton = new NativeButton(
                 "Set Value Using Equals", event -> comboBoxWithoutGetId
-                        .setValue(new TestItem(3, "c", "")));
+                        .setValue(new TestItem(4, "c", "")));
         setValueUsingEqualsButton.setId(SET_VALUE_USING_EQUALS_BUTTON_ID);
         add(setValueUsingEqualsButton);
-    }
-
-    private static class TestItem {
-        private int id;
-        private String name;
-        private String comments;
-
-        public TestItem(int id) {
-            this.id = id;
-        }
-
-        public TestItem(int id, String name, String comments) {
-            this.id = id;
-            this.name = name;
-            this.comments = comments;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name + ", " + comments;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-            TestItem testItem = (TestItem) o;
-            return id == testItem.id && Objects.equals(name, testItem.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, name);
-        }
     }
 }
