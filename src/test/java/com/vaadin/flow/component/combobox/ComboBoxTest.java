@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,13 +29,12 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.bean.TestItem;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
-
-import static org.junit.Assert.assertEquals;
 
 public class ComboBoxTest {
 
@@ -245,6 +246,35 @@ public class ComboBoxTest {
         // removes the second listener
         registration2.remove();
         Assert.assertFalse(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    public void setValue_nonMatchingId_IllegalArgumentException() {
+        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
+                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
+
+        expectIllegalArgumentException(
+                "The provided value is not part of ComboBox:");
+        ComboBox comboBox = new ComboBox();
+        comboBox.setDataProvider(new ListDataProvider<TestItem>(list) {
+            @Override
+            public Object getId(TestItem item) {
+                return item.getId();
+            }
+        });
+        comboBox.setValue(new TestItem(0, "b", ""));
+    }
+
+    @Test
+    public void setValue_nonExistingObject_IllegalArgumentException() {
+        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
+                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
+
+        expectIllegalArgumentException(
+                "The provided value is not part of ComboBox:");
+        ComboBox comboBox = new ComboBox();
+        comboBox.setItems(list);
+        comboBox.setValue(new TestItem(2, "bbb", ""));
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
