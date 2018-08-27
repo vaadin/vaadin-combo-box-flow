@@ -528,7 +528,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void cleanValueAndSelection() {
-        getElement().setProperty(VALUE_PROPERTY_NAME, "");
+        getElement().removeProperty(VALUE_PROPERTY_NAME);
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                 Json.createNull());
     }
