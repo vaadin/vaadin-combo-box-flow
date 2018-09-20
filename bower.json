@@ -1,0 +1,6 @@
+{
+  "name": "vaadin-combo-box-flow",
+  "dependencies": {
+    "vaadin-combo-box": "data-provider-proto"
+  }
+}
