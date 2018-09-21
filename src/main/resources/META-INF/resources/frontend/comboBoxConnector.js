@@ -6,13 +6,12 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
     const pageCallbacks = {};
     const cache = {};
-    let lastRequestedRange = [0, 0];
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
 
     comboBox.$connector = {};
 
-    comboBox.$connector.callbacks = [];
+    comboBox.itemValuePath = 'key';
 
     comboBox.dataProvider = function (params, callback) {
 
@@ -20,17 +19,15 @@ window.Vaadin.Flow.comboBoxConnector = {
         throw 'Invalid pageSize';
       }
 
-      console.log('CALLING DATAPROVIDER');
+      console.log('CALLING DATAPROVIDER FOR PAGE ' + params.page);
       console.log(params);
       console.log('COMBOBOX.SIZE ' + comboBox.size);
 
-      // comboBox.$server.setRequestedRange(0,2);
-      // comboBox.$server.setRequestedRange(params.page * params.pageSize, params.pageSize);
-      comboBox.$server.setRequestedRange(0, params.pageSize * (params.page + 1));
+      const upperLimit = params.pageSize * (params.page + 1);
+      console.log('RANGE UPPER LIMIT ' + upperLimit);
+      comboBox.$server.setRequestedRange(0, upperLimit);
 
-      // comboBox.$connector.dataProviderCallback = callback;
-      // pageCallbacks[params.page] = callback;
-      comboBox.$connector.callbacks.push(callback);
+      pageCallbacks[params.page] = callback;
     }
 
     comboBox.$connector.setValue = function (key) {
@@ -46,8 +43,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       console.log('index ' + index);
       console.log(items);
       console.log('COMBOBOX.SIZE ' + comboBox.size);
-      console.log('CALLBACKS:');
-      console.log(this.callbacks);
 
       const firstPage = index / comboBox.pageSize;
       const updatedPageCount = Math.ceil(items.length / comboBox.pageSize);
@@ -56,9 +51,8 @@ window.Vaadin.Flow.comboBoxConnector = {
         let page = firstPage + i;
         let slice = items.slice(i * comboBox.pageSize, (i + 1) * comboBox.pageSize);
 
-        this.callbacks[i](slice, comboBox.size);
+        cache[page] = slice;
       }
-      this.callbacks = [];
     };
 
     comboBox.$connector.updateData = function (items) {
@@ -83,6 +77,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     };
 
     comboBox.$connector.clear = function (index, length) {
+      return;
       if (Object.keys(cache).length === 0) {
         return;
       }
@@ -108,6 +103,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     };
 
     comboBox.$connector.reset = function () {
+      return;
       comboBox.size = 0;
       deleteObjectContents(cache);
       deleteObjectContents(comboBox._cache.items);
@@ -134,10 +130,16 @@ window.Vaadin.Flow.comboBoxConnector = {
       for (let i = 0; i < outstandingRequests.length; i++) {
         let page = outstandingRequests[i];
         // Resolve if we have data or if we don't expect to get data
-        if (cache[page] || page < lastRequestedRange[0] || page > lastRequestedRange[1]) {
+        if (cache[page] /*|| page < lastRequestedRange[0] || page > lastRequestedRange[1]*/) {
           let callback = pageCallbacks[page];
           delete pageCallbacks[page];
-          callback(cache[page] || new Array(comboBox.pageSize));
+
+          let data = cache[page];
+          delete cache[page];
+
+          callback(data, comboBox.size);
+
+          // callback(cache[page] || new Array(comboBox.pageSize));
         }
       }
 

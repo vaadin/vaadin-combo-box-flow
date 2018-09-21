@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.combobox.Combo;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -33,7 +34,7 @@ public class LazyLoadingPage extends Div {
 
     public LazyLoadingPage() {
 
-        Combo<String> comboBox = new Combo<>();
+        ComboBox<String> comboBox = new ComboBox<>();
 
         List<String> items = IntStream.range(0, 1000).mapToObj(i -> "Item " + i)
                 .collect(Collectors.toList());
@@ -67,13 +68,58 @@ public class LazyLoadingPage extends Div {
 
         NativeButton getButton = new NativeButton("get value", e -> {
             add(new Label(comboBox.getValue()));
+            // add(new Label(comboBox.getElement().getProperty("value")));
         });
 
         NativeButton setButton = new NativeButton("set value", e -> {
             // comboBox.setValue(dp.getItems().iterator().next());
-            comboBox.setValue("Item 5");
+            // comboBox.setValue("Item 5");
+            comboBox.setValue(dp.getItems().iterator().next());
         });
 
-        add(comboBox, getButton, setButton);
+        // add(comboBox, getButton, setButton);
+
+        List<Person> people = IntStream.range(0, 987)
+                .mapToObj(i -> new Person("Person " + i, i))
+                .collect(Collectors.toList());
+        ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
+                people);
+
+        ComboBox<Person> comboBox2 = new ComboBox<>();
+        comboBox2.setDataProvider(personDataProvider);
+
+        add(comboBox2);
+        add(new NativeButton("get value",
+                e -> add(new Label(comboBox2.getValue().getName()))));
+        add(new NativeButton("set value",
+                e -> comboBox2.setValue(people.get(3))));
+
+    }
+
+    public static class Person implements Serializable {
+        private String name;
+        private final int born;
+
+        public Person(String name, int born) {
+            this.name = name;
+            this.born = born;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getBorn() {
+            return born;
+        }
+
+        @Override
+        public String toString() {
+            return name + "(" + born + ")";
+        }
     }
 }

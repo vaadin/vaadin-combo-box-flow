@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.vaadin.flow.component.combobox.bean.TestItem;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,13 +29,12 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.bean.TestItem;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
-
-import static org.junit.Assert.assertEquals;
 
 public class ComboBoxTest {
 
@@ -46,10 +46,9 @@ public class ComboBoxTest {
         private List<String> items;
 
         @Override
-        public void setDataProvider(DataProvider<String, ?> dataProvider) {
+        public void setDataProvider(ListDataProvider<String> dataProvider) {
             super.setDataProvider(dataProvider);
-            items = new ArrayList<>(
-                    ((ListDataProvider<String>) dataProvider).getItems());
+            items = new ArrayList<>(dataProvider.getItems());
         }
 
         @Override
@@ -114,7 +113,8 @@ public class ComboBoxTest {
     public void setNull_thrownException() {
         expectNullPointerException("The data provider can not be null");
         ComboBox<Object> comboBox = new ComboBox<>();
-        comboBox.setDataProvider(null);
+        DataProvider<Object, String> dp = null;
+        comboBox.setDataProvider(dp);
     }
 
     @Test

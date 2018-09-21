@@ -1,145 +1,138 @@
-/*
- * Copyright 2000-2017 Vaadin Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.data.binder.HasFilterableDataProvider;
+import com.vaadin.flow.data.provider.ArrayUpdater;
+import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
-/**
- * Server-side component for the {@code vaadin-combo-box} webcomponent. It
- * contains the same features of the webcomponent, such as item filtering,
- * object selection and item templating.
- *
- * @param <T>
- *            the type of the items to be inserted in the combo box
- */
 @HtmlImport("frontend://flow-component-renderer.html")
+@HtmlImport("frontend://b_components/vaadin-combo-box/src/vaadin-combo-box.html")
+@JavaScript("frontend://comboBoxConnector.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
-        implements HasSize, HasValidation, HasDataProvider<T> {
+        implements HasSize, HasValidation,
+        HasFilterableDataProvider<T, String> {
+
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
     private static final String VALUE_PROPERTY_NAME = "value";
 
+    private final class UpdateQueue implements Update {
+        private List<Runnable> queue = new ArrayList<>();
+
+        private UpdateQueue(int size) {
+            enqueue("$connector.updateSize", size);
+            // getElement().setProperty("size", size);
+        }
+
+        @Override
+        public void set(int start, List<JsonValue> items) {
+            System.out.println("--------------");
+            System.out.println(start);
+            System.out.println(items.size());
+            enqueue("$connector.set", start,
+                    items.stream().collect(JsonUtils.asArray()));
+        }
+
+        @Override
+        public void clear(int start, int length) {
+            enqueue("$connector.clear", start, length);
+        }
+
+        @Override
+        public void commit(int updateId) {
+            // getDataCommunicator().confirmUpdate(updateId);
+            enqueue("$connector.confirm", updateId);
+            queue.forEach(Runnable::run);
+            queue.clear();
+        }
+
+        private void enqueue(String name, Serializable... arguments) {
+            queue.add(() -> getElement().callFunction(name, arguments));
+        }
+    }
+
+    private final ArrayUpdater arrayUpdater = new ArrayUpdater() {
+        @Override
+        public Update startUpdate(int sizeChange) {
+            return new UpdateQueue(sizeChange);
+        }
+
+        @Override
+        public void initialize() {
+            initConnector();
+        }
+    };
+
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private Renderer<T> renderer;
+
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
+    private Registration dataGeneratorRegistration;
 
-    private final KeyMapper<T> keyMapper = new KeyMapper<>();
     private Element template;
-
-    private transient List<T> itemsFromDataProvider = Collections.emptyList();
-    private Registration rendererRegistration;
-
-    private ArrayList<T> temporaryFilteredItems;
 
     private int customValueListenersCount;
 
-    private Registration dataProviderListenerRegistration;
-
-    private SerializableConsumer<UI> refreshJob;
     private String nullRepresentation = "";
 
-    private class CustomValueRegistraton implements Registration {
+    private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
+            dataGenerator, arrayUpdater,
+            data -> getElement().callFunction("$connector.updateData", data),
+            getElement().getNode());
 
-        private Registration delegate;
-
-        private CustomValueRegistraton(Registration delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void remove() {
-            if (delegate != null) {
-                delegate.remove();
-                customValueListenersCount--;
-
-                if (customValueListenersCount == 0) {
-                    setAllowCustomValue(false);
-                }
-                delegate = null;
-            }
-        }
-    }
-
-    private class RefreshJob implements SerializableConsumer<UI> {
-
-        @Override
-        public void accept(UI ui) {
-            if (refreshJob != this) {
-                return;
-            }
-            T value = getValue();
-            keyMapper.removeAll();
-            JsonArray array = generateJson(itemsFromDataProvider.stream());
-            setItems(array);
-            /*
-             * The value is stored as a JsonObject with a key in keyMapper.
-             * Since keyMapper is reset we have to regenerate the JsonObject
-             * based on new keyMapper.
-             */
-            setValue(value);
-            refreshJob = null;
-        }
-    }
-
-    /**
-     * Default constructor. Creates an empty combo box.
-     */
     public ComboBox() {
-        super(null, null, JsonValue.class, ComboBox::presentationToModel,
+        super(null, null, String.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
-        getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME, "change");
-        getElement().synchronizeProperty(VALUE_PROPERTY_NAME, "change");
+        dataGenerator.addDataGenerator(
+                (item, jsonObject) -> renderer.getValueProviders()
+                        .forEach((property, provider) -> jsonObject.put(
+                                property,
+                                JsonSerializer.toJson(provider.apply(item)))));
+        template = new Element("template");
+        getElement().appendChild(template);
+        setRenderer(String::valueOf);
 
-        setItemValuePath(KEY_PROPERTY);
+        getElement().addEventListener("filter-changed", event -> {
+            filterSlot.accept(getFilterString());
+        }).debounce(200);
 
-        setRenderer(TemplateRenderer.of("[[item.label]]"));
+        // addFilterChangeListener(event -> {
+        // getDataCommunicator().getDataProvider().refreshAll();
+        // filterSlot.accept(event.getFilter());
+        // });
     }
 
     /**
@@ -186,129 +179,137 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(items);
     }
 
+    public String getFilterString() {
+        return super.getFilterString();
+    }
+
     private static <T> T presentationToModel(ComboBox<T> comboBox,
-            JsonValue presentation) {
-        return comboBox.getValue(presentation);
+            String presentation) {
+        if (presentation != null) {
+            return comboBox.getKeyMapper().get(presentation);
+        }
+        return comboBox.getEmptyValue();
     }
 
-    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
+    private static <T> String modelToPresentation(ComboBox<T> comboBox,
             T model) {
-
-        if (model == null) {
-            return Json.createNull();
-        }
-        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
-        if (updatedIndex < 0) {
-            throw new IllegalArgumentException(
-                    "The provided value is not part of ComboBox: " + model);
-        }
-        return comboBox
-                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
-    }
-
-    /**
-     * Sets the TemplateRenderer responsible to render the individual items in
-     * the list of possible choices of the ComboBox. It doesn't affect how the
-     * selected item is rendered - that can be configured by using
-     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
-     *
-     * @param renderer
-     *            a renderer for the items in the selection list of the
-     *            ComboBox, not <code>null</code>
-     */
-    public void setRenderer(Renderer<T> renderer) {
-        Objects.requireNonNull(renderer, "The renderer can not be null");
-        unregister(rendererRegistration);
-
-        Rendering<T> rendering;
-        if (template == null) {
-            rendering = renderer.render(getElement(), keyMapper);
-            template = rendering.getTemplateElement();
-        } else {
-            rendering = renderer.render(getElement(), keyMapper, template);
-        }
-        rendering.getDataGenerator()
-                .ifPresent(generator -> rendererRegistration = dataGenerator
-                        .addDataGenerator(generator));
-        /*
-         * DataGenerator from above is created using renderer. The data
-         * generator participates in the generateJson method implementation. As
-         * a result data which is sent to the client depends on the renderer
-         * which is created here. It means that we need to regenerate the data
-         * from scratch once the renderer is set. So we call refresh to
-         * regenerate.
-         *
-         * This is extremely not obvious and I'm going to create a ticket about
-         * this "design".
-         */
-        refresh(true);
-    }
-
-    private void unregister(Registration registration) {
-        if (registration != null) {
-            registration.remove();
-        }
+        return comboBox.getKeyMapper().key(model);
     }
 
     @Override
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        Objects.requireNonNull(dataProvider,
-                "The data provider can not be null");
-        this.dataProvider = dataProvider;
-        refreshDataProvider();
-        setValue(getEmptyValue());
-        if (dataProviderListenerRegistration != null) {
-            dataProviderListenerRegistration.remove();
+    public T getValue() {
+        /* Internally we use the key property as the combobox's value */
+        String key = getElement().getProperty("value");
+        return presentationToModel(this, key);
+    }
+
+    public void setRenderer(ValueProvider<T, String> valueProvider) {
+        Objects.requireNonNull(valueProvider,
+                "The valueProvider must not be null");
+        setRenderer(TemplateRenderer.<T> of("[[item.label]]")
+                .withProperty("label", valueProvider));
+    }
+
+    public void setRenderer(Renderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+
+        if (dataGeneratorRegistration != null) {
+            dataGeneratorRegistration.remove();
+            dataGeneratorRegistration = null;
         }
-        dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> refreshDataProvider());
-    }
 
-    public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
-    }
-
-    /**
-     * Gets the list of items which were filtered by the user input.
-     *
-     * @return the list of filtered items, or empty list if none were filtered
-     */
-    public List<T> getFilteredItems() {
-        if (temporaryFilteredItems != null) {
-            return Collections.unmodifiableList(temporaryFilteredItems);
+        Rendering<T> rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper(), template);
+        if (rendering.getDataGenerator().isPresent()) {
+            dataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(rendering.getDataGenerator().get());
         }
-        JsonArray items = super.getFilteredItemsJsonArray();
-        List<T> result = new ArrayList<>(items.length());
-        for (int i = 0; i < items.length(); i++) {
-            result.add(getData(items.get(i)));
-        }
-        return result;
+
+        this.renderer = renderer;
+
+        getDataCommunicator().reset();
     }
 
-    /**
-     * Convenience method for the {@link #setFilteredItems(Collection)}. It sets
-     * the list of visible items in reaction of the input of the user.
-     *
-     * @param filteredItems
-     *            the items to show in response of a filter input
-     */
-    public void setFilteredItems(T... filteredItems) {
-        setFilteredItems(Arrays.asList(filteredItems));
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    private void confirmUpdate(int id) {
+        getDataCommunicator().confirmUpdate(id);
     }
 
-    /**
-     * It sets the list of visible items in reaction of the input of the user.
-     *
-     * @param filteredItems
-     *            the items to show in response of a filter input
-     */
-    public void setFilteredItems(Collection<T> filteredItems) {
-        temporaryFilteredItems = new ArrayList<>(filteredItems);
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    private void setRequestedRange(int start, int length) {
+        getDataCommunicator().setRequestedRange(start, length);
+    }
 
-        runBeforeClientResponse(ui -> {
-            setFilteredItems(generateJson(temporaryFilteredItems.stream()));
-            temporaryFilteredItems = null;
-        });
+    public DataCommunicator<T> getDataCommunicator() {
+        return dataCommunicator;
+    }
+
+    void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void initConnector() {
+        getUI().orElseThrow(() -> new IllegalStateException(
+                "Connector can only be initialized for an attached ComboBox"))
+                .getPage().executeJavaScript(
+                        "window.Vaadin.Flow.comboBoxConnector.initLazy($0)",
+                        getElement());
+    }
+
+    @Override
+    public void setItems(Collection<T> items) {
+        ListDataProvider<T> listDataProvider = DataProvider.ofCollection(items);
+        setDataProvider(listDataProvider);
+    }
+
+    @Override
+    public <C> void setDataProvider(DataProvider<T, C> dataProvider,
+            SerializableFunction<String, C> filterConverter) {
+        Objects.requireNonNull(dataProvider, "dataProvider cannot be null");
+        Objects.requireNonNull(filterConverter,
+                "filterConverter cannot be null");
+
+        SerializableFunction<String, C> convertOrNull = filterText -> {
+            if (filterText == null || filterText.isEmpty()) {
+                return null;
+            }
+
+            return filterConverter.apply(filterText);
+        };
+
+        SerializableConsumer<C> providerFilterSlot = getDataCommunicator()
+                .setDataProvider(dataProvider,
+                        convertOrNull.apply(getFilterString()));
+
+        filterSlot = filter -> providerFilterSlot
+                .accept(convertOrNull.apply(filter));
+
+    }
+
+    private SerializableConsumer<String> filterSlot = filter -> {
+        // Just ignore when neither setDataProvider nor setItems has been called
+    };
+
+    public void setDataProvider(ListDataProvider<T> listDataProvider) {
+        // Cannot use the case insensitive contains shorthand from
+        // ListDataProvider since it wouldn't react to locale changes
+        LabelFilter defaultLabelFilter = (itemText, filterText) -> itemText
+                .toLowerCase(getLocale())
+                .contains(filterText.toLowerCase(getLocale()));
+
+        setDataProvider(defaultLabelFilter, listDataProvider);
+    }
+
+    public void setDataProvider(LabelFilter labelFilter,
+            ListDataProvider<T> listDataProvider) {
+        Objects.requireNonNull(listDataProvider,
+                "List data provider cannot be null");
+
+        // Must do getItemLabelGenerator() for each operation since it might
+        // not be the same as when this method was invoked
+        setDataProvider(listDataProvider, filterText -> item -> labelFilter
+                .test(getItemLabelGenerator().apply(item), filterText));
     }
 
     /**
@@ -327,17 +328,24 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        refresh();
+        // refresh();
     }
 
-    /**
-     * Gets the item label generator that is used to produce the strings shown
-     * in the combo box for each item.
-     *
-     * @return the item label generator used, not null
-     */
     public ItemLabelGenerator<T> getItemLabelGenerator() {
         return itemLabelGenerator;
+    }
+
+    @Override
+    public T getEmptyValue() {
+        return null;
+    }
+
+    public DataProvider<T, ?> getDataProvider() {
+        return getDataCommunicator().getDataProvider();
+    }
+
+    private DataKeyMapper<T> getKeyMapper() {
+        return getDataCommunicator().getKeyMapper();
     }
 
     @Override
@@ -506,46 +514,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return getPatternString();
     }
 
-    @Override
-    public T getEmptyValue() {
-        return null;
-    }
-
-    @Override
-    public void setValue(T value) {
-        if (value == null || Objects.equals(value, getEmptyValue())) {
-            if (getValue() != null) {
-                cleanValueAndSelection();
-            }
-            return;
-        }
-        Optional<T> item = itemsFromDataProvider.stream()
-                .filter(object -> Objects.equals(dataProvider.getId(value)
-                        , dataProvider.getId(object)))
-                .findFirst();
-        if (!item.isPresent()) {
-            throw new IllegalArgumentException(
-                    "The provided value is not part of ComboBox: " + value);
-        }
-        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                generateJson(item.get()));
-    }
-
-    private void cleanValueAndSelection() {
-        /* in certain use case, leaving the value property
-           will enforce value refresh with empty value, even though
-           actual value was set. */
-        getElement().removeProperty(VALUE_PROPERTY_NAME);
-        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                Json.createNull());
-    }
-
-    @Override
-    public T getValue() {
-        return getValue(
-                getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
-    }
-
     /**
      * Adds a listener for CustomValueSetEvent which is fired when user types in
      * a value that don't already exist in the ComboBox.
@@ -568,14 +536,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the listener to be notified when a new value is filled
      * @return a {@link Registration} for removing the event listener
      */
-    @Override
-    public Registration addCustomValueSetListener(
-            ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
-        setAllowCustomValue(true);
-        customValueListenersCount++;
-        Registration registration = super.addCustomValueSetListener(listener);
-        return new CustomValueRegistraton(registration);
-    }
+    // @Override
+    // public Registration addCustomValueSetListener(
+    // ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
+    // setAllowCustomValue(true);
+    // customValueListenersCount++;
+    // Registration registration = super.addCustomValueSetListener(listener);
+    // return new CustomValueRegistraton(registration);
+    // }
 
     /**
      * Sets representation string for UI display, when the item is null.
@@ -601,88 +569,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return nullRepresentation;
     }
 
-    private T getValue(Serializable value) {
-        if (value instanceof JsonObject) {
-            JsonObject selected = (JsonObject) value;
-            assert selected.hasKey(KEY_PROPERTY);
-            return keyMapper.get(selected.getString(KEY_PROPERTY));
-        }
-        return getEmptyValue();
-    }
-
-    private JsonArray generateJson(Stream<T> data) {
-        JsonArray array = Json.createArray();
-        data.map(this::generateJson)
-                .forEachOrdered(json -> array.set(array.length(), json));
-        return array;
-    }
-
-    private JsonObject generateJson(T item) {
-        JsonObject json = Json.createObject();
-        json.put(KEY_PROPERTY, keyMapper.key(item));
-
-        String label;
-
-        if (item == null) {
-            label = nullRepresentation;
-        } else {
-            label = getItemLabelGenerator().apply(item);
-            if (label == null) {
-                throw new IllegalStateException(String.format(
-                    "Got 'null' as a label value for the item '%s'. "
-                            + "'%s' instance may not return 'null' values",
-                    item, ItemLabelGenerator.class.getSimpleName()));
-            }
-        }
-        json.put(ITEM_LABEL_PROPERTY, label);
-        dataGenerator.generateData(item, json);
-        return json;
-    }
-
-    private T getData(JsonObject item) {
-        if (item == null) {
-            return null;
-        }
-        assert item.hasKey(KEY_PROPERTY);
-        JsonValue key = item.get(KEY_PROPERTY);
-        return keyMapper.get(key.asString());
-    }
-
-    private void refreshDataProvider() {
-        itemsFromDataProvider = dataProvider.fetch(new Query<>())
-                .collect(Collectors.toList());
-        refresh();
-    }
-
-    private void refresh() {
-        refresh(false);
-    }
-
-    private void refresh(boolean force) {
-        if (force) {
-            refreshJob = null;
-        }
-        if (refreshJob != null) {
-            return;
-        }
-        refreshJob = new RefreshJob();
-        runBeforeClientResponse(refreshJob);
-
-    }
-
-    private void setItemValuePath(String path) {
-        getElement().setProperty("itemValuePath", path == null ? "" : path);
-    }
-
-    void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
-    @Override
-    public void onEnabledStateChanged(boolean enabled) {
-        super.onEnabledStateChanged(enabled);
-        refresh();
+    /**
+     * Predicate to check {@link ComboBox} items against user typed strings.
+     */
+    @FunctionalInterface
+    public interface LabelFilter
+            extends SerializableBiPredicate<String, String> {
+        @Override
+        public boolean test(String itemCaption, String filterText);
     }
 
 }
