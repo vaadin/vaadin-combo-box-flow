@@ -139,6 +139,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // });
     }
 
+    public ComboBox(int pageSize) {
+        this();
+        setPageSize(pageSize);
+    }
+
     /**
      * Creates an empty combo box with the defined label.
      *
@@ -570,6 +575,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public String getNullRepresentation() {
         return nullRepresentation;
+    }
+
+    private void setPageSize(int pageSize) {
+        getElement().setProperty("pageSize", pageSize);
     }
 
     /**
