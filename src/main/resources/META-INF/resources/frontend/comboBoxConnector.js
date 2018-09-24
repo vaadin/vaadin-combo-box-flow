@@ -102,22 +102,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
     };
 
-    comboBox.$connector.reset = function () {
-      return;
-      comboBox.size = 0;
-      deleteObjectContents(cache);
-      deleteObjectContents(comboBox._cache.items);
-      lastRequestedRange = [0, 0];
-      comboBox._assignModels();
-    };
-
-    const deleteObjectContents = function (obj) {
-      let props = Object.keys(obj);
-      for (let i = 0; i < props.length; i++) {
-        delete obj[props[i]];
-      }
-    }
-
     comboBox.$connector.updateSize = function (newSize) {
       console.log('SETTING COMBOBOX.SIZE ' + newSize);
       comboBox.size = newSize;
