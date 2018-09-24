@@ -121,6 +121,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         .forEach((property, provider) -> jsonObject.put(
                                 property,
                                 JsonSerializer.toJson(provider.apply(item)))));
+        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
+                .put("label", item == null ? nullRepresentation
+                        : itemLabelGenerator.apply(item)));
+
         template = new Element("template");
         getElement().appendChild(template);
         setRenderer(String::valueOf);
@@ -328,7 +332,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        // refresh();
     }
 
     public ItemLabelGenerator<T> getItemLabelGenerator() {
