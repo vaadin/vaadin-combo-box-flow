@@ -137,7 +137,7 @@ public class ComboBoxView extends DemoView {
         comboBox.setItemLabelGenerator(Song::getName);
 
         List<Song> listOfSongs = createListOfSongs();
-        
+
         comboBox.setItems(listOfSongs);
         comboBox.addValueChangeListener(event -> {
             Song song = comboBox.getValue();
@@ -209,7 +209,7 @@ public class ComboBoxView extends DemoView {
         addCard("Disabled ComboBox", comboBox, message);
     }
 
-    private void createComboBoxWithNullRepresentation() {       
+    private void createComboBoxWithNullRepresentation() {
         Div message = createMessageDiv("null-representation-message");
         // begin-source-example
         // source-example-heading: ComboBox with null representation
@@ -246,15 +246,15 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Rendering items using TemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
-        comboBox.setRenderer(TemplateRenderer.<Song> of(
-                "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
-                .withProperty("song", Song::getName)
-                .withProperty("artist", Song::getArtist));
 
         List<Song> listOfSongs = createListOfSongs();
 
         comboBox.setItems(listOfSongs);
         comboBox.setItemLabelGenerator(Song::getName);
+        comboBox.setRenderer(TemplateRenderer.<Song> of(
+                "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
+                .withProperty("song", Song::getName)
+                .withProperty("artist", Song::getArtist));
 
         comboBox.addValueChangeListener(event -> {
             if (event.getSource().isEmpty()) {
@@ -284,6 +284,12 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Rendering items using ComponentTemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
+
+
+        List<Song> listOfSongs = createListOfSongs();
+
+        comboBox.setItems(listOfSongs);
+        comboBox.setItemLabelGenerator(Song::getName);
         comboBox.setRenderer(new ComponentRenderer<>(item -> {
             VerticalLayout container = new VerticalLayout();
 
@@ -296,12 +302,6 @@ public class ComboBoxView extends DemoView {
 
             return container;
         }));
-
-
-        List<Song> listOfSongs = createListOfSongs();
-
-        comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.addValueChangeListener(event -> {
             if (event.getSource().isEmpty()) {

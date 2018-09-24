@@ -30,7 +30,6 @@ import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -72,7 +71,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void commit(int updateId) {
-            // getDataCommunicator().confirmUpdate(updateId);
+            // dataCommunicator.confirmUpdate(updateId);
             enqueue("$connector.confirm", updateId);
             queue.forEach(Runnable::run);
             queue.clear();
@@ -95,6 +94,40 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
     };
 
+    private final class EagerUpdateQueue implements Update {
+
+        private EagerUpdateQueue(int size) {
+            getElement().setProperty("size", size);
+        }
+
+        @Override
+        public void set(int start, List<JsonValue> items) {
+            System.out.println("--------------");
+            System.out.println(start);
+            System.out.println(items.size());
+            setItems(items.stream().collect(JsonUtils.asArray()));
+        }
+
+        @Override
+        public void clear(int start, int length) {
+        }
+
+        @Override
+        public void commit(int updateId) {
+        }
+    }
+
+    private final ArrayUpdater eagerArrayUpdater = new ArrayUpdater() {
+        @Override
+        public Update startUpdate(int sizeChange) {
+            return new EagerUpdateQueue(sizeChange);
+        }
+
+        @Override
+        public void initialize() {
+        }
+    };
+
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private Renderer<T> renderer;
@@ -108,40 +141,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private String nullRepresentation = "";
 
-    private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
-            dataGenerator, arrayUpdater,
-            data -> getElement().callFunction("$connector.updateData", data),
-            getElement().getNode());
+    private DataCommunicator<T> dataCommunicator;
 
     public ComboBox() {
         super(null, null, String.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
-        dataGenerator.addDataGenerator(
-                (item, jsonObject) -> renderer.getValueProviders()
-                        .forEach((property, provider) -> jsonObject.put(
-                                property,
-                                JsonSerializer.toJson(provider.apply(item)))));
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
                 .put("label", item == null ? nullRepresentation
                         : itemLabelGenerator.apply(item)));
 
-        template = new Element("template");
-        getElement().appendChild(template);
-        setRenderer(String::valueOf);
-
-        getElement().addEventListener("filter-changed", event -> {
-            filterSlot.accept(getFilterString());
-        }).debounce(200);
-
-        // addFilterChangeListener(event -> {
-        // getDataCommunicator().getDataProvider().refreshAll();
-        // filterSlot.accept(event.getFilter());
-        // });
-    }
-
-    public ComboBox(int pageSize) {
-        this();
-        setPageSize(pageSize);
+        getElement().setProperty("itemValuePath", "key");
     }
 
     /**
@@ -153,6 +162,20 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public ComboBox(String label) {
         this();
         setLabel(label);
+    }
+
+    /**
+     * Creates an empty combo box with the defined page size for lazy loading.
+     * <p>
+     * Note that the page size takes effect only when defining a data provider
+     * for the combo box.
+     * 
+     * @param pageSize
+     *            the amount of items to request at a time for lazy loading
+     */
+    public ComboBox(int pageSize) {
+        this();
+        setPageSize(pageSize);
     }
 
     /**
@@ -221,36 +244,57 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
-
-        if (dataGeneratorRegistration != null) {
-            dataGeneratorRegistration.remove();
-            dataGeneratorRegistration = null;
-        }
-
-        Rendering<T> rendering = renderer.render(getElement(),
-                dataCommunicator.getKeyMapper(), template);
-        if (rendering.getDataGenerator().isPresent()) {
-            dataGeneratorRegistration = dataGenerator
-                    .addDataGenerator(rendering.getDataGenerator().get());
-        }
-
         this.renderer = renderer;
 
-        getDataCommunicator().reset();
+        if (template == null) {
+            template = new Element("template");
+            getElement().appendChild(template);
+        }
+
+        // if (dataGeneratorRegistration != null) {
+        // dataGeneratorRegistration.remove();
+        // dataGeneratorRegistration = null;
+        // }
+        // if (dataCommunicator != null) {
+        // Rendering<T> rendering = renderer.render(getElement(),
+        // dataCommunicator.getKeyMapper(), template);
+        // if (rendering.getDataGenerator().isPresent()) {
+        // dataGeneratorRegistration = dataGenerator
+        // .addDataGenerator(rendering.getDataGenerator().get());
+        // }
+        //
+        // dataCommunicator.reset();
+        // }
+        render();
+    }
+
+    private void render() {
+        if (dataCommunicator == null || renderer == null) {
+            return;
+        }
+        runBeforeClientResponse(ui -> {
+            if (dataGeneratorRegistration != null) {
+                dataGeneratorRegistration.remove();
+                dataGeneratorRegistration = null;
+            }
+            Rendering<T> rendering = renderer.render(getElement(),
+                    dataCommunicator.getKeyMapper(), template);
+            if (rendering.getDataGenerator().isPresent()) {
+                dataGeneratorRegistration = dataGenerator
+                        .addDataGenerator(rendering.getDataGenerator().get());
+            }
+            dataCommunicator.reset();
+        });
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void confirmUpdate(int id) {
-        getDataCommunicator().confirmUpdate(id);
+        dataCommunicator.confirmUpdate(id);
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
-        getDataCommunicator().setRequestedRange(start, length);
-    }
-
-    public DataCommunicator<T> getDataCommunicator() {
-        return dataCommunicator;
+        dataCommunicator.setRequestedRange(start, length);
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -266,10 +310,26 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         getElement());
     }
 
+    private boolean eager;
+
     @Override
     public void setItems(Collection<T> items) {
-        ListDataProvider<T> listDataProvider = DataProvider.ofCollection(items);
+        eager = true;
+
+        dataCommunicator = new DataCommunicator<>(dataGenerator,
+                eagerArrayUpdater, data -> getElement()
+                        .callFunction("$connector.updateData", data),
+                getElement().getNode());
+        ListDataProvider<T> listDataProvider = new ListDataProvider<T>(items) {
+            // Allow null values
+            public Object getId(T item) {
+                return item;
+            };
+        };
         setDataProvider(listDataProvider);
+
+        dataCommunicator.setRequestedRange(0, items.size());
+        render();
     }
 
     @Override
@@ -279,6 +339,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(filterConverter,
                 "filterConverter cannot be null");
 
+        if (dataCommunicator == null)
+            dataCommunicator = new DataCommunicator<>(dataGenerator,
+                    arrayUpdater, data -> getElement()
+                            .callFunction("$connector.updateData", data),
+                    getElement().getNode());
+
+        if (renderer != null) {
+            setRenderer(renderer);
+        }
+
         SerializableFunction<String, C> convertOrNull = filterText -> {
             if (filterText == null || filterText.isEmpty()) {
                 return null;
@@ -287,12 +357,21 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return filterConverter.apply(filterText);
         };
 
-        SerializableConsumer<C> providerFilterSlot = getDataCommunicator()
+        SerializableConsumer<C> providerFilterSlot = dataCommunicator
                 .setDataProvider(dataProvider,
                         convertOrNull.apply(getFilterString()));
 
         filterSlot = filter -> providerFilterSlot
                 .accept(convertOrNull.apply(filter));
+
+        render();
+
+        if (eager) {
+            return;
+        }
+        getElement().addEventListener("filter-changed", event -> {
+            filterSlot.accept(getFilterString());
+        }).debounce(200);
 
     }
 
@@ -349,11 +428,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     public DataProvider<T, ?> getDataProvider() {
-        return getDataCommunicator().getDataProvider();
+        return dataCommunicator.getDataProvider();
     }
 
     private DataKeyMapper<T> getKeyMapper() {
-        return getDataCommunicator().getKeyMapper();
+        return dataCommunicator.getKeyMapper();
     }
 
     @Override

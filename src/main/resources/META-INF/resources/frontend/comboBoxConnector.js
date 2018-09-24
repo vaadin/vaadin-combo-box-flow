@@ -4,14 +4,13 @@ window.Vaadin.Flow.comboBoxConnector = {
     if (comboBox.$connector) {
       return;
     }
+
+    comboBox.$connector = {};
+
     const pageCallbacks = {};
     const cache = {};
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
-
-    comboBox.$connector = {};
-
-    comboBox.itemValuePath = 'key';
 
     comboBox.dataProvider = function (params, callback) {
 
