@@ -90,7 +90,8 @@ public class LazyLoadingPage extends Div {
 
         add(comboBox2);
         add(new NativeButton("get value",
-                e -> add(new Label(comboBox2.getValue().getName()))));
+                e -> add(new Label(comboBox2.getValue() == null ? "null"
+                        : comboBox2.getValue().getName()))));
         add(new NativeButton("set value",
                 e -> comboBox2.setValue(people.get(3))));
 

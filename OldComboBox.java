@@ -85,28 +85,6 @@ public class OldComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private SerializableConsumer<UI> refreshJob;
     private String nullRepresentation = "";
 
-    private class CustomValueRegistraton implements Registration {
-
-        private Registration delegate;
-
-        private CustomValueRegistraton(Registration delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void remove() {
-            if (delegate != null) {
-                delegate.remove();
-                customValueListenersCount--;
-
-                if (customValueListenersCount == 0) {
-                    setAllowCustomValue(false);
-                }
-                delegate = null;
-            }
-        }
-    }
-
     private class RefreshJob implements SerializableConsumer<UI> {
 
         @Override
@@ -243,12 +221,6 @@ public class OldComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
          * this "design".
          */
         refresh(true);
-    }
-
-    private void unregister(Registration registration) {
-        if (registration != null) {
-            registration.remove();
-        }
     }
 
     @Override
@@ -532,16 +504,6 @@ public class OldComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 generateJson(item.get()));
     }
 
-    private void cleanValueAndSelection() {
-        /*
-         * in certain use case, leaving the value property will enforce value
-         * refresh with empty value, even though actual value was set.
-         */
-        getElement().removeProperty(VALUE_PROPERTY_NAME);
-        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                Json.createNull());
-    }
-
     @Override
     public T getValue() {
         return getValue(
@@ -601,84 +563,6 @@ public class OldComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public String getNullRepresentation() {
         return nullRepresentation;
-    }
-
-    private T getValue(Serializable value) {
-        if (value instanceof JsonObject) {
-            JsonObject selected = (JsonObject) value;
-            assert selected.hasKey(KEY_PROPERTY);
-            return keyMapper.get(selected.getString(KEY_PROPERTY));
-        }
-        return getEmptyValue();
-    }
-
-    private JsonArray generateJson(Stream<T> data) {
-        JsonArray array = Json.createArray();
-        data.map(this::generateJson)
-                .forEachOrdered(json -> array.set(array.length(), json));
-        return array;
-    }
-
-    private JsonObject generateJson(T item) {
-        JsonObject json = Json.createObject();
-        json.put(KEY_PROPERTY, keyMapper.key(item));
-
-        String label;
-
-        if (item == null) {
-            label = nullRepresentation;
-        } else {
-            label = getItemLabelGenerator().apply(item);
-            if (label == null) {
-                throw new IllegalStateException(String.format(
-                        "Got 'null' as a label value for the item '%s'. "
-                                + "'%s' instance may not return 'null' values",
-                        item, ItemLabelGenerator.class.getSimpleName()));
-            }
-        }
-        json.put(ITEM_LABEL_PROPERTY, label);
-        dataGenerator.generateData(item, json);
-        return json;
-    }
-
-    private T getData(JsonObject item) {
-        if (item == null) {
-            return null;
-        }
-        assert item.hasKey(KEY_PROPERTY);
-        JsonValue key = item.get(KEY_PROPERTY);
-        return keyMapper.get(key.asString());
-    }
-
-    private void refreshDataProvider() {
-        itemsFromDataProvider = dataProvider.fetch(new Query<>())
-                .collect(Collectors.toList());
-        refresh();
-    }
-
-    private void refresh() {
-        refresh(false);
-    }
-
-    private void refresh(boolean force) {
-        if (force) {
-            refreshJob = null;
-        }
-        if (refreshJob != null) {
-            return;
-        }
-        refreshJob = new RefreshJob();
-        runBeforeClientResponse(refreshJob);
-
-    }
-
-    private void setItemValuePath(String path) {
-        getElement().setProperty("itemValuePath", path == null ? "" : path);
-    }
-
-    void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     @Override
