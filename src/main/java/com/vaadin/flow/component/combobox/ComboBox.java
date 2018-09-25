@@ -298,6 +298,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     // return presentationToModel(this, key);
     // }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method sends all of the items to the browser at once, so it should
+     * be used only with relatively small data sets. The benefit of using this
+     * method is that the filtering will happen responsively in the client-side.
+     * For large data-sets, you should use lazy loading via
+     * {@link #setDataProvider(DataProvider)}.
+     */
     @Override
     public void setItems(Collection<T> items) {
         eager = true;
