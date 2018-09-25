@@ -154,10 +154,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Predicate to check {@link ComboBox} items against user typed strings.
      */
     @FunctionalInterface
-    public interface LabelFilter
-            extends SerializableBiPredicate<String, String> {
+    public interface ItemFilter<T> extends SerializableBiPredicate<T, String> {
         @Override
-        public boolean test(String itemCaption, String filterText);
+        public boolean test(T item, String filterText);
     }
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
@@ -364,7 +363,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Sets a list data provider as the data provider of this combo box.
      * Filtering will use a case insensitive match to show all items where the
-     * filter text is a substring of the caption displayed for that item.
+     * filter text is a substring of the label displayed for that item.
      * <p>
      * The browser will request for the items lazily as the user scrolls down
      * the combo box. Filtering is done in the server. More responsive
@@ -377,17 +376,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public void setDataProvider(ListDataProvider<T> listDataProvider) {
         // Cannot use the case insensitive contains shorthand from
         // ListDataProvider since it wouldn't react to locale changes
-        LabelFilter defaultLabelFilter = (itemText, filterText) -> itemText
-                .toLowerCase(getLocale())
-                .contains(filterText.toLowerCase(getLocale()));
+        ItemFilter<T> defaultItemFilter = (item,
+                filterText) -> itemLabelGenerator.apply(item)
+                        .toLowerCase(getLocale())
+                        .contains(filterText.toLowerCase(getLocale()));
 
-        setDataProvider(defaultLabelFilter, listDataProvider);
+        setDataProvider(defaultItemFilter, listDataProvider);
     }
 
     /**
-     * Sets a list data provider with an item caption filter as the data
-     * provider of this combo box. The caption filter is used to compare the
-     * displayed caption of each item to the filter text entered by the user.
+     * Sets a list data provider with an item filter as the data provider of
+     * this combo box. The item filter is used to compare each item to the
+     * filter text entered by the user.
      * <p>
      * The browser will request for the items lazily as the user scrolls down
      * the combo box. Filtering is done in the server. More responsive
@@ -400,15 +400,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @param listDataProvider
      *            the list data provider to use, not <code>null</code>
      */
-    public void setDataProvider(LabelFilter labelFilter,
+    public void setDataProvider(ItemFilter<T> itemFilter,
             ListDataProvider<T> listDataProvider) {
         Objects.requireNonNull(listDataProvider,
                 "List data provider cannot be null");
 
         // Must do getItemLabelGenerator() for each operation since it might
         // not be the same as when this method was invoked
-        setDataProvider(listDataProvider, filterText -> item -> labelFilter
-                .test(getItemLabelGenerator().apply(item), filterText));
+        setDataProvider(listDataProvider,
+                filterText -> item -> itemFilter.test(item, filterText));
     }
 
     /**
