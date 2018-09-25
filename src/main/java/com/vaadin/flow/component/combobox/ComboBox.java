@@ -311,9 +311,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         eager = true;
 
         dataCommunicator = new DataCommunicator<>(dataGenerator,
-                eagerArrayUpdater, data -> getElement()
-                        .callFunction("$connector.updateData", data),
-                getElement().getNode());
+                eagerArrayUpdater, data -> {
+                    // NO-OP
+                }, getElement().getNode());
         ListDataProvider<T> listDataProvider = new ListDataProvider<T>(items) {
             // Allow null values
             @Override

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,6 +38,13 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 public class ComboBoxTest {
+
+    private MockUI ui;
+
+    @Before
+    public void init() {
+        ui = new MockUI();
+    }
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -129,8 +137,12 @@ public class ComboBoxTest {
         expectIllegalStateException(
                 "Got 'null' as a label value for the item 'foo'. 'ItemLabelGenerator' instance may not return 'null' values");
         TestComboBox comboBox = new TestComboBox();
+
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
+
+        ui.add(comboBox);
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
     }
 
     @Test
