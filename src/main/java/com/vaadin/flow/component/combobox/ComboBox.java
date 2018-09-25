@@ -191,8 +191,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         super(null, null, String.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
-                .put("label", item == null ? nullRepresentation
-                        : itemLabelGenerator.apply(item)));
+                .put("label", generateLabel(item)));
 
         getElement().setProperty("itemValuePath", "key");
         // getElement().synchronizeProperty("value", "value-changed");
@@ -259,10 +258,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private static <T> T presentationToModel(ComboBox<T> comboBox,
             String presentation) {
-        if (presentation != null) {
-            return comboBox.getKeyMapper().get(presentation);
+        if (presentation == null || !comboBox.hasItems()) {
+            return comboBox.getEmptyValue();
         }
-        return comboBox.getEmptyValue();
+        return comboBox.getKeyMapper().get(presentation);
     }
 
     private static <T> String modelToPresentation(ComboBox<T> comboBox,
@@ -386,8 +385,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // Cannot use the case insensitive contains shorthand from
         // ListDataProvider since it wouldn't react to locale changes
         ItemFilter<T> defaultItemFilter = (item,
-                filterText) -> itemLabelGenerator.apply(item)
-                        .toLowerCase(getLocale())
+                filterText) -> generateLabel(item).toLowerCase(getLocale())
                         .contains(filterText.toLowerCase(getLocale()));
 
         setDataProvider(defaultItemFilter, listDataProvider);
@@ -727,6 +725,20 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return nullRepresentation;
     }
 
+    private String generateLabel(T item) {
+        if (item == null) {
+            return nullRepresentation;
+        }
+        String label = getItemLabelGenerator().apply(item);
+        if (label == null) {
+            throw new IllegalStateException(String.format(
+                    "Got 'null' as a label value for the item '%s'. "
+                            + "'%s' instance may not return 'null' values",
+                    item, ItemLabelGenerator.class.getSimpleName()));
+        }
+        return label;
+    }
+
     private void render() {
         if (dataCommunicator == null || renderer == null) {
             return;
@@ -775,6 +787,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private DataKeyMapper<T> getKeyMapper() {
         return dataCommunicator.getKeyMapper();
+    }
+
+    private boolean hasItems() {
+        return dataCommunicator != null;
     }
 
 }
