@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +29,6 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
 
 @TestPath("combo-box-test")
 public class ComboBoxPageIT extends AbstractComponentIT {
@@ -127,7 +127,7 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     public void setValue_changeDataProvider_valueIsReset() {
         WebElement combo = findElement(By.id("combo"));
 
-        findElement(By.id("update-provider")).click();
+        findElement(By.id("change-items")).click();
         waitUntil(driver -> "baz".equals(getItem(getItems(combo), 0)));
 
         findElement(By.id("update-value")).click();
@@ -211,9 +211,8 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     }
 
     private TestBenchElement getItemFromBox(int index) {
-        return $(TestBenchElement.class).id("overlay")
-                .$(TestBenchElement.class).id("content")
-                .$(TestBenchElement.class).id("selector")
+        return $(TestBenchElement.class).id("overlay").$(TestBenchElement.class)
+                .id("content").$(TestBenchElement.class).id("selector")
                 .$("vaadin-combo-box-item").get(index);
     }
 

@@ -15,14 +15,19 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
+
+/**
+ * Using ListDataProvider eagerly with setItems()-method, not lazy loading with
+ * setDataProvider()
+ */
 @TestPath("data-provider")
 public class DataProviderIT extends AbstractComponentIT {
     @Before
