@@ -85,6 +85,21 @@ public class LazyLoadingIT extends AbstractComponentIT {
         assertMessage("Item 2");
     }
 
+    @Test
+    public void setValue_valueChanged_valueShown() {
+        stringBox.openPopup();
+        $("button").id("set-value").click();
+        assertMessage("Item 10");
+        Assert.assertEquals(
+                "The selected value should be displayed in the ComboBox's TextField",
+                "Item 10", getTextFieldValue(stringBox));
+    }
+
+    private String getTextFieldValue(ComboBoxElement comboBox) {
+        return (String) executeScript("return arguments[0].inputElement.value",
+                comboBox);
+    }
+
     private void assertMessage(String expectedMessage) {
         Assert.assertEquals(expectedMessage, $("div").id("message").getText());
     }
