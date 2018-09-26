@@ -36,9 +36,29 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonValue;
 
+/**
+ * Server-side component for the {@code vaadin-combo-box} webcomponent. It
+ * contains the same features of the webcomponent, such as item filtering,
+ * object selection and item templating.
+ * <p>
+ * You can provide data for the component either eagerly or lazily. To send data
+ * eagerly, use {@link #setItems(Collection)} or its overload. This method is
+ * suitable for a small set of options, and it enables the more responsive
+ * client-side filtering.
+ * <p>
+ * For lazy loading data as the user scrolls down the component, use
+ * {@link #setDataProvider(DataProvider)} or its overloads. This method is
+ * suitable for large data sets, to avoid unnecessary network traffic. The
+ * filtering will happen in server-side, and you can override the default filter
+ * strategy with {@link #setDataProvider(ItemFilter, ListDataProvider)}.
+ *
+ * @param <T>
+ *            the type of the items to be inserted in the combo box
+ */
 @HtmlImport("frontend://flow-component-renderer.html")
 @HtmlImport("frontend://b_components/vaadin-combo-box/src/vaadin-combo-box.html")
 @JavaScript("frontend://comboBoxConnector.js")
+@SuppressWarnings("serial")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasFilterableDataProvider<T, String> {
@@ -104,6 +124,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
     }
 
+    /**
+     * Lazy loading updater, used when calling setDataProvider()
+     */
     private final ArrayUpdater arrayUpdater = new ArrayUpdater() {
         @Override
         public Update startUpdate(int sizeChange) {
@@ -119,7 +142,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Updater which just sets the items-property eagerly for the web component.
      * This is done to allow re-using the dataprovider design for the eager
-     * use-case.
+     * use-case. This is used when calling setItems().
      */
     private final ArrayUpdater eagerArrayUpdater = new ArrayUpdater() {
         @Override
