@@ -518,6 +518,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
+        if (hasItems()) {
+            dataCommunicator.reset();
+        }
     }
 
     /**
