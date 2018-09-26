@@ -22,9 +22,7 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
@@ -32,69 +30,53 @@ import com.vaadin.flow.router.Route;
 @Route("lazy-loading")
 public class LazyLoadingPage extends Div {
 
-    public LazyLoadingPage() {
+    private Div message = new Div();
 
+    public LazyLoadingPage() {
+        message.setId("message");
+        add(message);
+
+        createListDataProviderWithStrings();
+
+        // List<Person> people = IntStream.range(0, 987)
+        // .mapToObj(i -> new Person("Person " + i, i))
+        // .collect(Collectors.toList());
+        // ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
+        // people);
+        //
+        // ComboBox<Person> comboBox2 = new ComboBox<>();
+        // comboBox2.setDataProvider(personDataProvider);
+        //
+        // add(comboBox2);
+        // add(new NativeButton("get value",
+        // e -> add(new Label(comboBox2.getValue() == null ? "null"
+        // : comboBox2.getValue().getName()))));
+        // add(new NativeButton("set value",
+        // e -> comboBox2.setValue(people.get(3))));
+
+    }
+
+    private void createListDataProviderWithStrings() {
         ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("lazy-strings");
 
         List<String> items = IntStream.range(0, 1000).mapToObj(i -> "Item " + i)
                 .collect(Collectors.toList());
         ListDataProvider<String> dp = DataProvider.ofCollection(items);
-        // dp.addFilter(item -> {
-        // String filterString = comboBox.getFilterString();
-        // if (filterString == null || filterString.isEmpty()) {
-        // return true;
-        // }
-        // return item.startsWith(comboBox.getFilterString());
-        // });
-
-        CallbackDataProvider<String, String> callbackDp = new CallbackDataProvider<>(
-                query -> {
-                    int offset = query.getOffset();
-                    int limit = query.getLimit();
-                    System.out.println("-- dataprovider query --");
-                    System.out.println("offset " + offset);
-                    System.out.println("limit " + limit);
-                    return IntStream.range(offset, offset + limit)
-                            .mapToObj(index -> "Item " + index);
-                }, query -> 30000);
 
         comboBox.setDataProvider(dp);
-        // comboBox.setDataProvider(callbackDp);
-
-        // comboBox.setRenderer(new ComponentRenderer<H1, String>(s -> new
-        // H1(s)));
-
-        // comboBox.getElement().setProperty("pageSize", 10);
 
         NativeButton getButton = new NativeButton("get value", e -> {
-            add(new Label(comboBox.getValue()));
-            // add(new Label(comboBox.getElement().getProperty("value")));
+            message.setText(comboBox.getValue());
         });
+        getButton.setId("get-value");
 
         NativeButton setButton = new NativeButton("set value", e -> {
-            // comboBox.setValue(dp.getItems().iterator().next());
-            // comboBox.setValue("Item 5");
-            comboBox.setValue(dp.getItems().iterator().next());
+            comboBox.setValue(items.get(10));
         });
+        setButton.setId("set-value");
 
-        // add(comboBox, getButton, setButton);
-
-        List<Person> people = IntStream.range(0, 987)
-                .mapToObj(i -> new Person("Person " + i, i))
-                .collect(Collectors.toList());
-        ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
-                people);
-
-        ComboBox<Person> comboBox2 = new ComboBox<>();
-        comboBox2.setDataProvider(personDataProvider);
-
-        add(comboBox2);
-        add(new NativeButton("get value",
-                e -> add(new Label(comboBox2.getValue() == null ? "null"
-                        : comboBox2.getValue().getName()))));
-        add(new NativeButton("set value",
-                e -> comboBox2.setValue(people.get(3))));
-
+        add(comboBox, getButton, setButton, message);
     }
 
     public static class Person implements Serializable {
