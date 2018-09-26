@@ -66,17 +66,14 @@ public class LazyLoadingPage extends Div {
 
         comboBox.setDataProvider(dp);
 
-        NativeButton getButton = new NativeButton("get value", e -> {
-            message.setText(comboBox.getValue());
-        });
-        getButton.setId("get-value");
+        comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
         NativeButton setButton = new NativeButton("set value", e -> {
             comboBox.setValue(items.get(10));
         });
         setButton.setId("set-value");
 
-        add(comboBox, getButton, setButton, message);
+        add(comboBox, setButton);
     }
 
     public static class Person implements Serializable {

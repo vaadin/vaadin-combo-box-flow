@@ -78,6 +78,17 @@ public class LazyLoadingIT extends AbstractComponentIT {
         assertRendered("Item 115");
     }
 
+    @Test
+    public void clickItem_valueChanged() {
+        stringBox.openPopup();
+        getItemElements().get(2).click();
+        assertMessage("Item 2");
+    }
+
+    private void assertMessage(String expectedMessage) {
+        Assert.assertEquals(expectedMessage, $("div").id("message").getText());
+    }
+
     // Gets all the loaded json items, but they are not necessarily rendered
     private List<JsonObject> getLoadedItems(ComboBoxElement comboBox) {
         List<JsonObject> list = (List<JsonObject>) executeScript(
@@ -103,10 +114,15 @@ public class LazyLoadingIT extends AbstractComponentIT {
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
     private List<String> getOverlayContents() {
-        return getOverlay().$("div").id("content").$("vaadin-combo-box-item")
-                .all().stream().map(element -> element.$("div").id("content"))
+        return getItemElements().stream()
+                .map(element -> element.$("div").id("content"))
                 .map(element -> element.getPropertyString("innerHTML"))
                 .collect(Collectors.toList());
+    }
+
+    private List<TestBenchElement> getItemElements() {
+        return getOverlay().$("div").id("content").$("vaadin-combo-box-item")
+                .all();
     }
 
     private void scrollToItem(ComboBoxElement comboBox, int index) {
