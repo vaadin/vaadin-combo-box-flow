@@ -20,10 +20,8 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
@@ -33,11 +31,9 @@ import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
-import elemental.json.JsonArray;
 import elemental.json.JsonValue;
 
 @HtmlImport("frontend://flow-component-renderer.html")
@@ -168,6 +164,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private Renderer<T> renderer;
+    private boolean renderScheduled;
 
     private DataCommunicator<T> dataCommunicator;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
@@ -774,9 +771,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void render() {
-        if (dataCommunicator == null || renderer == null) {
+        if (renderScheduled || dataCommunicator == null || renderer == null) {
             return;
         }
+        renderScheduled = true;
         runBeforeClientResponse(ui -> {
             if (dataGeneratorRegistration != null) {
                 dataGeneratorRegistration.remove();
@@ -789,6 +787,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         .addDataGenerator(rendering.getDataGenerator().get());
             }
             dataCommunicator.reset();
+            renderScheduled = false;
         });
     }
 
