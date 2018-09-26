@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -19,8 +20,10 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
@@ -30,8 +33,11 @@ import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
+import elemental.json.JsonArray;
 import elemental.json.JsonValue;
 
 @HtmlImport("frontend://flow-component-renderer.html")
@@ -126,7 +132,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return new Update() {
                 @Override
                 public void clear(int start, int length) {
-                    // NO-OP
+                    setItems(Json.createArray());
                 }
 
                 @Override
@@ -266,6 +272,23 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private static <T> String modelToPresentation(ComboBox<T> comboBox,
             T model) {
+        if (model == null) {
+            return null;
+        }
+
+        if (comboBox.eager) {
+            ListDataProvider<T> dp = ((ListDataProvider<T>) comboBox
+                    .getDataProvider());
+            Collection<T> items = dp.getItems();
+            Optional<T> item = items.stream().filter(
+                    object -> Objects.equals(dp.getId(model), dp.getId(object)))
+                    .findFirst();
+
+            if (!item.isPresent()) {
+                throw new IllegalArgumentException(
+                        "The provided value is not part of ComboBox: " + model);
+            }
+        }
         return comboBox.getKeyMapper().key(model);
     }
 
@@ -290,13 +313,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         render();
     }
 
-    // @Override
-    // public T getValue() {
-    // // Internally the key property is used as the combobox's value
-    // String key = getElement().getProperty("value");
-    // return presentationToModel(this, key);
-    // }
-
     /**
      * {@inheritDoc}
      * <p>
@@ -308,12 +324,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public void setItems(Collection<T> items) {
-        eager = true;
-
-        dataCommunicator = new DataCommunicator<>(dataGenerator,
-                eagerArrayUpdater, data -> {
-                    // NO-OP
-                }, getElement().getNode());
         ListDataProvider<T> listDataProvider = new ListDataProvider<T>(items) {
             // Allow null values
             @Override
@@ -321,16 +331,40 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 return item;
             };
         };
-        setDataProvider(listDataProvider);
+        setItems(listDataProvider);
+    }
 
-        dataCommunicator.setRequestedRange(0, items.size());
+    /**
+     * Sets the items of this component from the given data provider.
+     * <p>
+     * This method sends all of the items to the browser at once, so it should
+     * be used only with relatively small data sets. The benefit of using this
+     * method is that the filtering will happen responsively in the client-side.
+     * For large data-sets, you should use lazy loading via
+     * {@link #setDataProvider(DataProvider)}.
+     * 
+     * @param dataProvider
+     */
+    public void setItems(ListDataProvider<T> dataProvider) {
+        eager = true;
+
+        dataCommunicator = new DataCommunicator<T>(dataGenerator,
+                eagerArrayUpdater, data -> {
+                    // NO-OP
+                }, getElement().getNode());
+
+        setDataProvider(dataProvider);
+        setValue(null);
+
+        dataCommunicator.setRequestedRange(0, dataProvider.getItems().size());
         render();
     }
 
     @Override
     public <C> void setDataProvider(DataProvider<T, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
-        Objects.requireNonNull(dataProvider, "dataProvider cannot be null");
+        Objects.requireNonNull(dataProvider,
+                "The data provider can not be null");
         Objects.requireNonNull(filterConverter,
                 "filterConverter cannot be null");
 

@@ -280,7 +280,7 @@ public class ComboBoxTest {
         expectIllegalArgumentException(
                 "The provided value is not part of ComboBox:");
         ComboBox comboBox = new ComboBox();
-        comboBox.setDataProvider(new ListDataProvider<TestItem>(list) {
+        comboBox.setItems(new ListDataProvider<TestItem>(list) {
             @Override
             public Object getId(TestItem item) {
                 return item.getId();
