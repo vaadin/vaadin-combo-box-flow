@@ -2,7 +2,9 @@ package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,6 +36,8 @@ import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
@@ -205,6 +209,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private int customValueListenersCount;
 
     private String nullRepresentation = "";
+
+    private ArrayList<T> temporaryFilteredItems;
 
     private SerializableConsumer<String> filterSlot = filter -> {
         // Just ignore when setDataProvider has not been called
@@ -481,49 +487,55 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return dataCommunicator.getDataProvider();
     }
 
-    // /**
-    // * Gets the list of items which were filtered by the user input.
-    // *
-    // * @return the list of filtered items, or empty list if none were filtered
-    // */
-    // public List<T> getFilteredItems() {
-    // if (temporaryFilteredItems != null) {
-    // return Collections.unmodifiableList(temporaryFilteredItems);
-    // }
-    // JsonArray items = super.getFilteredItemsJsonArray();
-    // List<T> result = new ArrayList<>(items.length());
-    // for (int i = 0; i < items.length(); i++) {
-    // result.add(getData(items.get(i)));
-    // }
-    // return result;
-    // }
-    //
-    // /**
-    // * Convenience method for the {@link #setFilteredItems(Collection)}. It
-    // sets
-    // * the list of visible items in reaction of the input of the user.
-    // *
-    // * @param filteredItems
-    // * the items to show in response of a filter input
-    // */
-    // public void setFilteredItems(T... filteredItems) {
-    // setFilteredItems(Arrays.asList(filteredItems));
-    // }
-    //
-    // /**
-    // * It sets the list of visible items in reaction of the input of the user.
-    // *
-    // * @param filteredItems
-    // * the items to show in response of a filter input
-    // */
-    // public void setFilteredItems(Collection<T> filteredItems) {
-    // temporaryFilteredItems = new ArrayList<>(filteredItems);
-    //
-    // runBeforeClientResponse(ui -> {
-    // setFilteredItems(generateJson(temporaryFilteredItems.stream()));
-    // temporaryFilteredItems = null;
-    // });
-    // }
+    /**
+     * Gets the list of items which were filtered by the user input.
+     *
+     * @return the list of filtered items, or empty list if none were filtered
+     */
+    public List<T> getFilteredItems() {
+        if (temporaryFilteredItems != null) {
+            return Collections.unmodifiableList(temporaryFilteredItems);
+        }
+        JsonArray items = super.getFilteredItemsJsonArray();
+        List<T> result = new ArrayList<>(items.length());
+        for (int i = 0; i < items.length(); i++) {
+            JsonObject object = items.get(i);
+            String key = object.getString("key");
+            getKeyMapper().get(key);
+        }
+        return result;
+    }
+
+    /**
+     * Convenience method for the {@link #setFilteredItems(Collection)}. It sets
+     * the list of visible items in reaction of the input of the user.
+     *
+     * @param filteredItems
+     *            the items to show in response of a filter input
+     */
+    public void setFilteredItems(T... filteredItems) {
+        setFilteredItems(Arrays.asList(filteredItems));
+    }
+
+    /**
+     * It sets the list of visible items in reaction of the input of the user.
+     *
+     * @param filteredItems
+     *            the items to show in response of a filter input
+     */
+    public void setFilteredItems(Collection<T> filteredItems) {
+        temporaryFilteredItems = new ArrayList<>(filteredItems);
+
+        runBeforeClientResponse(ui -> {
+            JsonArray jsonArray = filteredItems.stream().map(item -> {
+                JsonObject json = Json.createObject();
+                dataGenerator.generateData(item, json);
+                return json;
+            }).collect(JsonUtils.asArray());
+            setFilteredItems(jsonArray);
+            temporaryFilteredItems = null;
+        });
+    }
 
     /**
      * Sets the item label generator that is used to produce the strings shown
