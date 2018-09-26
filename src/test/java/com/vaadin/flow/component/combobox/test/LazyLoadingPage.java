@@ -37,6 +37,7 @@ public class LazyLoadingPage extends Div {
         add(message);
 
         createListDataProviderWithStrings();
+        createComboBoxWithCustomPageSize();
 
         // List<Person> people = IntStream.range(0, 987)
         // .mapToObj(i -> new Person("Person " + i, i))
@@ -60,10 +61,8 @@ public class LazyLoadingPage extends Div {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("lazy-strings");
 
-        List<String> items = IntStream.range(0, 1000).mapToObj(i -> "Item " + i)
-                .collect(Collectors.toList());
+        List<String> items = generateStrings();
         ListDataProvider<String> dp = DataProvider.ofCollection(items);
-
         comboBox.setDataProvider(dp);
 
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
@@ -74,6 +73,19 @@ public class LazyLoadingPage extends Div {
         setButton.setId("set-value");
 
         add(comboBox, setButton);
+    }
+
+    private void createComboBoxWithCustomPageSize() {
+        ComboBox<String> comboBox = new ComboBox<>(180);
+        comboBox.setId("pagesize");
+        comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
+        add(comboBox);
+    }
+
+    private List<String> generateStrings() {
+        List<String> items = IntStream.range(0, 1000).mapToObj(i -> "Item " + i)
+                .collect(Collectors.toList());
+        return items;
     }
 
     public static class Person implements Serializable {

@@ -35,6 +35,7 @@ import elemental.json.JsonObject;
 public class LazyLoadingIT extends AbstractComponentIT {
 
     private ComboBoxElement stringBox;
+    private ComboBoxElement pagesizeBox;
 
     @Before
     public void init() {
@@ -42,6 +43,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
                 .size() > 0);
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
+        pagesizeBox = $(ComboBoxElement.class).id("pagesize");
     }
 
     @Test
@@ -93,6 +95,20 @@ public class LazyLoadingIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "The selected value should be displayed in the ComboBox's TextField",
                 "Item 10", getTextFieldValue(stringBox));
+    }
+
+    @Test
+    public void customPageSize_correctAmountOfItemsRequested() {
+        pagesizeBox.openPopup();
+        Assert.assertEquals(
+                "After opening the ComboBox, the first 'pageSize' amount "
+                        + "of items should be loaded.",
+                180, getLoadedItems(pagesizeBox).size());
+
+        scrollToItem(pagesizeBox, 200);
+        Assert.assertEquals("Expected two pages to be loaded.", 360,
+                getLoadedItems(pagesizeBox).size());
+        assertRendered("Item 200");
     }
 
     private String getTextFieldValue(ComboBoxElement comboBox) {
