@@ -820,8 +820,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private JsonObject generateData(T item) {
         JsonObject json = Json.createObject();
-        dataGenerator.generateData(item, json);
         json.put("key", getKeyMapper().key(item));
+        dataGenerator.generateData(item, json);
         return json;
     }
 

@@ -76,6 +76,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     };
 
     comboBox.$connector.clear = function (index, length) {
+      comboBox.clearCache();
       return;
       if (Object.keys(cache).length === 0) {
         return;

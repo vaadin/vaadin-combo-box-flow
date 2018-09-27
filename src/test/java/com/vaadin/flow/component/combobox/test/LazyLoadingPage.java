@@ -66,6 +66,13 @@ public class LazyLoadingPage extends Div {
         add(comboBox, setButton);
     }
 
+    private void createComboBoxWithCustomPageSize() {
+        ComboBox<String> comboBox = new ComboBox<>(180);
+        comboBox.setId("pagesize");
+        comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
+        add(comboBox);
+    }
+
     private void createListDataProviderWithBeans() {
         ComboBox<Person> comboBox = new ComboBox<>();
         comboBox.setId("lazy-beans");
@@ -87,14 +94,14 @@ public class LazyLoadingPage extends Div {
                         person -> new H4(person.getName()))));
         componentRendererButton.setId("component-renderer");
 
-        add(comboBox, setButton, componentRendererButton);
-    }
+        NativeButton itemLabelGeneratorButton = new NativeButton(
+                "change item label generator",
+                e -> comboBox.setItemLabelGenerator(
+                        person -> "Born " + person.getBorn()));
+        itemLabelGeneratorButton.setId("item-label-generator");
 
-    private void createComboBoxWithCustomPageSize() {
-        ComboBox<String> comboBox = new ComboBox<>(180);
-        comboBox.setId("pagesize");
-        comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
-        add(comboBox);
+        add(comboBox, setButton, componentRendererButton,
+                itemLabelGeneratorButton);
     }
 
     private List<String> generateStrings() {
@@ -130,7 +137,7 @@ public class LazyLoadingPage extends Div {
 
         @Override
         public String toString() {
-            return name + "(" + born + ")";
+            return name;
         }
     }
 }

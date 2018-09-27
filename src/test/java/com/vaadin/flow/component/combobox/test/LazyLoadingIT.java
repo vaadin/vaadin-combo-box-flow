@@ -88,13 +88,26 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setValue_valueChanged_valueShown() {
+    public void openPopup_setValue_valueChanged_valueShown() {
         stringBox.openPopup();
         $("button").id("set-value").click();
         assertMessage("Item 10");
         Assert.assertEquals(
                 "The selected value should be displayed in the ComboBox's TextField",
                 "Item 10", getTextFieldValue(stringBox));
+        stringBox.openPopup();
+        assertItemSelected("Item 10");
+    }
+
+    @Test
+    public void setValueBeforeLoading_valueChanged_valueShown() {
+        $("button").id("set-value").click();
+        assertMessage("Item 10");
+        Assert.assertEquals(
+                "The selected value should be displayed in the ComboBox's TextField",
+                "Item 10", getTextFieldValue(stringBox));
+        stringBox.openPopup();
+        assertItemSelected("Item 10");
     }
 
     @Test
@@ -109,6 +122,20 @@ public class LazyLoadingIT extends AbstractComponentIT {
         Assert.assertEquals("Expected two pages to be loaded.", 360,
                 getLoadedItems(pagesizeBox).size());
         assertRendered("Item 200");
+    }
+
+    private void assertItemSelected(String label) {
+        Optional<TestBenchElement> itemElement = getItemElements().stream()
+                .filter(element -> getItemLabel(element).equals(label))
+                .findFirst();
+        Assert.assertTrue(
+                "Could not find the item with label '" + label
+                        + "' which was expected to be selected.",
+                itemElement.isPresent());
+        Assert.assertEquals(
+                "Expected item element with label '" + label
+                        + "' to have 'selected' attribute.",
+                true, itemElement.get().getProperty("selected"));
     }
 
     private String getTextFieldValue(ComboBoxElement comboBox) {
@@ -145,10 +172,13 @@ public class LazyLoadingIT extends AbstractComponentIT {
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
     private List<String> getOverlayContents() {
-        return getItemElements().stream()
-                .map(element -> element.$("div").id("content"))
-                .map(element -> element.getPropertyString("innerHTML"))
+        return getItemElements().stream().map(this::getItemLabel)
                 .collect(Collectors.toList());
+    }
+
+    private String getItemLabel(TestBenchElement itemElement) {
+        return itemElement.$("div").id("content")
+                .getPropertyString("innerHTML");
     }
 
     private List<TestBenchElement> getItemElements() {
