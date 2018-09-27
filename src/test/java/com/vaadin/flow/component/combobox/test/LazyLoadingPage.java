@@ -22,9 +22,12 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
 @Route("lazy-loading")
@@ -36,24 +39,12 @@ public class LazyLoadingPage extends Div {
         message.setId("message");
         add(message);
 
+        addSeparator();
         createListDataProviderWithStrings();
+        addSeparator();
         createComboBoxWithCustomPageSize();
-
-        // List<Person> people = IntStream.range(0, 987)
-        // .mapToObj(i -> new Person("Person " + i, i))
-        // .collect(Collectors.toList());
-        // ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
-        // people);
-        //
-        // ComboBox<Person> comboBox2 = new ComboBox<>();
-        // comboBox2.setDataProvider(personDataProvider);
-        //
-        // add(comboBox2);
-        // add(new NativeButton("get value",
-        // e -> add(new Label(comboBox2.getValue() == null ? "null"
-        // : comboBox2.getValue().getName()))));
-        // add(new NativeButton("set value",
-        // e -> comboBox2.setValue(people.get(3))));
+        addSeparator();
+        createListDataProviderWithBeans();
 
     }
 
@@ -75,6 +66,30 @@ public class LazyLoadingPage extends Div {
         add(comboBox, setButton);
     }
 
+    private void createListDataProviderWithBeans() {
+        ComboBox<Person> comboBox = new ComboBox<>();
+        comboBox.setId("lazy-beans");
+
+        List<Person> people = IntStream.range(0, 987)
+                .mapToObj(i -> new Person("Person " + i, i))
+                .collect(Collectors.toList());
+        ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
+                people);
+
+        comboBox.setDataProvider(personDataProvider);
+
+        NativeButton setButton = new NativeButton("set value",
+                e -> comboBox.setValue(people.get(3)));
+        setButton.setId("set-bean-value");
+
+        NativeButton componentRendererButton = new NativeButton("set renderer",
+                e -> comboBox.setRenderer(new ComponentRenderer<H4, Person>(
+                        person -> new H4(person.getName()))));
+        componentRendererButton.setId("component-renderer");
+
+        add(comboBox, setButton, componentRendererButton);
+    }
+
     private void createComboBoxWithCustomPageSize() {
         ComboBox<String> comboBox = new ComboBox<>(180);
         comboBox.setId("pagesize");
@@ -86,6 +101,10 @@ public class LazyLoadingPage extends Div {
         List<String> items = IntStream.range(0, 1000).mapToObj(i -> "Item " + i)
                 .collect(Collectors.toList());
         return items;
+    }
+
+    private void addSeparator() {
+        getElement().appendChild(new Element("hr"));
     }
 
     public static class Person implements Serializable {
