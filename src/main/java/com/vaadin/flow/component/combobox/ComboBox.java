@@ -198,12 +198,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
 
-    /**
-     * True when using {@link #setItems(Collection)} instead of dataprovider.
-     * All the items are sent to the client, and filtering happens in
-     * client-side.
-     */
-    private boolean eager;
+    // Eager when using setItems() instead of data provider.
+    private enum LoadMode {
+        EAGER, LAZY
+    };
+
+    private LoadMode loadMode;
+    private boolean settingItems;
 
     private Element template;
 
@@ -293,7 +294,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private static <T> T presentationToModel(ComboBox<T> comboBox,
             String presentation) {
-        if (presentation == null || !comboBox.hasItems()) {
+        if (presentation == null || comboBox.dataCommunicator == null) {
             return comboBox.getEmptyValue();
         }
         return comboBox.getKeyMapper().get(presentation);
@@ -305,7 +306,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return null;
         }
 
-        if (comboBox.eager) {
+        if (comboBox.loadMode == LoadMode.EAGER) {
             ListDataProvider<T> dp = ((ListDataProvider<T>) comboBox
                     .getDataProvider());
             Collection<T> items = dp.getItems();
@@ -382,15 +383,20 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@link #setDataProvider(DataProvider)}.
      * 
      * @param dataProvider
+     *            the data provider which will populate the ComboBox eagerly
      */
     public void setItems(ListDataProvider<T> dataProvider) {
-        eager = true;
+        if (loadMode == LoadMode.LAZY) {
+            throwWhenChangingBetweenEagerAndLazy();
+        }
+        loadMode = LoadMode.EAGER;
 
         dataCommunicator = new DataCommunicator<T>(dataGenerator,
                 eagerArrayUpdater, data -> {
                     // Updating data not implemented
                 }, getElement().getNode());
 
+        settingItems = true;
         setDataProvider(dataProvider);
         setValue(null);
 
@@ -406,7 +412,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(filterConverter,
                 "filterConverter cannot be null");
 
+        if (loadMode == LoadMode.EAGER && !settingItems) {
+            throwWhenChangingBetweenEagerAndLazy();
+        }
+
         if (dataCommunicator == null) {
+            loadMode = LoadMode.LAZY;
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> {
                         // Updating data not implemented
@@ -430,12 +441,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         filterSlot = filter -> providerFilterSlot
                 .accept(convertOrNull.apply(filter));
 
-        if (!eager && filterChangeRegistration == null) {
+        if (loadMode == LoadMode.LAZY && filterChangeRegistration == null) {
             filterChangeRegistration = getElement()
                     .addEventListener("filter-changed", event -> {
                         filterSlot.accept(getFilterString());
                     }).debounce(200);
         }
+        settingItems = false;
     }
 
     /**
@@ -559,7 +571,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        if (hasItems()) {
+        if (dataCommunicator != null) {
             dataCommunicator.reset();
         }
     }
@@ -877,8 +889,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return dataCommunicator.getKeyMapper();
     }
 
-    private boolean hasItems() {
-        return dataCommunicator != null;
+    private void throwWhenChangingBetweenEagerAndLazy() {
+        throw new IllegalStateException(
+                "Changing a ComboBox from using a lazy data provider "
+                        + "to eager or vice versa is not supported. "
+                        + "Use either setItems() or setDataProvider() "
+                        + "for one ComboBox.");
     }
 
 }

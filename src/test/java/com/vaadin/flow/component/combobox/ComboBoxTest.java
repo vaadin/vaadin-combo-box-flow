@@ -301,6 +301,24 @@ public class ComboBoxTest {
         comboBox.setValue(new TestItem(2, "bbb", ""));
     }
 
+    @Test
+    public void changeFromEagerToLazy_throws() {
+        expectIllegalStateException("Changing a ComboBox from "
+                + "using a lazy data provider to eager or vice versa is not supported.");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems("1", "2");
+        comboBox.setDataProvider(DataProvider.ofItems("1", "2"));
+    }
+
+    @Test
+    public void changeFromLazyToEager_throws() {
+        expectIllegalStateException("Changing a ComboBox from "
+                + "using a lazy data provider to eager or vice versa is not supported.");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setDataProvider(DataProvider.ofItems("1", "2"));
+        comboBox.setItems("1", "2");
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);
