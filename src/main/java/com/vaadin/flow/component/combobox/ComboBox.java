@@ -388,7 +388,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         dataCommunicator = new DataCommunicator<T>(dataGenerator,
                 eagerArrayUpdater, data -> {
-                    // NO-OP
+                    // Updating data not implemented
                 }, getElement().getNode());
 
         setDataProvider(dataProvider);
@@ -408,9 +408,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
-                    arrayUpdater, data -> getElement()
-                            .callFunction("$connector.updateData", data),
-                    getElement().getNode());
+                    arrayUpdater, data -> {
+                        // Updating data not implemented
+                    }, getElement().getNode());
         }
 
         render();

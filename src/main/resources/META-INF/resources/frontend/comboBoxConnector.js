@@ -54,27 +54,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
     };
 
-    comboBox.$connector.updateData = function (items) {
-
-      return;
-
-      let pagesToUpdate = [];
-      for (let i = 0; i < items.length; i++) {
-        let cacheLocation = itemToCacheLocation(items[i].key);
-        if (cacheLocation) {
-          cache[cacheLocation.page][cacheLocation.index] = items[i];
-          if (pagesToUpdate.indexOf(cacheLocation.page) === -1) {
-            pagesToUpdate.push(cacheLocation.page);
-          }
-        }
-      }
-      // IE11 doesn't work with the transpiled version of the forEach.
-      for (var i = 0; i < pagesToUpdate.length; i++) {
-        let page = pagesToUpdate[i];
-        updatecomboBoxCache(page);
-      }
-    };
-
     comboBox.$connector.clear = function (index, length) {
       comboBox.clearCache();
       return;
