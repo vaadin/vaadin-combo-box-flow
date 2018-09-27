@@ -124,7 +124,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
     private List<JsonObject> getLoadedItems(ComboBoxElement comboBox) {
         List<JsonObject> list = (List<JsonObject>) executeScript(
                 "return arguments[0].filteredItems.filter("
-                        + "item => !item.vaadinComboBoxPlaceholder);",
+                        + "item => !(item instanceof Vaadin.ComboBoxPlaceholder));",
                 comboBox);
         return list;
     }

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -318,6 +319,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return comboBox.getKeyMapper().key(model);
     }
 
+    @Override
+    public void setValue(T value) {
+        super.setValue(value);
+
+        // This ensures that the selection works even with lazy loading when the
+        // item is not yet loaded
+        getElement().setPropertyJson("selectedItem", generateData(value));
+    }
+
     /**
      * Sets the TemplateRenderer responsible to render the individual items in
      * the list of possible choices of the ComboBox. It doesn't affect how the
@@ -501,7 +511,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         for (int i = 0; i < items.length(); i++) {
             JsonObject object = items.get(i);
             String key = object.getString("key");
-            getKeyMapper().get(key);
+            result.add(getKeyMapper().get(key));
         }
         return result;
     }
@@ -527,11 +537,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         temporaryFilteredItems = new ArrayList<>(filteredItems);
 
         runBeforeClientResponse(ui -> {
-            JsonArray jsonArray = filteredItems.stream().map(item -> {
-                JsonObject json = Json.createObject();
-                dataGenerator.generateData(item, json);
-                return json;
-            }).collect(JsonUtils.asArray());
+            JsonArray jsonArray = generateJson(filteredItems.stream());
             setFilteredItems(jsonArray);
             temporaryFilteredItems = null;
         });
@@ -806,6 +812,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     item, ItemLabelGenerator.class.getSimpleName()));
         }
         return label;
+    }
+
+    private JsonArray generateJson(Stream<T> data) {
+        return data.map(this::generateData).collect(JsonUtils.asArray());
+    }
+
+    private JsonObject generateData(T item) {
+        JsonObject json = Json.createObject();
+        dataGenerator.generateData(item, json);
+        json.put("key", getKeyMapper().key(item));
+        return json;
     }
 
     private void render() {
