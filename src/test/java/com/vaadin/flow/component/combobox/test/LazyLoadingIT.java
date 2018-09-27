@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -36,6 +37,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     private ComboBoxElement stringBox;
     private ComboBoxElement pagesizeBox;
+    private ComboBoxElement beanBox;
 
     @Before
     public void init() {
@@ -44,22 +46,21 @@ public class LazyLoadingIT extends AbstractComponentIT {
                 .size() > 0);
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
+        beanBox = $(ComboBoxElement.class).id("lazy-beans");
     }
 
     @Test
     public void initiallyEmpty_openPopup_firstPageLoaded() {
-        Assert.assertEquals(
-                "Lazy loading ComboBox should not have items "
-                        + "before opening the dropdown.",
-                0, getLoadedItems(stringBox).size());
+        assertLoadedItemsCount("Lazy loading ComboBox should not have items "
+                + "before opening the dropdown.", 0, stringBox);
     }
 
     @Test
     public void openPopup_firstPageLoaded() {
         stringBox.openPopup();
-        Assert.assertEquals(
+        assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
-                50, getLoadedItems(stringBox).size());
+                50, stringBox);
         assertRendered("Item 10");
     }
 
@@ -68,15 +69,16 @@ public class LazyLoadingIT extends AbstractComponentIT {
         stringBox.openPopup();
         scrollToItem(stringBox, 50);
 
-        Assert.assertEquals("There should be 100 items after loading two pages",
-                100, getLoadedItems(stringBox).size());
+        assertLoadedItemsCount(
+                "There should be 100 items after loading two pages", 100,
+                stringBox);
         assertRendered("Item 52");
 
         scrollToItem(stringBox, 110);
 
-        Assert.assertEquals(
+        assertLoadedItemsCount(
                 "There should be 150 items after loading three pages", 150,
-                getLoadedItems(stringBox).size());
+                stringBox);
         assertRendered("Item 115");
     }
 
@@ -88,9 +90,10 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void openPopup_setValue_valueChanged_valueShown() {
         stringBox.openPopup();
-        $("button").id("set-value").click();
+        clickButton("set-value");
         assertMessage("Item 10");
         Assert.assertEquals(
                 "The selected value should be displayed in the ComboBox's TextField",
@@ -113,15 +116,67 @@ public class LazyLoadingIT extends AbstractComponentIT {
     @Test
     public void customPageSize_correctAmountOfItemsRequested() {
         pagesizeBox.openPopup();
-        Assert.assertEquals(
+        assertLoadedItemsCount(
                 "After opening the ComboBox, the first 'pageSize' amount "
                         + "of items should be loaded.",
-                180, getLoadedItems(pagesizeBox).size());
+                180, pagesizeBox);
 
         scrollToItem(pagesizeBox, 200);
-        Assert.assertEquals("Expected two pages to be loaded.", 360,
-                getLoadedItems(pagesizeBox).size());
+
+        assertLoadedItemsCount("Expected two pages to be loaded.", 360,
+                pagesizeBox);
         assertRendered("Item 200");
+    }
+
+    @Test
+    @Ignore
+    public void loadItems_changeItemLabelGenerator() {
+        beanBox.openPopup();
+        clickButton("item-label-generator");
+        beanBox.openPopup();
+        assertRendered("Born 3");
+
+        getItemElements().get(5).click();
+        Assert.assertEquals("Born 5", getTextFieldValue(beanBox));
+
+        assertLoadedItemsCount("Only the first page should be loaded.", 50,
+                beanBox);
+    }
+
+    @Test
+    @Ignore
+    public void loadItems_changeRenderer() {
+        beanBox.openPopup();
+        clickButton("component-renderer");
+        beanBox.openPopup();
+        assertRendered("<flow-component-renderer appid=\"ROOT\">"
+                + "<h4>Person 4</h4></flow-component-renderer>");
+        assertLoadedItemsCount("Only the first page should be loaded.", 50,
+                beanBox);
+    }
+
+    @Test
+    @Ignore
+    public void loadItems_changeDataProvider() {
+        beanBox.openPopup();
+        clickButton("data-provider");
+        beanBox.openPopup();
+
+        assertRendered("Changed 6");
+        assertLoadedItemsCount("Only the first page should be loaded.", 50,
+                beanBox);
+    }
+
+    @Test
+    public void setItemLabelGenerator_setComponentRenderer_labelGeneratorUsedForTextField() {
+        clickButton("item-label-generator");
+        clickButton("component-renderer");
+        beanBox.openPopup();
+        assertRendered("<flow-component-renderer appid=\"ROOT\">"
+                + "<h4>Person 4</h4></flow-component-renderer>");
+        getItemElements().get(7).click();
+        Assert.assertEquals("Born 7", getTextFieldValue(beanBox));
+
     }
 
     private void assertItemSelected(String label) {
@@ -145,6 +200,12 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     private void assertMessage(String expectedMessage) {
         Assert.assertEquals(expectedMessage, $("div").id("message").getText());
+    }
+
+    private void assertLoadedItemsCount(String message, int expectedCount,
+            ComboBoxElement comboBox) {
+        Assert.assertEquals(message, expectedCount,
+                getLoadedItems(comboBox).size());
     }
 
     // Gets all the loaded json items, but they are not necessarily rendered
@@ -193,6 +254,10 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     private TestBenchElement getOverlay() {
         return $("vaadin-combo-box-overlay").first();
+    }
+
+    private void clickButton(String id) {
+        $("button").id(id).click();
     }
 
 }

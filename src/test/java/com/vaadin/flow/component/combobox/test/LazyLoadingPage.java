@@ -100,8 +100,18 @@ public class LazyLoadingPage extends Div {
                         person -> "Born " + person.getBorn()));
         itemLabelGeneratorButton.setId("item-label-generator");
 
+        List<Person> altPeople = IntStream.range(0, 987)
+                .mapToObj(i -> new Person("Changed " + i, 2000 + i))
+                .collect(Collectors.toList());
+        ListDataProvider<Person> altPersonDataProvider = new ListDataProvider<>(
+                altPeople);
+        NativeButton dataProviderButton = new NativeButton(
+                "Change data provider",
+                e -> comboBox.setDataProvider(altPersonDataProvider));
+        dataProviderButton.setId("data-provider");
+
         add(comboBox, setButton, componentRendererButton,
-                itemLabelGeneratorButton);
+                itemLabelGeneratorButton, dataProviderButton);
     }
 
     private List<String> generateStrings() {
