@@ -217,6 +217,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // Just ignore when setDataProvider has not been called
     };
 
+    private Registration filterChangeRegistration;
+
     /**
      * Default constructor. Creates an empty combo box.
      */
@@ -428,14 +430,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         filterSlot = filter -> providerFilterSlot
                 .accept(convertOrNull.apply(filter));
 
-        if (eager) {
-            return;
+        if (!eager && filterChangeRegistration == null) {
+            filterChangeRegistration = getElement()
+                    .addEventListener("filter-changed", event -> {
+                        filterSlot.accept(getFilterString());
+                    }).debounce(200);
         }
-
-        getElement().addEventListener("filter-changed", event -> {
-            filterSlot.accept(getFilterString());
-        }).debounce(200);
-
     }
 
     /**
