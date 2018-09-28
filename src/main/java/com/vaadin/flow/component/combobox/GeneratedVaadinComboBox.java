@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
@@ -228,7 +229,7 @@ import elemental.json.JsonArray;
         "WebComponent: Vaadin.ComboBoxElement#4.1.0-alpha3",
         "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-combo-box")
-// @HtmlImport("frontend://bower_components/vaadin-combo-box/src/vaadin-combo-box.html")
+@HtmlImport("frontend://bower_components/vaadin-combo-box/src/vaadin-combo-box.html")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {

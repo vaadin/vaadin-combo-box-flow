@@ -61,7 +61,6 @@ import elemental.json.JsonValue;
  *            the type of the items to be inserted in the combo box
  */
 @HtmlImport("frontend://flow-component-renderer.html")
-@HtmlImport("frontend://b_components/vaadin-combo-box/src/vaadin-combo-box.html")
 @JavaScript("frontend://comboBoxConnector.js")
 @SuppressWarnings("serial")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>

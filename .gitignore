@@ -14,4 +14,4 @@ reference-screenshots
 *.iml
 .idea/
 
-**/b_components/**
+**/bower_components/**
