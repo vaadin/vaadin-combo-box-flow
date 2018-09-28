@@ -116,8 +116,15 @@ public class LazyLoadingPage extends Div {
         });
         updateButton.setId("update-item");
 
+        NativeButton removeButton = new NativeButton("Remove third item", e -> {
+            people.remove(2);
+            personDataProvider.refreshAll();
+        });
+        removeButton.setId("remove-item");
+
         add(comboBox, setButton, componentRendererButton,
-                itemLabelGeneratorButton, dataProviderButton, updateButton);
+                itemLabelGeneratorButton, dataProviderButton, updateButton,
+                removeButton);
     }
 
     private List<String> generateStrings() {

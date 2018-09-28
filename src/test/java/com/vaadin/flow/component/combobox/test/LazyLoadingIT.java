@@ -15,10 +15,13 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -189,6 +192,46 @@ public class LazyLoadingIT extends AbstractComponentIT {
                 "Updated", getOverlayContents().get(0));
     }
 
+    @Test
+    @Ignore
+    public void loadItems_removeItem_itemRemoved() {
+        beanBox.openPopup();
+        clickButton("remove-item");
+        beanBox.openPopup();
+        assertNotRendered("Person 2");
+        assertRendered("Person 1");
+        assertRendered("Person 3");
+    }
+
+    @Test
+    public void defaultFiltering_lowerCaseContains() {
+        beanBox.setFilter("person 2");
+        beanBox.openPopup();
+
+        waitUntil(driver -> getNonEmptyOverlayContents().size() > 10);
+
+        getNonEmptyOverlayContents().forEach(rendered -> {
+            Assert.assertThat(rendered,
+                    CoreMatchers.containsString("Person 2"));
+        });
+
+        beanBox.setFilter("oN 33");
+
+        List<String> expectedFilteredItems = new ArrayList<>();
+        expectedFilteredItems.add("Person 33");
+        expectedFilteredItems.addAll(IntStream.range(0, 10)
+                .mapToObj(i -> "Person 33" + i).collect(Collectors.toList()));
+
+        waitUntil(driver -> getOverlayContents().size() == expectedFilteredItems
+                .size());
+
+        List<String> filteredItems = getNonEmptyOverlayContents();
+        IntStream.range(0, filteredItems.size()).forEach(i -> {
+            Assert.assertEquals("Unexpected item after filtering.",
+                    expectedFilteredItems.get(i), filteredItems.get(i));
+        });
+    }
+
     private void assertItemSelected(String label) {
         Optional<TestBenchElement> itemElement = getItemElements().stream()
                 .filter(element -> getItemLabel(element).equals(label))
@@ -240,10 +283,26 @@ public class LazyLoadingIT extends AbstractComponentIT {
                 matchingItem.isPresent());
     }
 
+    private void assertNotRendered(String innerHTML) {
+        List<String> overlayContents = getOverlayContents();
+        Optional<String> matchingItem = overlayContents.stream()
+                .filter(s -> s.equals(innerHTML)).findFirst();
+        Assert.assertFalse(
+                "Expected to not find an item with rendered innerHTML: "
+                        + innerHTML,
+                matchingItem.isPresent());
+    }
+
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
     private List<String> getOverlayContents() {
         return getItemElements().stream().map(this::getItemLabel)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getNonEmptyOverlayContents() {
+        return getOverlayContents().stream()
+                .filter(rendered -> !rendered.isEmpty())
                 .collect(Collectors.toList());
     }
 
@@ -254,7 +313,9 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     private List<TestBenchElement> getItemElements() {
         return getOverlay().$("div").id("content").$("vaadin-combo-box-item")
-                .all();
+                .all().stream()
+                .filter(element -> !element.hasAttribute("hidden"))
+                .collect(Collectors.toList());
     }
 
     private void scrollToItem(ComboBoxElement comboBox, int index) {
