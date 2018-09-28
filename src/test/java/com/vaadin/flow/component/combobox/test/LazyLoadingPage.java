@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -45,6 +46,8 @@ public class LazyLoadingPage extends Div {
         createComboBoxWithCustomPageSize();
         addSeparator();
         createListDataProviderWithBeans();
+        addSeparator();
+        createDataProviderWithCustomItemFilter();
 
     }
 
@@ -100,7 +103,7 @@ public class LazyLoadingPage extends Div {
                         person -> "Born " + person.getBorn()));
         itemLabelGeneratorButton.setId("item-label-generator");
 
-        List<Person> altPeople = IntStream.range(0, 987)
+        List<Person> altPeople = IntStream.range(0, 220)
                 .mapToObj(i -> new Person("Changed " + i, 2000 + i))
                 .collect(Collectors.toList());
         ListDataProvider<Person> altPersonDataProvider = new ListDataProvider<>(
@@ -125,6 +128,27 @@ public class LazyLoadingPage extends Div {
         add(comboBox, setButton, componentRendererButton,
                 itemLabelGeneratorButton, dataProviderButton, updateButton,
                 removeButton);
+    }
+
+    private void createDataProviderWithCustomItemFilter() {
+        ComboBox<Person> comboBox = new ComboBox<>();
+        comboBox.setId("custom-filter");
+
+        List<Person> people = IntStream.range(0, 500)
+                .mapToObj(i -> new Person("Person", i))
+                .collect(Collectors.toList());
+        ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
+                people);
+
+        comboBox.setRenderer(new ComponentRenderer<Div, Person>(person -> {
+            return new Div(new H4(person.getName()),
+                    new Label("Born: " + person.getBorn()));
+        }));
+
+        comboBox.setDataProvider((person, filter) -> String
+                .valueOf(person.getBorn()).startsWith(filter),
+                personDataProvider);
+        add(comboBox);
     }
 
     private List<String> generateStrings() {

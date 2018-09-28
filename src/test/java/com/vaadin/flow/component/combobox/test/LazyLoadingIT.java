@@ -41,6 +41,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
     private ComboBoxElement stringBox;
     private ComboBoxElement pagesizeBox;
     private ComboBoxElement beanBox;
+    private ComboBoxElement filterBox;
 
     @Before
     public void init() {
@@ -50,6 +51,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
+        filterBox = $(ComboBoxElement.class).id("custom-filter");
     }
 
     @Test
@@ -229,6 +231,26 @@ public class LazyLoadingIT extends AbstractComponentIT {
         IntStream.range(0, filteredItems.size()).forEach(i -> {
             Assert.assertEquals("Unexpected item after filtering.",
                     expectedFilteredItems.get(i), filteredItems.get(i));
+        });
+    }
+
+    @Test
+    public void customItemFilter() {
+        filterBox.setFilter("Person");
+        filterBox.openPopup();
+
+        waitForElementVisible(By.tagName("vaadin-combo-box-overlay"));
+
+        Assert.assertEquals("None of the items should match the filter.", 0,
+                getNonEmptyOverlayContents().size());
+
+        filterBox.setFilter("10");
+
+        waitUntil(driver -> getNonEmptyOverlayContents().size() > 10);
+
+        getNonEmptyOverlayContents().forEach(rendered -> {
+            Assert.assertThat(rendered,
+                    CoreMatchers.containsString("Born: 10"));
         });
     }
 
