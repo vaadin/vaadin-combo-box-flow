@@ -29,10 +29,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       pageCallbacks[params.page] = callback;
     }
 
-    comboBox.$connector.setValue = function (key) {
-
-    }
-
     comboBox.$connector.set = function (index, items) {
       if (index % comboBox.pageSize != 0) {
         throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
@@ -53,6 +49,20 @@ window.Vaadin.Flow.comboBoxConnector = {
         cache[page] = slice;
       }
     };
+
+    comboBox.$connector.updateData = function (items) {
+      // IE11 doesn't work with the transpiled version of the forEach.
+      for (let i = 0; i < items.length; i++) {
+        let item = items[i];
+
+        for (let j = 0; j < comboBox.filteredItems.length; j++) {
+          if (comboBox.filteredItems[j].key === item.key) {
+            comboBox.set('filteredItems.' + j, item);
+            break;
+          }
+        }
+      }
+    }
 
     comboBox.$connector.clear = function (index, length) {
       comboBox.clearCache();

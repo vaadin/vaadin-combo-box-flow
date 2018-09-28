@@ -419,9 +419,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataCommunicator == null) {
             loadMode = LoadMode.LAZY;
             dataCommunicator = new DataCommunicator<>(dataGenerator,
-                    arrayUpdater, data -> {
-                        // Updating data not implemented
-                    }, getElement().getNode());
+                    arrayUpdater, data -> getElement()
+                            .callFunction("$connector.updateData", data),
+                    getElement().getNode());
         }
 
         render();

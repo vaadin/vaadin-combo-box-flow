@@ -179,6 +179,16 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     }
 
+    @Test
+    public void loadItems_refreshItem_itemUpdated() {
+        beanBox.openPopup();
+        clickButton("update-item");
+        beanBox.openPopup();
+        Assert.assertEquals(
+                "Expected the item to be updated after calling refreshItem().",
+                "Updated", getOverlayContents().get(0));
+    }
+
     private void assertItemSelected(String label) {
         Optional<TestBenchElement> itemElement = getItemElements().stream()
                 .filter(element -> getItemLabel(element).equals(label))

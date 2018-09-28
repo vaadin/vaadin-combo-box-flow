@@ -110,8 +110,14 @@ public class LazyLoadingPage extends Div {
                 e -> comboBox.setDataProvider(altPersonDataProvider));
         dataProviderButton.setId("data-provider");
 
+        NativeButton updateButton = new NativeButton("Update first item", e -> {
+            people.get(0).setName("Updated");
+            personDataProvider.refreshItem(people.get(0));
+        });
+        updateButton.setId("update-item");
+
         add(comboBox, setButton, componentRendererButton,
-                itemLabelGeneratorButton, dataProviderButton);
+                itemLabelGeneratorButton, dataProviderButton, updateButton);
     }
 
     private List<String> generateStrings() {
