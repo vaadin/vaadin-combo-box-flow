@@ -22,11 +22,19 @@ window.Vaadin.Flow.comboBoxConnector = {
       console.log(params);
       console.log('COMBOBOX.SIZE ' + comboBox.size);
 
-      const upperLimit = params.pageSize * (params.page + 1);
-      console.log('RANGE UPPER LIMIT ' + upperLimit);
-      comboBox.$server.setRequestedRange(0, upperLimit);
+      if (cache[params.page]) {
+        // This may happen when scrolling fast and skipping pages
+        console.log('FOUND FROM CACHE');
+        let data = cache[params.page];
+        delete cache[params.page];
+        callback(data, comboBox.size);
+      } else {
+        const upperLimit = params.pageSize * (params.page + 1);
+        console.log('RANGE UPPER LIMIT ' + upperLimit);
+        comboBox.$server.setRequestedRange(0, upperLimit);
 
-      pageCallbacks[params.page] = callback;
+        pageCallbacks[params.page] = callback;
+      }
     }
 
     comboBox.$connector.set = function (index, items) {

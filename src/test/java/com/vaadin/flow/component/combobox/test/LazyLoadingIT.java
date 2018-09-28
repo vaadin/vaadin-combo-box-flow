@@ -100,6 +100,18 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
+    public void scrollToEnd_scrollUpwards_pagesLoaded() {
+        stringBox.openPopup();
+        scrollToItem(stringBox, 1000);
+        scrollToItem(stringBox, 920);
+
+        assertLoadedItemsCount(
+                "Expected the first and the two last pages to be loaded (150 items).",
+                150, stringBox);
+        assertRendered("Item 920");
+    }
+
+    @Test
     public void clickItem_valueChanged() {
         stringBox.openPopup();
         getItemElements().get(2).click();
