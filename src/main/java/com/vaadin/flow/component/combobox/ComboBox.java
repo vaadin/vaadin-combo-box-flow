@@ -67,11 +67,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasFilterableDataProvider<T, String> {
 
-    private static final String ITEM_LABEL_PROPERTY = "label";
-    private static final String KEY_PROPERTY = "key";
-    private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
-    private static final String VALUE_PROPERTY_NAME = "value";
-
     private class CustomValueRegistration implements Registration {
 
         private Registration delegate;
@@ -197,9 +192,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
 
-    // Eager when using setItems() instead of data provider.
     private enum LoadMode {
-        EAGER, LAZY
+        EAGER, // when using setItems()
+        LAZY // when using setDataProvider()
     };
 
     private LoadMode loadMode;
@@ -229,7 +224,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 .put("label", generateLabel(item)));
 
         getElement().setProperty("itemValuePath", "key");
-        // getElement().synchronizeProperty("value", "value-changed");
     }
 
     /**
