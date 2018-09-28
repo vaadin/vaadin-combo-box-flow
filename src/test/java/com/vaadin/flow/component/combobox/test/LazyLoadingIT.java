@@ -42,6 +42,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
     private ComboBoxElement pagesizeBox;
     private ComboBoxElement beanBox;
     private ComboBoxElement filterBox;
+    private ComboBoxElement callbackBox;
 
     @Before
     public void init() {
@@ -52,6 +53,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
         filterBox = $(ComboBoxElement.class).id("custom-filter");
+        callbackBox = $(ComboBoxElement.class).id("callback-dataprovider");
     }
 
     @Test
@@ -85,6 +87,16 @@ public class LazyLoadingIT extends AbstractComponentIT {
                 "There should be 150 items after loading three pages", 150,
                 stringBox);
         assertRendered("Item 115");
+    }
+
+    @Test
+    public void openPopup_scrollToEnd_onlyFirstAndLastPagesLoaded() {
+        stringBox.openPopup();
+        scrollToItem(stringBox, 1000);
+        assertLoadedItemsCount(
+                "Expected the first and the last pages to be loaded (100 items).",
+                100, stringBox);
+        assertRendered("Item 999");
     }
 
     @Test
@@ -252,6 +264,23 @@ public class LazyLoadingIT extends AbstractComponentIT {
             Assert.assertThat(rendered,
                     CoreMatchers.containsString("Born: 10"));
         });
+    }
+
+    @Test
+    public void callbackDataprovider_pagesLoadedLazily() {
+        callbackBox.openPopup();
+        assertLoadedItemsCount(
+                "After opening the ComboBox, the first 50 items should be loaded",
+                50, callbackBox);
+        assertRendered("Item 10");
+
+        callbackBox.openPopup();
+        scrollToItem(callbackBox, 75);
+
+        assertLoadedItemsCount(
+                "There should be 100 items after loading two pages", 100,
+                callbackBox);
+        assertRendered("Item 70");
     }
 
     private void assertItemSelected(String label) {

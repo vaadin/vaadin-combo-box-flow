@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -48,6 +49,8 @@ public class LazyLoadingPage extends Div {
         createListDataProviderWithBeans();
         addSeparator();
         createDataProviderWithCustomItemFilter();
+        addSeparator();
+        createCallbackDataProvider();
 
     }
 
@@ -148,6 +151,22 @@ public class LazyLoadingPage extends Div {
         comboBox.setDataProvider((person, filter) -> String
                 .valueOf(person.getBorn()).startsWith(filter),
                 personDataProvider);
+        add(comboBox);
+    }
+
+    private void createCallbackDataProvider() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("callback-dataprovider");
+
+        CallbackDataProvider<String, String> dataProvider = new CallbackDataProvider<String, String>(
+                query -> IntStream
+                        .range(query.getOffset(),
+                                query.getOffset() + query.getLimit())
+                        .mapToObj(i -> "Item " + i),
+                query -> 210);
+
+        comboBox.setDataProvider(dataProvider);
+
         add(comboBox);
     }
 
