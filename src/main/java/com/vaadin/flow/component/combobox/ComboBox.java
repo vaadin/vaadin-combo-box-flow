@@ -446,7 +446,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Sets a list data provider as the data provider of this combo box.
      * Filtering will use a case insensitive match to show all items where the
-     * filter text is a substring of the label displayed for that item.
+     * filter text is a substring of the label displayed for that item, which
+     * you can configure with
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      * <p>
      * The browser will request for the items lazily as the user scrolls down
      * the combo box. Filtering is done in the server. More responsive
@@ -476,7 +478,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * client-side filtering can be achieved only by sending all the items to
      * the client at once with the {@link #setItems(Collection)} method.
      *
-     * @param captionFilter
+     * @param itemFilter
      *            filter to check if an item is shown when user typed some text
      *            into the ComboBox
      * @param listDataProvider
