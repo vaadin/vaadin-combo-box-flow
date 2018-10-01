@@ -94,14 +94,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         private UpdateQueue(int size) {
             enqueue("$connector.updateSize", size);
-            // getElement().setProperty("size", size);
         }
 
         @Override
         public void set(int start, List<JsonValue> items) {
             System.out.println("--------------");
             System.out.println(start + " - " + (start + items.size()));
-            // System.out.println(items.size());
             enqueue("$connector.set", start,
                     items.stream().collect(JsonUtils.asArray()));
         }
@@ -109,7 +107,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         @Override
         public void clear(int start, int length) {
             if (length > 0) {
-                getElement().callFunction("clearCache");
+                enqueue("clearCache");
             }
         }
 
