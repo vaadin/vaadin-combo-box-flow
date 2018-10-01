@@ -108,7 +108,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void clear(int start, int length) {
-            enqueue("$connector.clear", start, length);
+            if (length > 0) {
+                getElement().callFunction("clearCache");
+            }
         }
 
         @Override

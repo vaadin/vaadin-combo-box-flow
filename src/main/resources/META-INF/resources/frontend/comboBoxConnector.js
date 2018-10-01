@@ -23,7 +23,7 @@ window.Vaadin.Flow.comboBoxConnector = {
       console.log('COMBOBOX.SIZE ' + comboBox.size);
 
       if (cache[params.page]) {
-        // This may happen when scrolling fast and skipping pages
+        // This may happen after skipping pages by scrolling fast
         console.log('FOUND FROM CACHE');
         let data = cache[params.page];
         delete cache[params.page];
@@ -72,33 +72,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
     }
 
-    comboBox.$connector.clear = function (index, length) {
-      comboBox.clearCache();
-      return;
-      if (Object.keys(cache).length === 0) {
-        return;
-      }
-      if (index % comboBox.pageSize != 0) {
-        throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
-      }
-
-      let firstPage = index / comboBox.pageSize;
-      let updatedPageCount = Math.ceil(length / comboBox.pageSize);
-
-      for (let i = 0; i < updatedPageCount; i++) {
-        let page = firstPage + i;
-        let items = cache[page];
-        for (let j = 0; j < items.length; j++) {
-          let item = items[j];
-          if (selectedKeys[item.key]) {
-            comboBox.$connector.doDeselection(item);
-          }
-        }
-        delete cache[page];
-        updatecomboBoxCache(page);
-      }
-    };
-
     comboBox.$connector.updateSize = function (newSize) {
       console.log('SETTING COMBOBOX.SIZE ' + newSize);
       comboBox.size = newSize;
@@ -110,8 +83,8 @@ window.Vaadin.Flow.comboBoxConnector = {
       let outstandingRequests = Object.getOwnPropertyNames(pageCallbacks);
       for (let i = 0; i < outstandingRequests.length; i++) {
         let page = outstandingRequests[i];
-        // Resolve if we have data or if we don't expect to get data
-        if (cache[page] /*|| page < lastRequestedRange[0] || page > lastRequestedRange[1]*/) {
+
+        if (cache[page]) {
           let callback = pageCallbacks[page];
           delete pageCallbacks[page];
 
@@ -119,8 +92,6 @@ window.Vaadin.Flow.comboBoxConnector = {
           delete cache[page];
 
           callback(data, comboBox.size);
-
-          // callback(cache[page] || new Array(comboBox.pageSize));
         }
       }
 
