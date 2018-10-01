@@ -18,19 +18,13 @@ window.Vaadin.Flow.comboBoxConnector = {
         throw 'Invalid pageSize';
       }
 
-      console.log('CALLING DATAPROVIDER FOR PAGE ' + params.page);
-      console.log(params);
-      console.log('COMBOBOX.SIZE ' + comboBox.size);
-
       if (cache[params.page]) {
         // This may happen after skipping pages by scrolling fast
-        console.log('FOUND FROM CACHE');
         let data = cache[params.page];
         delete cache[params.page];
         callback(data, comboBox.size);
       } else {
         const upperLimit = params.pageSize * (params.page + 1);
-        console.log('RANGE UPPER LIMIT ' + upperLimit);
         comboBox.$server.setRequestedRange(0, upperLimit);
 
         pageCallbacks[params.page] = callback;
@@ -41,11 +35,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       if (index % comboBox.pageSize != 0) {
         throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
       }
-
-      console.log('SETTING ITEMS');
-      console.log('index ' + index);
-      console.log(items);
-      console.log('COMBOBOX.SIZE ' + comboBox.size);
 
       const firstPage = index / comboBox.pageSize;
       const updatedPageCount = Math.ceil(items.length / comboBox.pageSize);
@@ -73,7 +62,6 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
 
     comboBox.$connector.updateSize = function (newSize) {
-      console.log('SETTING COMBOBOX.SIZE ' + newSize);
       comboBox.size = newSize;
     };
 

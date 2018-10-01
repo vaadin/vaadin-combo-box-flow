@@ -98,8 +98,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void set(int start, List<JsonValue> items) {
-            System.out.println("--------------");
-            System.out.println(start + " - " + (start + items.size()));
             enqueue("$connector.set", start,
                     items.stream().collect(JsonUtils.asArray()));
         }
@@ -155,9 +153,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
                 @Override
                 public void set(int start, List<JsonValue> items) {
-                    System.out.println("--------------");
-                    System.out.println(start);
-                    System.out.println(items.size());
                     setItems(items.stream().collect(JsonUtils.asArray()));
                 }
 
