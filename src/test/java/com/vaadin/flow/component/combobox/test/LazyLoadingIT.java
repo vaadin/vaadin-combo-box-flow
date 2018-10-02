@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -119,7 +118,6 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void openPopup_setValue_valueChanged_valueShown() {
         stringBox.openPopup();
         clickButton("set-value");
@@ -158,7 +156,6 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void loadItems_changeItemLabelGenerator() {
         beanBox.openPopup();
         clickButton("item-label-generator");
@@ -173,7 +170,6 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void loadItems_changeRenderer() {
         beanBox.openPopup();
         clickButton("component-renderer");
@@ -185,7 +181,6 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void loadItems_changeDataProvider() {
         beanBox.openPopup();
         clickButton("data-provider");
@@ -219,7 +214,6 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void loadItems_removeItem_itemRemoved() {
         beanBox.openPopup();
         clickButton("remove-item");

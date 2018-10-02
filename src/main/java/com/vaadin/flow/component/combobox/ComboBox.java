@@ -245,6 +245,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 .put("label", generateLabel(item)));
 
         getElement().setProperty("itemValuePath", "key");
+        getElement().setProperty("itemIdPath", "key");
     }
 
     /**
