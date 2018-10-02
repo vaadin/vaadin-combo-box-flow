@@ -170,6 +170,12 @@
             <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>0.14</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -57,7 +57,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void initiallyEmpty_openPopup_firstPageLoaded() {
+    public void initiallyEmpty() {
         assertLoadedItemsCount("Lazy loading ComboBox should not have items "
                 + "before opening the dropdown.", 0, stringBox);
     }

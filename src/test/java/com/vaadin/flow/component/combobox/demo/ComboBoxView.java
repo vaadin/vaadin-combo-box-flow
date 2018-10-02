@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.github.javafaker.Faker;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -343,7 +344,7 @@ public class ComboBoxView extends DemoView {
          * the overlay.
          */
         ListDataProvider<String> dataProvider = DataProvider
-                .ofCollection(getItems());
+                .ofCollection(getNames());
         comboBox.setDataProvider(dataProvider);
         // end-source-example
 
@@ -377,8 +378,9 @@ public class ComboBoxView extends DemoView {
                 comboBox);
     }
 
-    private List<String> getItems() {
-        return IntStream.range(0, 500).mapToObj(i -> "Item " + i)
+    private List<String> getNames() {
+        Faker faker = Faker.instance();
+        return IntStream.range(0, 500).mapToObj(i -> faker.name().fullName())
                 .collect(Collectors.toList());
     }
 

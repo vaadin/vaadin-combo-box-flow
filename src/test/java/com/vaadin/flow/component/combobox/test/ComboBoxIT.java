@@ -17,6 +17,8 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,8 +26,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.demo.ComboBoxView;
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
+
+import elemental.json.JsonObject;
 
 /**
  * Integration tests for the {@link ComboBoxView}.
@@ -187,6 +192,66 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
         waitUntil(driver -> message.getText().equals(
                 "Selected artist: Haircuts for Men\nThe old selection was: Haywyre"));
+    }
+
+    @Test
+    public void inMemoryLazyComboBox_itemsLoadedLazily() {
+        testLazyComboBox("lazy-loading-box");
+    }
+
+    @Test
+    public void callBackLazyComboBox_itemsLoadedLazily() {
+        testLazyComboBox("callback-box");
+    }
+
+    private void testLazyComboBox(String comboBoxId) {
+        openTabAndCheckForErrors("lazy-loading");
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
+
+        Assert.assertEquals("No items should be loaded initially.", 0,
+                getLoadedItems(comboBox).size());
+
+        comboBox.openPopup();
+
+        Assert.assertEquals(
+                "First page should be loaded after opening overlay.", 50,
+                getLoadedItems(comboBox).size());
+        assertRendered();
+
+        scrollToItem(comboBox, 50);
+        Assert.assertEquals("Second page should be loaded after scrolling.",
+                100, getLoadedItems(comboBox).size());
+    }
+
+    private void scrollToItem(ComboBoxElement comboBox, int index) {
+        executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
+                comboBox, index);
+    }
+
+    private List<JsonObject> getLoadedItems(ComboBoxElement comboBox) {
+        List<JsonObject> list = (List<JsonObject>) executeScript(
+                "return arguments[0].filteredItems.filter("
+                        + "item => !(item instanceof Vaadin.ComboBoxPlaceholder));",
+                comboBox);
+        return list;
+    }
+
+    private void assertRendered() {
+        List<String> items = $("vaadin-combo-box-overlay").first().$("div")
+                .id("content").$("vaadin-combo-box-item").all().stream()
+                .map(element -> element.$("div").id("content")
+                        .getPropertyString("innerHTML"))
+                .collect(Collectors.toList());
+        Assert.assertTrue("Expected more than 10 items to be rendered.",
+                items.size() > 10);
+        items.forEach(item -> {
+            boolean containsAtLeastTwoWords = Pattern.matches("\\S+\\s\\S+.*",
+                    item);
+            Assert.assertTrue(
+                    "Expected rendred item to contain at least two words, but was: "
+                            + item,
+                    containsAtLeastTwoWords);
+        });
     }
 
     @Override
