@@ -22,13 +22,7 @@ add the following dependency to your `pom.xml`:
 ```
 <dependency>
     <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-combo-box-flow</artifactId>
-    <version>${component.version}</version>
-</dependency>
-```
 
-## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/master/documentation/Overview.asciidoc).
 
 ## Contributing
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
