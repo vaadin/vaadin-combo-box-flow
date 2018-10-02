@@ -460,7 +460,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             filterChangeRegistration = getElement()
                     .addEventListener("filter-changed", event -> {
                         filterSlot.accept(getFilterString());
-                    }).debounce(200);
+                    }).debounce(300);
         }
         settingItems = false;
     }
