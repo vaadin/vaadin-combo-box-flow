@@ -603,7 +603,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         temporaryFilteredItems = new ArrayList<>(filteredItems);
 
         runBeforeClientResponse(ui -> {
-            JsonArray jsonArray = generateJson(filteredItems.stream());
+            JsonArray jsonArray = generateJson(temporaryFilteredItems.stream());
             setFilteredItems(jsonArray);
             temporaryFilteredItems = null;
         });
