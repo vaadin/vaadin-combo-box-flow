@@ -188,6 +188,7 @@
                     <webApp>
                         <resourceBases>
                             <resourceBase>${project.basedir}/src/main/resources/META-INF/resources</resourceBase>
+                            <resourceBase>${project.basedir}/src/test/webapp</resourceBase>
                         </resourceBases>
                     </webApp>
                 </configuration>

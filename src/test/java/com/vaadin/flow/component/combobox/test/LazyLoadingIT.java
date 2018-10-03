@@ -42,6 +42,7 @@ public class LazyLoadingIT extends AbstractComponentIT {
     private ComboBoxElement beanBox;
     private ComboBoxElement filterBox;
     private ComboBoxElement callbackBox;
+    private ComboBoxElement templateBox;
 
     @Before
     public void init() {
@@ -53,6 +54,8 @@ public class LazyLoadingIT extends AbstractComponentIT {
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
         filterBox = $(ComboBoxElement.class).id("custom-filter");
         callbackBox = $(ComboBoxElement.class).id("callback-dataprovider");
+        templateBox = $("combo-box-in-a-template").id("template")
+                .$(ComboBoxElement.class).first();
     }
 
     @Test
@@ -327,6 +330,26 @@ public class LazyLoadingIT extends AbstractComponentIT {
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
         assertRendered("Item 70");
+    }
+
+    @Test
+    public void comboBoxInATemplate_worksWithLazyLoading() {
+        templateBox.openPopup();
+
+        assertLoadedItemsCount(
+                "After opening the ComboBox, the first 50 items should be loaded",
+                50, templateBox);
+
+        getItemElements().get(8).click();
+        assertMessage("Item 8");
+
+        templateBox.openPopup();
+        scrollToItem(templateBox, 50);
+
+        assertLoadedItemsCount(
+                "There should be 100 items after loading two pages", 100,
+                templateBox);
+        assertRendered("Item 52");
     }
 
     private void removeDisabledAttribute(TestBenchElement element) {

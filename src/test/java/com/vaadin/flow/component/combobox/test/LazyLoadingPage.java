@@ -51,7 +51,8 @@ public class LazyLoadingPage extends Div {
         createDataProviderWithCustomItemFilter();
         addSeparator();
         createCallbackDataProvider();
-
+        addSeparator();
+        createComboBoxInATemplate();
     }
 
     private void createListDataProviderWithStrings() {
@@ -173,6 +174,17 @@ public class LazyLoadingPage extends Div {
         comboBox.setDataProvider(dataProvider);
 
         add(comboBox);
+    }
+
+    private void createComboBoxInATemplate() {
+        ComboBoxInATemplate comboBoxInATemplate = new ComboBoxInATemplate();
+        comboBoxInATemplate.setId("template");
+        ComboBox<String> comboBox = comboBoxInATemplate.getComboBox();
+
+        comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
+        comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
+
+        add(comboBoxInATemplate);
     }
 
     private List<String> generateStrings() {
