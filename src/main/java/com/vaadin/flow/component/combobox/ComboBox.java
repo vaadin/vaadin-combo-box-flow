@@ -44,7 +44,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -917,12 +916,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         getElement().setProperty("pageSize", pageSize);
     }
 
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    @ClientCallable
     private void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);
     }
 
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    @ClientCallable
     private void setRequestedRange(int start, int length) {
         dataCommunicator.setRequestedRange(start, length);
     }

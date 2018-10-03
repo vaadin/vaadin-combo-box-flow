@@ -141,6 +141,46 @@ public class LazyLoadingIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setDisabled_removeDisabledAttribute_noDataLoaded() {
+        clickButton("disable");
+        removeDisabledAttribute(stringBox);
+
+        stringBox.openPopup();
+        assertLoadedItemsCount(
+                "No items should be loaded for disabled ComboBox.", 0,
+                stringBox);
+
+        scrollToItem(stringBox, 60);
+        assertLoadedItemsCount(
+                "No items should be loaded for disabled ComboBox.", 0,
+                stringBox);
+    }
+
+    @Test
+    public void openPopup_setDisabled_removeDisabledAttribute_noNewDataLoaded() {
+        stringBox.openPopup();
+        clickButton("disable");
+        removeDisabledAttribute(stringBox);
+
+        stringBox.openPopup();
+        scrollToItem(stringBox, 60);
+        assertLoadedItemsCount(
+                "No new items should be loaded for disabled ComboBox.", 50,
+                stringBox);
+    }
+
+    @Test
+    public void setDisabled_removeDisabledAttribute_clickItem_noEvent() {
+        stringBox.openPopup();
+        clickButton("disable");
+        removeDisabledAttribute(stringBox);
+        stringBox.openPopup();
+
+        getItemElements().get(4).click();
+        assertMessage("");
+    }
+
+    @Test
     public void customPageSize_correctAmountOfItemsRequested() {
         pagesizeBox.openPopup();
         assertLoadedItemsCount(
@@ -287,6 +327,10 @@ public class LazyLoadingIT extends AbstractComponentIT {
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
         assertRendered("Item 70");
+    }
+
+    private void removeDisabledAttribute(TestBenchElement element) {
+        executeScript("arguments[0].removeAttribute('disabled');", element);
     }
 
     private void assertItemSelected(String label) {
