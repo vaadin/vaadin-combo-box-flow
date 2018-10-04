@@ -52,7 +52,7 @@ public class ComboBoxPage extends Div {
     public ComboBoxPage() {
         createExternalSetValue();
         createExternalDisableTest();
-        createWithChangeItems();
+        createWithUpdateProvider();
         createWithValueChangeListener();
         createWithUpdatableValue();
         createWithPresetValue();
@@ -97,16 +97,16 @@ public class ComboBoxPage extends Div {
         add(comboBox, valueSet, disableCB, message);
     }
 
-    private void createWithChangeItems() {
+    private void createWithUpdateProvider() {
         ComboBox<String> comboBox = new ComboBox<>();
 
         comboBox.setItems("foo", "bar");
         comboBox.setId("combo");
 
-        NativeButton changeItems = new NativeButton("Change items",
-                event -> comboBox
-                        .setItems(DataProvider.ofItems("baz", "foobar")));
-        changeItems.setId("change-items");
+        NativeButton setProvider = new NativeButton("Update data provider",
+                event -> comboBox.setDataProvider(
+                        DataProvider.ofItems("baz", "foobar")));
+        setProvider.setId("update-provider");
 
         NativeButton setItemCaptionGenerator = new NativeButton(
                 "Update caption generator",
@@ -118,7 +118,7 @@ public class ComboBoxPage extends Div {
                 event -> comboBox.setValue("baz"));
         setValue.setId("update-value");
 
-        add(comboBox, changeItems, setItemCaptionGenerator, setValue);
+        add(comboBox, setProvider, setItemCaptionGenerator, setValue);
     }
 
     private void createWithValueChangeListener() {

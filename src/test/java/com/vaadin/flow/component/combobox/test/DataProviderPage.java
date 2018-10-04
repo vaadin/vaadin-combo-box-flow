@@ -25,10 +25,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
-/**
- * Using ListDataProvider eagerly with setItems()-method, not lazy loading with
- * setDataProvider()
- */
 @Route("data-provider")
 public class DataProviderPage extends Div {
     static final String COMBO_BOX_WITH_GET_ID_ID = "comboBoxWithGetId";
@@ -43,7 +39,7 @@ public class DataProviderPage extends Div {
 
         ComboBox<TestItem> comboBoxWithGetId = new ComboBox<>();
         comboBoxWithGetId.setId(COMBO_BOX_WITH_GET_ID_ID);
-        comboBoxWithGetId.setItems(new ListDataProvider<TestItem>(list) {
+        comboBoxWithGetId.setDataProvider(new ListDataProvider<TestItem>(list) {
             @Override
             public Object getId(TestItem item) {
                 return item.getId();

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -174,39 +173,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     };
 
     /**
-     * Updater which just sets the items-property eagerly for the web component.
-     * This is done to allow re-using the dataprovider design for the eager
-     * use-case. This is used when calling setItems().
-     */
-    private final ArrayUpdater eagerArrayUpdater = new ArrayUpdater() {
-        @Override
-        public Update startUpdate(int sizeChange) {
-            getElement().setProperty("size", sizeChange);
-            return new Update() {
-                @Override
-                public void clear(int start, int length) {
-                    setItems(Json.createArray());
-                }
-
-                @Override
-                public void set(int start, List<JsonValue> items) {
-                    setItems(items.stream().collect(JsonUtils.asArray()));
-                }
-
-                @Override
-                public void commit(int updateId) {
-                    // NO-OP
-                }
-            };
-        }
-
-        @Override
-        public void initialize() {
-            // NO-OP
-        }
-    };
-
-    /**
      * Predicate to check {@link ComboBox} items against user typed strings.
      */
     @FunctionalInterface
@@ -223,14 +189,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private DataCommunicator<T> dataCommunicator;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
-
-    private enum LoadMode {
-        EAGER, // when using setItems()
-        LAZY // when using setDataProvider()
-    };
-
-    private LoadMode loadMode;
-    private boolean settingItems;
 
     private Element template;
 
@@ -330,19 +288,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return null;
         }
 
-        if (comboBox.loadMode == LoadMode.EAGER) {
-            ListDataProvider<T> dp = ((ListDataProvider<T>) comboBox
-                    .getDataProvider());
-            Collection<T> items = dp.getItems();
-            Optional<T> item = items.stream().filter(
-                    object -> Objects.equals(dp.getId(model), dp.getId(object)))
-                    .findFirst();
-
-            if (!item.isPresent()) {
-                throw new IllegalArgumentException(
-                        "The provided value is not part of ComboBox: " + model);
-            }
-        }
+        // if (comboBox.loadMode == LoadMode.EAGER) {
+        // ListDataProvider<T> dp = ((ListDataProvider<T>) comboBox
+        // .getDataProvider());
+        // Collection<T> items = dp.getItems();
+        // Optional<T> item = items.stream().filter(
+        // object -> Objects.equals(dp.getId(model), dp.getId(object)))
+        // .findFirst();
+        //
+        // if (!item.isPresent()) {
+        // throw new IllegalArgumentException(
+        // "The provided value is not part of ComboBox: " + model);
+        // }
+        // }
         return comboBox.getKeyMapper().key(model);
     }
 
@@ -390,45 +348,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public void setItems(Collection<T> items) {
-        ListDataProvider<T> listDataProvider = new ListDataProvider<T>(items) {
-            // Allow null values
-            @Override
-            public Object getId(T item) {
-                return item;
-            };
-        };
-        setItems(listDataProvider);
-    }
-
-    /**
-     * Sets the items of this component from the given data provider.
-     * <p>
-     * This method sends all of the items to the browser at once, so it should
-     * be used only with relatively small data sets. The benefit of using this
-     * method is that the filtering will happen responsively in the client-side.
-     * For large data-sets, you should use lazy loading via
-     * {@link #setDataProvider(DataProvider)}.
-     * 
-     * @param dataProvider
-     *            the data provider which will populate the ComboBox eagerly
-     */
-    public void setItems(ListDataProvider<T> dataProvider) {
-        if (loadMode == LoadMode.LAZY) {
-            throwWhenChangingBetweenEagerAndLazy();
-        }
-        loadMode = LoadMode.EAGER;
-
-        dataCommunicator = new DataCommunicator<T>(dataGenerator,
-                eagerArrayUpdater, data -> {
-                    // Updating data not implemented
-                }, getElement().getNode());
-
-        settingItems = true;
-        setDataProvider(dataProvider);
-        setValue(null);
-
-        dataCommunicator.setRequestedRange(0, dataProvider.getItems().size());
-        scheduleRender();
+        setDataProvider(DataProvider.ofCollection(items));
+        // ListDataProvider<T> listDataProvider = new ListDataProvider<T>(items)
+        // {
+        // // Allow null values
+        // @Override
+        // public Object getId(T item) {
+        // return item;
+        // };
+        // };
+        // setDataProvider(listDataProvider);
     }
 
     @Override
@@ -439,12 +368,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(filterConverter,
                 "filterConverter cannot be null");
 
-        if (loadMode == LoadMode.EAGER && !settingItems) {
-            throwWhenChangingBetweenEagerAndLazy();
-        }
-
         if (dataCommunicator == null) {
-            loadMode = LoadMode.LAZY;
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
                             .callFunction("$connector.updateData", data),
@@ -452,6 +376,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
 
         scheduleRender();
+        setValue(null);
 
         SerializableFunction<String, C> convertOrNull = filterText -> {
             if (filterText == null || filterText.isEmpty()) {
@@ -468,13 +393,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         filterSlot = filter -> providerFilterSlot
                 .accept(convertOrNull.apply(filter));
 
-        if (loadMode == LoadMode.LAZY && filterChangeRegistration == null) {
+        if (/* TODO: items.size > pageSize && */ filterChangeRegistration == null) {
             filterChangeRegistration = getElement()
                     .addEventListener("filter-changed", event -> {
                         filterSlot.accept(getFilterString());
                     }).debounce(300);
         }
-        settingItems = false;
     }
 
     /**

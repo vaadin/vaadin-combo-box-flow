@@ -272,8 +272,8 @@ public class ComboBoxTest {
 
         expectIllegalArgumentException(
                 "The provided value is not part of ComboBox:");
-        ComboBox comboBox = new ComboBox();
-        comboBox.setItems(new ListDataProvider<TestItem>(list) {
+        ComboBox<TestItem> comboBox = new ComboBox<>();
+        comboBox.setDataProvider(new ListDataProvider<TestItem>(list) {
             @Override
             public Object getId(TestItem item) {
                 return item.getId();
@@ -292,24 +292,6 @@ public class ComboBoxTest {
         ComboBox comboBox = new ComboBox();
         comboBox.setItems(list);
         comboBox.setValue(new TestItem(2, "bbb", ""));
-    }
-
-    @Test
-    public void changeFromEagerToLazy_throws() {
-        expectIllegalStateException("Changing a ComboBox from "
-                + "using a lazy data provider to eager or vice versa is not supported.");
-        ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setItems("1", "2");
-        comboBox.setDataProvider(DataProvider.ofItems("1", "2"));
-    }
-
-    @Test
-    public void changeFromLazyToEager_throws() {
-        expectIllegalStateException("Changing a ComboBox from "
-                + "using a lazy data provider to eager or vice versa is not supported.");
-        ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setDataProvider(DataProvider.ofItems("1", "2"));
-        comboBox.setItems("1", "2");
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

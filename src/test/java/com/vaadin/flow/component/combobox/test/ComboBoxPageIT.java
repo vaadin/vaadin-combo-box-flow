@@ -50,7 +50,7 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         assertItem(items, 1, "bar");
 
         // update data provider
-        findElement(By.id("change-items")).click();
+        findElement(By.id("update-provider")).click();
 
         waitUntil(driver -> "baz".equals(getItem(getItems(combo), 0)));
         assertItem(getItems(combo), 1, "foobar");
