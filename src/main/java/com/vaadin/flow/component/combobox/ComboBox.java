@@ -376,7 +376,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             template = new Element("template");
             getElement().appendChild(template);
         }
-        render();
+        scheduleRender();
     }
 
     /**
@@ -428,7 +428,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setValue(null);
 
         dataCommunicator.setRequestedRange(0, dataProvider.getItems().size());
-        render();
+        scheduleRender();
     }
 
     @Override
@@ -451,7 +451,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     getElement().getNode());
         }
 
-        render();
+        scheduleRender();
 
         SerializableFunction<String, C> convertOrNull = filterText -> {
             if (filterText == null || filterText.isEmpty()) {
@@ -832,7 +832,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return label;
     }
 
-    private void render() {
+    private void scheduleRender() {
         if (renderScheduled || dataCommunicator == null || renderer == null) {
             return;
         }
@@ -851,10 +851,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataCommunicator.reset();
             renderScheduled = false;
         });
-    }
-
-    private void setPageSize(int pageSize) {
-        getElement().setProperty("pageSize", pageSize);
     }
 
     @ClientCallable
