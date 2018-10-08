@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.component.combobox.demo.ComboBoxView;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
@@ -40,11 +41,14 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     @Test
     public void openStringBoxAndSelectAnItem() {
         openTabAndCheckForErrors("");
-        WebElement comboBox = layout.findElement(By.id("string-selection-box"));
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("string-selection-box");
         WebElement message = layout
                 .findElement(By.id("string-selection-message"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[2]",
+        comboBox.openPopup();
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[2]",
                 comboBox);
 
         Assert.assertEquals("Selected browser: Opera", message.getText());
@@ -53,11 +57,14 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     @Test
     public void openObjectBoxAndSelectAnItem() {
         openTabAndCheckForErrors("");
-        WebElement comboBox = layout.findElement(By.id("object-selection-box"));
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("object-selection-box");
         WebElement message = layout
                 .findElement(By.id("object-selection-message"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+        comboBox.openPopup();
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 comboBox);
 
         waitUntil(driver -> message.getText().equals(
@@ -67,14 +74,14 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     @Test
     public void setEnabledCombobox() {
         openTabAndCheckForErrors("");
-        WebElement comboBox = layout.findElement(By.id("disabled-combo-box"));
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("disabled-combo-box");
         WebElement message = layout
                 .findElement(By.id("value-selection-message"));
         Assert.assertEquals("", message.getText());
 
-        executeScript(
-                "arguments[0].removeAttribute(\"disabled\");"
-                        + "arguments[0].selectedItem = arguments[0].items[1]",
+        executeScript("arguments[0].removeAttribute(\"disabled\");"
+                + "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 comboBox);
         message = layout.findElement(By.id("value-selection-message"));
         Assert.assertEquals("", message.getText());
@@ -83,17 +90,21 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     @Test
     public void openValueBoxSelectTwoItems() {
         openTabAndCheckForErrors("");
-        WebElement comboBox = layout.findElement(By.id("value-selection-box"));
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("value-selection-box");
         WebElement message = layout
                 .findElement(By.id("value-selection-message"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+        comboBox.openPopup();
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 comboBox);
 
         waitUntil(
                 driver -> message.getText().equals("Selected artist: Haywyre"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 comboBox);
 
         waitUntil(driver -> message.getText().equals(
@@ -128,13 +139,14 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     public void openTemplateBox() {
         openTabAndCheckForErrors("using-templates");
 
-        WebElement comboBox = layout
-                .findElement(By.id("template-selection-box"));
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("template-selection-box");
         WebElement message = layout
                 .findElement(By.id("template-selection-message"));
 
+        comboBox.openPopup();
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
-                "return arguments[0].items", comboBox);
+                "return arguments[0].filteredItems", comboBox);
 
         items.forEach(item -> {
             Assert.assertNotNull(item.get("key"));
@@ -148,13 +160,15 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
         Assert.assertEquals("A V Club Disagrees", firstItem.get("song"));
         Assert.assertEquals("Haircuts for Men", firstItem.get("artist"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 comboBox);
 
         waitUntil(
                 driver -> message.getText().equals("Selected artist: Haywyre"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 comboBox);
 
         waitUntil(driver -> message.getText().equals(
@@ -165,13 +179,14 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     public void openComponentBox() {
         openTabAndCheckForErrors("using-components");
 
-        WebElement comboBox = layout
-                .findElement(By.id("component-selection-box"));
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("component-selection-box");
         WebElement message = layout
                 .findElement(By.id("component-selection-message"));
 
+        comboBox.openPopup();
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
-                "return arguments[0].items", comboBox);
+                "return arguments[0].filteredItems", comboBox);
 
         items.forEach(item -> {
             Assert.assertNotNull(item.get("key"));
@@ -181,13 +196,15 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
         Map<String, ?> firstItem = items.get(0);
         Assert.assertEquals("A V Club Disagrees", firstItem.get("label"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 comboBox);
 
         waitUntil(
                 driver -> message.getText().equals("Selected artist: Haywyre"));
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 comboBox);
 
         waitUntil(driver -> message.getText().equals(
