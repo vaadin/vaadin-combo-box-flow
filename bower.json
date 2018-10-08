@@ -1,6 +1,0 @@
-{
-  "name": "vaadin-combo-box-flow",
-  "dependencies": {
-    "vaadin-combo-box": "b74c879af25de233fa677b5332f7b1f390771ae0"
-  }
-}
