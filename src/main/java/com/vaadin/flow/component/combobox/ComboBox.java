@@ -219,9 +219,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
                 .put("label", generateLabel(item)));
 
-        getElement().setProperty("itemValuePath", "key");
-        getElement().setProperty("itemIdPath", "key");
-
+        setItemValuePath("key");
+        setItemIdPath("key");
         setPageSize(pageSize);
     }
 
@@ -315,7 +314,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         JsonObject json = Json.createObject();
         json.put("key", getKeyMapper().key(value));
         dataGenerator.generateData(value, json);
-        getElement().setPropertyJson("selectedItem", json);
+        setSelectedItem(json);
     }
 
     /**
