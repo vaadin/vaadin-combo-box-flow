@@ -404,7 +404,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         System.out.println("new data size " + size);
         System.out.println("page size " + getPageSizeDouble());
 
-        if (size > getPageSizeDouble() && filterChangeRegistration != null) {
+        if (size > getPageSizeDouble() && filterChangeRegistration == null) {
             setClientSideFilter(false);
             filterChangeRegistration = getElement()
                     .addEventListener("filter-changed", event -> {
