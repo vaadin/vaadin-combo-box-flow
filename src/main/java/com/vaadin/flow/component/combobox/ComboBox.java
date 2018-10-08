@@ -39,6 +39,7 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
@@ -203,9 +204,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Registration filterChangeRegistration;
 
     /**
-     * Default constructor. Creates an empty combo box.
+     * Creates an empty combo box with the defined page size for lazy loading.
+     * <p>
+     * Note that the page size takes effect only when setting a data provider
+     * for the combo box. If you are using {@link #setItems(Collection)}, all
+     * the items are sent eagerly to the client.
+     * 
+     * @param pageSize
+     *            the amount of items to request at a time for lazy loading
      */
-    public ComboBox() {
+    public ComboBox(int pageSize) {
         super(null, null, String.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
@@ -213,6 +221,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         getElement().setProperty("itemValuePath", "key");
         getElement().setProperty("itemIdPath", "key");
+
+        setPageSize(pageSize);
+    }
+
+    /**
+     * Default constructor. Creates an empty combo box.
+     */
+    public ComboBox() {
+        this(50);
     }
 
     /**
@@ -224,21 +241,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public ComboBox(String label) {
         this();
         setLabel(label);
-    }
-
-    /**
-     * Creates an empty combo box with the defined page size for lazy loading.
-     * <p>
-     * Note that the page size takes effect only when setting a data provider
-     * for the combo box. If you are using {@link #setItems(Collection)}, all
-     * the items are sent eagerly to the client.
-     * 
-     * @param pageSize
-     *            the amount of items to request at a time for lazy loading
-     */
-    public ComboBox(int pageSize) {
-        this();
-        setPageSize(pageSize);
     }
 
     /**
@@ -393,11 +395,30 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         filterSlot = filter -> providerFilterSlot
                 .accept(convertOrNull.apply(filter));
 
-        if (/* TODO: items.size > pageSize && */ filterChangeRegistration == null) {
+        dataProvider.addDataProviderListener(e -> dataProviderUpdated());
+        dataProviderUpdated();
+    }
+
+    private void dataProviderUpdated() {
+        int size = getDataProvider().size(new Query<>());
+
+        System.out.println("new data size " + size);
+        System.out.println("page size " + getPageSizeDouble());
+
+        if (size > getPageSizeDouble() && filterChangeRegistration != null) {
+            setClientSideFilter(false);
             filterChangeRegistration = getElement()
                     .addEventListener("filter-changed", event -> {
                         filterSlot.accept(getFilterString());
                     }).debounce(300);
+
+        } else if (size <= getPageSizeDouble()) {
+            setClientSideFilter(true);
+
+            if (filterChangeRegistration != null) {
+                filterChangeRegistration.remove();
+                filterChangeRegistration = null;
+            }
         }
     }
 
@@ -804,12 +825,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return dataCommunicator.getKeyMapper();
     }
 
-    private void throwWhenChangingBetweenEagerAndLazy() {
-        throw new IllegalStateException(
-                "Changing a ComboBox from using a lazy data provider "
-                        + "to eager or vice versa is not supported. "
-                        + "Use either setItems() or setDataProvider() "
-                        + "for one ComboBox.");
+    private void setClientSideFilter(boolean clientSideFilter) {
+        getElement().setProperty("_clientSideFilter", clientSideFilter);
     }
 
 }

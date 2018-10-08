@@ -9,6 +9,7 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     const pageCallbacks = {};
     const cache = {};
+    let firstPage;
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
 
@@ -18,17 +19,28 @@ window.Vaadin.Flow.comboBoxConnector = {
         throw 'Invalid pageSize';
       }
 
+      if (comboBox._clientSideFilter && firstPage) {
+        // Data size is less than page size and we have all the data,
+        // so we'll use client-side filtering
+        comboBox.filteredItems = firstPage.filter(item =>
+          comboBox.$connector.filter(item, comboBox.filter));
+        return;
+      }
+
       if (cache[params.page]) {
         // This may happen after skipping pages by scrolling fast
-        let data = cache[params.page];
-        delete cache[params.page];
-        callback(data, comboBox.size);
+        commitPage(params.page, callback);
       } else {
         const upperLimit = params.pageSize * (params.page + 1);
         comboBox.$server.setRequestedRange(0, upperLimit);
 
         pageCallbacks[params.page] = callback;
       }
+    }
+
+    comboBox.$connector.filter = function (item, filter) {
+      filter = filter ? filter.toString().toLowerCase() : '';
+      return comboBox._getItemLabel(item).toString().toLowerCase().indexOf(filter) > -1;
     }
 
     comboBox.$connector.set = function (index, items) {
@@ -76,15 +88,23 @@ window.Vaadin.Flow.comboBoxConnector = {
           let callback = pageCallbacks[page];
           delete pageCallbacks[page];
 
-          let data = cache[page];
-          delete cache[page];
-
-          callback(data, comboBox.size);
+          commitPage(page, callback);
         }
       }
 
       // Let server know we're done
       comboBox.$server.confirmUpdate(id);
+    }
+
+    const commitPage = function (page, callback) {
+      let data = cache[page];
+      delete cache[page];
+
+      if (page == 0) {
+        // Keep the data for client-side filtering
+        firstPage = data;
+      }
+      callback(data, comboBox.size);
     }
   }
 }
