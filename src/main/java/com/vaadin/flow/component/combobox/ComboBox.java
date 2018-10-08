@@ -71,6 +71,7 @@ import elemental.json.JsonValue;
  *
  * @param <T>
  *            the type of the items to be inserted in the combo box
+ * @author Vaadin Ltd
  */
 @HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://comboBoxConnector.js")
