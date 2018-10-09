@@ -29,7 +29,6 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.combobox.bean.TestItem;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -80,15 +79,6 @@ public class ComboBoxTest {
         Assert.assertEquals(2, comboBox.items.size());
         assertItem(comboBox, 0, "foo");
         assertItem(comboBox, 1, "bar");
-    }
-
-    @Test
-    public void setInvalidValue_throw() {
-        expectIllegalArgumentException(
-                "The provided value is not part of ComboBox: invalid");
-        TestComboBox comboBox = new TestComboBox();
-        comboBox.setItems(Arrays.asList("foo", "bar"));
-        comboBox.setValue("invalid");
     }
 
     @Test
@@ -263,35 +253,6 @@ public class ComboBoxTest {
         Assert.assertEquals(
                 "The null representation string should be \"Missing Value\"",
                 "Missing Value", comboBox.getNullRepresentation());
-    }
-
-    @Test
-    public void setValue_nonMatchingId_IllegalArgumentException() {
-        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
-                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
-
-        expectIllegalArgumentException(
-                "The provided value is not part of ComboBox:");
-        ComboBox<TestItem> comboBox = new ComboBox<>();
-        comboBox.setDataProvider(new ListDataProvider<TestItem>(list) {
-            @Override
-            public Object getId(TestItem item) {
-                return item.getId();
-            }
-        });
-        comboBox.setValue(new TestItem(0, "b", ""));
-    }
-
-    @Test
-    public void setValue_nonExistingObject_IllegalArgumentException() {
-        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
-                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
-
-        expectIllegalArgumentException(
-                "The provided value is not part of ComboBox:");
-        ComboBox comboBox = new ComboBox();
-        comboBox.setItems(list);
-        comboBox.setValue(new TestItem(2, "bbb", ""));
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
