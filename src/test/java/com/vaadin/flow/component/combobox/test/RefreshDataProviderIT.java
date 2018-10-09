@@ -25,7 +25,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -44,7 +43,6 @@ public class RefreshDataProviderIT extends AbstractComponentIT {
         findElement(By.id("update")).click();
 
         items = getItems();
-        $(ComboBoxElementUpdated.class).first().openPopup();
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
                 items.size());

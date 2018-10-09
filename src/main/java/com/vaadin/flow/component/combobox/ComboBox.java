@@ -752,6 +752,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return nullRepresentation;
     }
 
+    CompositeDataGenerator<T> getDataGenerator() {
+        return dataGenerator;
+    }
+
     private String generateLabel(T item) {
         if (item == null) {
             return nullRepresentation;

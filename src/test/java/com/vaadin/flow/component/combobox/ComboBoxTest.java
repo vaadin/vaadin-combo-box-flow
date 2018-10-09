@@ -28,12 +28,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
+
+import elemental.json.Json;
 
 public class ComboBoxTest {
 
@@ -50,10 +50,6 @@ public class ComboBoxTest {
             items = new ArrayList<>(dataProvider.getItems());
         }
 
-        @Override
-        void runBeforeClientResponse(SerializableConsumer<UI> command) {
-            command.accept(new UI());
-        }
     }
 
     private enum Category {
@@ -123,9 +119,7 @@ public class ComboBoxTest {
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
-        UI ui = new UI();
-        ui.add(comboBox);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        comboBox.getDataGenerator().generateData("foo", Json.createObject());
     }
 
     @Test
