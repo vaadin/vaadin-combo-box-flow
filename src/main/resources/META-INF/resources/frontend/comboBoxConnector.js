@@ -10,6 +10,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     let pageCallbacks = {};
     let cache = {};
     let firstPage;
+    let lastFilter = '';
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
 
@@ -19,9 +20,15 @@ window.Vaadin.Flow.comboBoxConnector = {
         throw 'Invalid pageSize';
       }
 
+      const filterChanged = params.filter !== lastFilter;
+      if (filterChanged) {
+        cache = {};
+        lastFilter = params.filter;
+      }
+
       if (comboBox._clientSideFilter && firstPage) {
-        // Data size is less than page size and we have all the data,
-        // so we'll use client-side filtering
+        // Data size is less than page size and client has all the data,
+        // so client-side filtering is used
         comboBox.filteredItems = firstPage.filter(item =>
           comboBox.$connector.filter(item, comboBox.filter));
         return;
@@ -32,7 +39,7 @@ window.Vaadin.Flow.comboBoxConnector = {
         commitPage(params.page, callback);
       } else {
         const upperLimit = params.pageSize * (params.page + 1);
-        comboBox.$server.setRequestedRange(0, upperLimit);
+        comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
 
         pageCallbacks[params.page] = callback;
       }
@@ -77,7 +84,7 @@ window.Vaadin.Flow.comboBoxConnector = {
       comboBox.size = newSize;
     };
 
-    comboBox.$connector.clear = function () {
+    comboBox.$connector.reset = function () {
       pageCallbacks = {};
       cache = {};
       firstPage = undefined;

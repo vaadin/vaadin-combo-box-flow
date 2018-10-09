@@ -142,9 +142,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void clear(int start, int length) {
-            if (length > 0) {
-                enqueue("$connector.clear");
-            }
+            // NO-OP
         }
 
         @Override
@@ -377,6 +375,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     getElement().getNode());
         }
 
+        getElement().callFunction("$connector.reset");
         scheduleRender();
         setValue(null);
 
@@ -405,21 +404,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         System.out.println("new data size " + size);
         System.out.println("page size " + getPageSizeDouble());
 
-        if (size > getPageSizeDouble() && filterChangeRegistration == null) {
+        if (size > getPageSizeDouble()) {
             setClientSideFilter(false);
-            filterChangeRegistration = getElement()
-                    .addEventListener("filter-changed", event -> {
-                        filterSlot.accept(getFilterString());
-                    }).debounce(300);
 
         } else if (size <= getPageSizeDouble()) {
             setClientSideFilter(true);
-
-            if (filterChangeRegistration != null) {
-                filterChangeRegistration.remove();
-                filterChangeRegistration = null;
-            }
         }
+        reset();
     }
 
     /**
@@ -522,9 +513,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        if (dataCommunicator != null) {
-            dataCommunicator.reset();
-        }
+        reset();
     }
 
     /**
@@ -793,8 +782,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 dataGeneratorRegistration = dataGenerator
                         .addDataGenerator(rendering.getDataGenerator().get());
             }
-            dataCommunicator.reset();
-            renderScheduled = false;
+            reset();
         });
     }
 
@@ -804,8 +792,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     @ClientCallable
-    private void setRequestedRange(int start, int length) {
+    private void setRequestedRange(int start, int length, String filter) {
         dataCommunicator.setRequestedRange(start, length);
+        filterSlot.accept(filter);
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -827,6 +816,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private void setClientSideFilter(boolean clientSideFilter) {
         getElement().setProperty("_clientSideFilter", clientSideFilter);
+    }
+
+    private void reset() {
+        if (dataCommunicator != null) {
+            dataCommunicator.reset();
+        }
+        getElement().callFunction("$connector.reset");
     }
 
 }

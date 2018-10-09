@@ -268,8 +268,8 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     @Test
     public void defaultFiltering_lowerCaseContains() {
-        beanBox.setFilter("person 2");
         beanBox.openPopup();
+        beanBox.setFilter("person 2");
 
         waitUntil(driver -> getNonEmptyOverlayContents().size() > 10);
 
@@ -297,8 +297,8 @@ public class LazyLoadingIT extends AbstractComponentIT {
 
     @Test
     public void customItemFilter() {
-        filterBox.setFilter("Person");
         filterBox.openPopup();
+        filterBox.setFilter("Person");
 
         waitForElementVisible(By.tagName("vaadin-combo-box-overlay"));
 
