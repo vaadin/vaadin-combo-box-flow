@@ -200,8 +200,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // Just ignore when setDataProvider has not been called
     };
 
-    private Registration filterChangeRegistration;
-
     /**
      * Creates an empty combo box with the defined page size for lazy loading.
      * <p>
@@ -307,6 +305,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
+
+        if (value != null && getKeyMapper().has(value)) {
+            value = getKeyMapper().get(getKeyMapper().key(value));
+        }
 
         // This ensures that the selection works even with lazy loading when the
         // item is not yet loaded
