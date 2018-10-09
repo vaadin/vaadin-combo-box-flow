@@ -7,8 +7,8 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     comboBox.$connector = {};
 
-    const pageCallbacks = {};
-    const cache = {};
+    let pageCallbacks = {};
+    let cache = {};
     let firstPage;
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
@@ -75,6 +75,13 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     comboBox.$connector.updateSize = function (newSize) {
       comboBox.size = newSize;
+    };
+
+    comboBox.$connector.clear = function () {
+      pageCallbacks = {};
+      cache = {};
+      firstPage = undefined;
+      comboBox.clearCache();
     };
 
     comboBox.$connector.confirm = function (id) {

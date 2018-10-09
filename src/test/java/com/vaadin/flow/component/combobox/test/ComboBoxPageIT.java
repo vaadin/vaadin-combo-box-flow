@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -78,15 +79,19 @@ public class ComboBoxPageIT extends AbstractComponentIT {
 
     @Test
     public void selectedValue() {
-        WebElement combo = findElement(By.id("titles"));
+        ComboBoxElementUpdated combo = $(ComboBoxElementUpdated.class)
+                .id("titles");
+        combo.openPopup();
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 combo);
 
         WebElement selectionInfo = findElement(By.id("selected-titles"));
         Assert.assertEquals("MR", selectionInfo.getText());
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 combo);
         Assert.assertEquals("MRS", selectionInfo.getText());
     }
@@ -127,14 +132,14 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     public void setValue_changeDataProvider_valueIsReset() {
         WebElement combo = findElement(By.id("combo"));
 
-        findElement(By.id("change-items")).click();
+        findElement(By.id("update-provider")).click();
         waitUntil(driver -> "baz".equals(getItem(getItems(combo), 0)));
 
         findElement(By.id("update-value")).click();
         String value = getSelectedItemLabel(combo);
         Assert.assertEquals("baz", value);
 
-        findElement(By.id("change-items")).click();
+        findElement(By.id("update-provider")).click();
         Assert.assertNull(
                 executeScript("return arguments[0].selectedItem", combo));
     }
@@ -153,7 +158,9 @@ public class ComboBoxPageIT extends AbstractComponentIT {
 
     @Test
     public void changeValue_IsFromClientIsSetAccordingly() {
-        WebElement combo = findElement(By.id("updatable-combo"));
+        ComboBoxElementUpdated combo = $(ComboBoxElementUpdated.class)
+                .id("updatable-combo");
+        combo.openPopup();
         WebElement message = findElement(By.id("updatable-combo-message"));
         WebElement button = findElement(By.id("updatable-combo-button"));
 
@@ -164,7 +171,8 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 combo);
         Assert.assertEquals("Item 1", getSelectedItemLabel(combo));
         Assert.assertEquals("Value: Item 1 isFromClient: true",
@@ -217,8 +225,10 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     }
 
     private List<?> getItems(WebElement combo) {
+        executeScript("arguments[0].opened=true", combo);
         List<?> items = (List<?>) getCommandExecutor()
-                .executeScript("return arguments[0].items;", combo);
+                .executeScript("return arguments[0].filteredItems;", combo);
+        executeScript("arguments[0].opened=false", combo);
         return items;
     }
 
