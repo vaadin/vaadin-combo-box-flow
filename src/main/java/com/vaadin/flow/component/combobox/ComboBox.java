@@ -822,7 +822,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataCommunicator != null) {
             dataCommunicator.reset();
         }
-        getElement().callFunction("$connector.reset");
+        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+                "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
 }
