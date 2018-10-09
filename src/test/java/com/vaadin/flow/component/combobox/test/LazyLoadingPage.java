@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -56,6 +57,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createListDataProviderWithStrings() {
+        addTitle("ListDataProvider with strings");
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("lazy-strings");
 
@@ -79,6 +81,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createComboBoxWithCustomPageSize() {
+        addTitle("ListDataProvider with custom page size 180");
         ComboBox<String> comboBox = new ComboBox<>(180);
         comboBox.setId("pagesize");
         comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
@@ -86,6 +89,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createListDataProviderWithBeans() {
+        addTitle("ListDataProvider with beans");
         ComboBox<Person> comboBox = new ComboBox<>();
         comboBox.setId("lazy-beans");
 
@@ -140,6 +144,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createDataProviderWithCustomItemFilter() {
+        addTitle("ListDataProvider with custom item filter");
         ComboBox<Person> comboBox = new ComboBox<>();
         comboBox.setId("custom-filter");
 
@@ -161,6 +166,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createCallbackDataProvider() {
+        addTitle("CallbackDataProvider");
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("callback-dataprovider");
 
@@ -177,6 +183,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createComboBoxInATemplate() {
+        addTitle("Combobox inside a template");
         ComboBoxInATemplate comboBoxInATemplate = new ComboBoxInATemplate();
         comboBoxInATemplate.setId("template");
         ComboBox<String> comboBox = comboBoxInATemplate.getComboBox();
@@ -195,6 +202,10 @@ public class LazyLoadingPage extends Div {
 
     private void addSeparator() {
         getElement().appendChild(new Element("hr"));
+    }
+
+    private void addTitle(String title) {
+        add(new Paragraph(title));
     }
 
     public static class Person implements Serializable {
