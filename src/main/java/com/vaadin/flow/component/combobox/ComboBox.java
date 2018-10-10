@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -360,6 +361,37 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // };
         // };
         // setDataProvider(listDataProvider);
+    }
+
+    /**
+     * Sets the data items of this combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     * 
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox
+     * @param items
+     *            the data items to display
+     */
+    public void setItems(ItemFilter<T> itemFilter, Collection<T> items) {
+        ListDataProvider<T> listDataProvider = DataProvider.ofCollection(items);
+
+        setDataProvider(itemFilter, listDataProvider);
+    }
+
+    /**
+     * Sets the data items of this combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox
+     * @param items
+     *            the data items to display
+     */
+    public void setItems(ItemFilter<T> itemFilter,
+            @SuppressWarnings("unchecked") T... items) {
+        setItems(itemFilter, Arrays.asList(items));
     }
 
     @Override
