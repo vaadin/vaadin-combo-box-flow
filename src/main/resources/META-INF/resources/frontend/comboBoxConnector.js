@@ -40,7 +40,16 @@ window.Vaadin.Flow.comboBoxConnector = {
         commitPage(params.page, callback);
       } else {
         const upperLimit = params.pageSize * (params.page + 1);
-        comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+
+        if (filterChanged) {
+          this._debouncer = Polymer.Debouncer.debounce(
+            this._debouncer,
+            Polymer.Async.timeOut.after(500),
+            () => comboBox.$server.setRequestedRange(0, upperLimit, params.filter));
+        }
+        else {
+          comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+        }
 
         pageCallbacks[params.page] = callback;
       }
