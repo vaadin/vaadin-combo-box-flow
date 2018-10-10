@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
@@ -27,6 +28,7 @@ import com.vaadin.testbench.TestBenchElement;
 
 import elemental.json.JsonObject;
 
+@Ignore
 public class AbstractComboBoxIT extends AbstractComponentIT {
 
     protected void removeDisabledAttribute(TestBenchElement element) {

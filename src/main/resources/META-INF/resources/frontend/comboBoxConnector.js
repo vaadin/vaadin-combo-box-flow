@@ -90,6 +90,7 @@ window.Vaadin.Flow.comboBoxConnector = {
       cache = {};
       firstPage = undefined;
       comboBox.clearCache();
+      comboBox._pendingRequests = {}; // Should be done by clearCache()
     };
 
     comboBox.$connector.confirm = function (id) {
