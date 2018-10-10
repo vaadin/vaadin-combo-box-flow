@@ -286,20 +286,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (model == null) {
             return null;
         }
-
-        // if (comboBox.loadMode == LoadMode.EAGER) {
-        // ListDataProvider<T> dp = ((ListDataProvider<T>) comboBox
-        // .getDataProvider());
-        // Collection<T> items = dp.getItems();
-        // Optional<T> item = items.stream().filter(
-        // object -> Objects.equals(dp.getId(model), dp.getId(object)))
-        // .findFirst();
-        //
-        // if (!item.isPresent()) {
-        // throw new IllegalArgumentException(
-        // "The provided value is not part of ComboBox: " + model);
-        // }
-        // }
         return comboBox.getKeyMapper().key(model);
     }
 
@@ -352,15 +338,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public void setItems(Collection<T> items) {
         setDataProvider(DataProvider.ofCollection(items));
-        // ListDataProvider<T> listDataProvider = new ListDataProvider<T>(items)
-        // {
-        // // Allow null values
-        // @Override
-        // public Object getId(T item) {
-        // return item;
-        // };
-        // };
-        // setDataProvider(listDataProvider);
     }
 
     /**
@@ -434,9 +411,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private void dataProviderUpdated() {
         int size = getDataProvider().size(new Query<>());
-
-        System.out.println("new data size " + size);
-        System.out.println("page size " + getPageSizeDouble());
 
         if (size > getPageSizeDouble()) {
             setClientSideFilter(false);
