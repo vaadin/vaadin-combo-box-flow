@@ -195,8 +195,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private int customValueListenersCount;
 
-    private String nullRepresentation = "";
-
     private SerializableConsumer<String> filterSlot = filter -> {
         // Just ignore when setDataProvider has not been called
     };
@@ -756,37 +754,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return new CustomValueRegistration(registration);
     }
 
-    /**
-     * Sets representation string for UI display, when the item is null.
-     * 
-     * <p>
-     * By default, the null field value will be shown as empty string.
-     * 
-     * @param label
-     *            the string to be set
-     */
-    public void setNullRepresentation(String label) {
-        Objects.requireNonNull(label,
-                "The null representation should not be null.");
-        nullRepresentation = label;
-    }
-
-    /**
-     * Gets the null representation string.
-     * 
-     * @return the string represents the null item in the ComboBox
-     */
-    public String getNullRepresentation() {
-        return nullRepresentation;
-    }
-
     CompositeDataGenerator<T> getDataGenerator() {
         return dataGenerator;
     }
 
     private String generateLabel(T item) {
         if (item == null) {
-            return nullRepresentation;
+            return "";
         }
         String label = getItemLabelGenerator().apply(item);
         if (label == null) {
