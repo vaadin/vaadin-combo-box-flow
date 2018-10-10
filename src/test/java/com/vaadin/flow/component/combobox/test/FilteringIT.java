@@ -92,15 +92,27 @@ public class FilteringIT extends AbstractComboBoxIT {
     public void useItemFilterWithLessThanPageSize_serverSideFiltering() {
         clickButton("item-filter");
         box.openPopup();
-        assertClientSideFilter(false);
+
+        List<String> items = setFilterAndGetImmediateResults("tem 3");
+        Assert.assertEquals("Expected server-side filtering, so there "
+                + "should be no filtered items until server has responded.", 0,
+                items.size());
 
         Assert.assertEquals("No item should match the ItemFilter (startsWith).",
                 0, getNonEmptyOverlayContents().size());
 
-        setFilterAndGetImmediateResults("Ite");
+        items = setFilterAndGetImmediateResults("Item 2");
+        Assert.assertEquals("Expected server-side filtering, so there "
+                + "should be no filtered items until server has responded.", 0,
+                items.size());
+
+        List<String> filteredItems = getNonEmptyOverlayContents();
         Assert.assertEquals(
-                "All the items should match the ItemFilter (startsWith).", 40,
-                getNonEmptyOverlayContents().size());
+                "Unexpected amount of items matching the ItemFilter (startsWith).",
+                11, filteredItems.size());
+        filteredItems.forEach(item -> Assert.assertThat(
+                "Unexpected item found after filtering.", item,
+                CoreMatchers.startsWith("Item 2")));
     }
 
     private void assertClientSideFilter(boolean clientSide) {

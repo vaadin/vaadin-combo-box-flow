@@ -201,6 +201,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // Just ignore when setDataProvider has not been called
     };
 
+    private Boolean forceServerSideFiltering;
+
     /**
      * Creates an empty combo box with the defined page size for lazy loading.
      * <p>
@@ -372,12 +374,24 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     @Override
+    public void setDataProvider(DataProvider<T, String> dataProvider) {
+        if (forceServerSideFiltering == null) {
+            forceServerSideFiltering = false;
+        }
+        setDataProvider(dataProvider, SerializableFunction.identity());
+    }
+
+    @Override
     public <C> void setDataProvider(DataProvider<T, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
         Objects.requireNonNull(dataProvider,
                 "The data provider can not be null");
         Objects.requireNonNull(filterConverter,
                 "filterConverter cannot be null");
+
+        if (forceServerSideFiltering == null) {
+            forceServerSideFiltering = true;
+        }
 
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
@@ -405,19 +419,20 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         filterSlot = filter -> providerFilterSlot
                 .accept(convertOrNull.apply(filter));
 
-        dataProvider.addDataProviderListener(e -> dataProviderUpdated());
-        dataProviderUpdated();
+        boolean shouldForceServerSideFiltering = forceServerSideFiltering;
+
+        dataProvider.addDataProviderListener(
+                e -> dataProviderUpdated(shouldForceServerSideFiltering));
+        dataProviderUpdated(shouldForceServerSideFiltering);
+
+        forceServerSideFiltering = null;
     }
 
-    private void dataProviderUpdated() {
+    private void dataProviderUpdated(boolean forceServerSideFiltering) {
         int size = getDataProvider().size(new Query<>());
+        setClientSideFilter(
+                !forceServerSideFiltering && size <= getPageSizeDouble());
 
-        if (size > getPageSizeDouble()) {
-            setClientSideFilter(false);
-
-        } else if (size <= getPageSizeDouble()) {
-            setClientSideFilter(true);
-        }
         reset();
     }
 
@@ -437,6 +452,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the list data provider to use, not <code>null</code>
      */
     public void setDataProvider(ListDataProvider<T> listDataProvider) {
+        if (forceServerSideFiltering == null) {
+            forceServerSideFiltering = false;
+        }
+
         // Cannot use the case insensitive contains shorthand from
         // ListDataProvider since it wouldn't react to locale changes
         ItemFilter<T> defaultItemFilter = (item,
@@ -463,6 +482,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public void setDataProvider(FetchItemsCallback<T> fetchItems,
             SerializableFunction<String, Integer> sizeCallback) {
+        forceServerSideFiltering = true;
         setDataProvider(new CallbackDataProvider<>(
                 q -> fetchItems.fetchItems(q.getFilter().orElse(""),
                         q.getOffset(), q.getLimit()),
