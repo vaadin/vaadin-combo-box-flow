@@ -59,16 +59,23 @@ import elemental.json.JsonValue;
  * contains the same features of the webcomponent, such as item filtering,
  * object selection and item templating.
  * <p>
- * You can provide data for the component either eagerly or lazily. To send data
- * eagerly, use {@link #setItems(Collection)} or its overload. This method is
- * suitable for a small set of options, and it enables the more responsive
- * client-side filtering.
+ * ComboBox supports lazy loading. This means that when using large data sets,
+ * items are requested from the server one "page" at a time when the user
+ * scrolls down the overlay. By default the number of items in one page
+ * ({@code pageSize}) is 50, but this can be overridden in the constructor
+ * {@link #ComboBox(int)}.
  * <p>
- * For lazy loading data as the user scrolls down the component, use
- * {@link #setDataProvider(DataProvider)} or its overloads. This method is
- * suitable for large data sets, to avoid unnecessary network traffic. The
- * filtering will happen in server-side, and you can override the default filter
- * strategy with {@link #setDataProvider(ItemFilter, ListDataProvider)}.
+ * ComboBox can do filtering either in the browser or in the server. When
+ * ComboBox has only a relatively small set of items, the filtering will happen
+ * in the browser, allowing smooth user-experience. When the size of the data
+ * set is larger than the {@code pageSize}, the webcomponent doesn't necessarily
+ * have all the data available and it will make requests to the server to handle
+ * the filtering. Also, if you have defined custom filtering logic, with eg.
+ * {@link #setItems(ItemFilter, Collection)}, filtering will happen in the
+ * server. To enable client-side filtering with larger data sets, you can
+ * override the {@code pageSize} to be bigger than the size of your data set.
+ * However, then the full data set will be sent to the client immediately and
+ * you will lose the benefits of lazy loading.
  *
  * @param <T>
  *            the type of the items to be inserted in the combo box
@@ -204,9 +211,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Creates an empty combo box with the defined page size for lazy loading.
      * <p>
-     * Note that the page size takes effect only when setting a data provider
-     * for the combo box. If you are using {@link #setItems(Collection)}, all
-     * the items are sent eagerly to the client.
+     * The default page size is 50.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
      * 
      * @param pageSize
      *            the amount of items to request at a time for lazy loading
@@ -329,11 +338,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * {@inheritDoc}
      * <p>
-     * This method sends all of the items to the browser at once, so it should
-     * be used only with relatively small data sets. The benefit of using this
-     * method is that the filtering will happen responsively in the client-side.
-     * For large data-sets, you should use lazy loading via
-     * {@link #setDataProvider(DataProvider)}.
+     * Filtering will use a case insensitive match to show all items where the
+     * filter text is a substring of the label displayed for that item, which
+     * you can configure with
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
     @Override
     public void setItems(Collection<T> items) {
@@ -343,6 +351,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Sets the data items of this combo box and a filtering function for
      * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #ComboBox(int) pageSize}.
      * 
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -359,6 +372,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Sets the data items of this combo box and a filtering function for
      * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #ComboBox(int) pageSize}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -436,15 +454,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     /**
      * Sets a list data provider as the data provider of this combo box.
+     * <p>
      * Filtering will use a case insensitive match to show all items where the
      * filter text is a substring of the label displayed for that item, which
      * you can configure with
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
-     * <p>
-     * The browser will request for the items lazily as the user scrolls down
-     * the combo box. Filtering is done in the server. More responsive
-     * client-side filtering can be achieved only by sending all the items to
-     * the client at once with the {@link #setItems(Collection)} method.
      *
      * @param listDataProvider
      *            the list data provider to use, not <code>null</code>
@@ -492,10 +506,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * this combo box. The item filter is used to compare each item to the
      * filter text entered by the user.
      * <p>
-     * The browser will request for the items lazily as the user scrolls down
-     * the combo box. Filtering is done in the server. More responsive
-     * client-side filtering can be achieved only by sending all the items to
-     * the client at once with the {@link #setItems(Collection)} method.
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #ComboBox(int) pageSize}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
