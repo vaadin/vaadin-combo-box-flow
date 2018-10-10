@@ -29,8 +29,9 @@ window.Vaadin.Flow.comboBoxConnector = {
       if (comboBox._clientSideFilter && firstPage) {
         // Data size is less than page size and client has all the data,
         // so client-side filtering is used
-        comboBox.filteredItems = firstPage.filter(item =>
+        const filteredItems = firstPage.filter(item =>
           comboBox.$connector.filter(item, comboBox.filter));
+        callback(filteredItems, filteredItems.size);
         return;
       }
 

@@ -61,7 +61,7 @@ public class LazyLoadingPage extends Div {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("lazy-strings");
 
-        List<String> items = generateStrings();
+        List<String> items = generateStrings(1000);
         ListDataProvider<String> dp = DataProvider.ofCollection(items);
         comboBox.setDataProvider(dp);
 
@@ -84,7 +84,8 @@ public class LazyLoadingPage extends Div {
         addTitle("ListDataProvider with custom page size 180");
         ComboBox<String> comboBox = new ComboBox<>(180);
         comboBox.setId("pagesize");
-        comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
+        comboBox.setDataProvider(
+                DataProvider.ofCollection(generateStrings(1000)));
         add(comboBox);
     }
 
@@ -188,15 +189,16 @@ public class LazyLoadingPage extends Div {
         comboBoxInATemplate.setId("template");
         ComboBox<String> comboBox = comboBoxInATemplate.getComboBox();
 
-        comboBox.setDataProvider(DataProvider.ofCollection(generateStrings()));
+        comboBox.setDataProvider(
+                DataProvider.ofCollection(generateStrings(1000)));
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
         add(comboBoxInATemplate);
     }
 
-    private List<String> generateStrings() {
-        List<String> items = IntStream.range(0, 1000).mapToObj(i -> "Item " + i)
-                .collect(Collectors.toList());
+    public static List<String> generateStrings(int count) {
+        List<String> items = IntStream.range(0, count)
+                .mapToObj(i -> "Item " + i).collect(Collectors.toList());
         return items;
     }
 
