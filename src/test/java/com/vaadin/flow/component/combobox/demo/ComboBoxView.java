@@ -22,6 +22,7 @@ import java.util.stream.IntStream;
 
 import com.github.javafaker.Faker;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -216,13 +217,24 @@ public class ComboBoxView extends DemoView {
     private void createComboBoxUsingTemplateRenderer() {
         Div message = createMessageDiv("template-selection-message");
 
+        //@formatter:off
         // begin-source-example
         // source-example-heading: Rendering items using TemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
 
         List<Song> listOfSongs = createListOfSongs();
 
-        comboBox.setItems(listOfSongs);
+        /*
+         * Providing a custom item filter allows filtering based on all of
+         * the rendered properties:
+         */
+        ItemFilter<Song> filter = (song, filterString) -> 
+                song.getName().toLowerCase()
+                    .contains(filterString.toLowerCase())
+                || song.getArtist().toLowerCase()
+                    .contains(filterString.toLowerCase());
+
+        comboBox.setItems(filter, listOfSongs);
         comboBox.setItemLabelGenerator(Song::getName);
         comboBox.setRenderer(TemplateRenderer.<Song> of(
                 "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
@@ -243,6 +255,7 @@ public class ComboBoxView extends DemoView {
             }
         });
         // end-source-example
+        //@formatter:on
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
