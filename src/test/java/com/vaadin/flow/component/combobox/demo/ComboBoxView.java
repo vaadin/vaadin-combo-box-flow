@@ -25,8 +25,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
@@ -303,28 +301,27 @@ public class ComboBoxView extends DemoView {
 
     private void createComboBoxWithInMemoryLazyLoading() {
         // begin-source-example
-        // source-example-heading: Lazy loading with an in-memory data provider
+        // source-example-heading: Lazy loading between client and server
         ComboBox<String> comboBox = new ComboBox<>();
 
         /*
-         * When using setDataProvider() instead of setItems(), the component
-         * requests more items from the server lazily as the user scrolls down
-         * the overlay.
+         * Using a large data set makes the browser request items lazily as the
+         * user scrolls down the overlay. This will also trigger server-side
+         * filtering.
          */
-        ListDataProvider<String> dataProvider = DataProvider
-                .ofCollection(getNames());
-        comboBox.setDataProvider(dataProvider);
+        List<String> names = getNames(500);
+        comboBox.setItems(names);
         // end-source-example
 
         comboBox.setId("lazy-loading-box");
-        addCard("Lazy Loading", "Lazy loading with an in-memory data provider",
+        addCard("Lazy Loading", "Lazy loading between client and server",
                 comboBox);
     }
 
     private void createComboBoxWithCallbackLazyLoading() {
         //@formatter:off
         // begin-source-example
-        // source-example-heading: Lazy loading with a callback data provider
+        // source-example-heading: Lazy loading with callbacks
         ComboBox<String> comboBox = new ComboBox<>();
 
         /*
@@ -342,13 +339,12 @@ public class ComboBoxView extends DemoView {
         // end-source-example
         //@formatter:on
         comboBox.setId("callback-box");
-        addCard("Lazy Loading", "Lazy loading with a callback data provider",
-                comboBox);
+        addCard("Lazy Loading", "Lazy loading with callbacks", comboBox);
     }
 
-    private List<String> getNames() {
+    private List<String> getNames(int count) {
         Faker faker = Faker.instance();
-        return IntStream.range(0, 500).mapToObj(i -> faker.name().fullName())
+        return IntStream.range(0, count).mapToObj(i -> faker.name().fullName())
                 .collect(Collectors.toList());
     }
 
