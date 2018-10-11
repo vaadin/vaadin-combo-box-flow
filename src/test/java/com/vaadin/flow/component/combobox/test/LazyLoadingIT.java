@@ -78,7 +78,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 stringBox);
         assertRendered("Item 52");
 
-        scrollToItem(stringBox, 110);
+        scrollToItem(stringBox, 100);
 
         assertLoadedItemsCount(
                 "There should be 150 items after loading three pages", 150,
