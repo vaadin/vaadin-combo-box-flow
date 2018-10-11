@@ -113,30 +113,48 @@ public class FilteringIT extends AbstractComboBoxIT {
                 CoreMatchers.startsWith("Item 2")));
     }
 
-    private void assertClientSideFilter(boolean clientSide) {
+    @Test
+    public void biggerPageSize_clientSideFilteringWithMoreItems() {
+        box = $(ComboBoxElement.class).id("page-size-60");
 
-        List<String> items = setFilterAndGetImmediateResults("3");
+        clickButton("add-items");
+        box.openPopup();
+        assertClientSideFilter(true, "3", 15);
+
+        clickButton("add-items");
+        box.openPopup();
+        assertClientSideFilter(false, "3", 17);
+    }
+
+    private void assertClientSideFilter(boolean clientSide) {
+        assertClientSideFilter(clientSide, "3", 13);
+    }
+
+    private void assertClientSideFilter(boolean clientSide, String filter,
+            int expectedCount) {
+
+        List<String> items = setFilterAndGetImmediateResults(filter);
 
         if (clientSide) {
             Assert.assertEquals("Unexpected amount of filtered items. "
                     + "Expected the items to be already filtered synchronously in client-side.",
-                    13, items.size());
+                    expectedCount, items.size());
             items.forEach(item -> {
                 Assert.assertThat(
                         "Found an item which doesn't match the filter. "
                                 + "Expected the items to be already filtered synchronously in client-side.",
-                        item, CoreMatchers.containsString("3"));
+                        item, CoreMatchers.containsString(filter));
             });
         } else {
             Assert.assertEquals("Expected server-side filtering, so there "
                     + "should be no filtered items until server has responded.",
                     0, items.size());
 
-            waitUntil(driver -> getNonEmptyOverlayContents().size() > 10);
+            waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
             getNonEmptyOverlayContents().forEach(rendered -> {
                 Assert.assertThat(
                         "Item which doesn't match the filter was found after server-side filtering.",
-                        rendered, CoreMatchers.containsString("3"));
+                        rendered, CoreMatchers.containsString(filter));
             });
         }
     }

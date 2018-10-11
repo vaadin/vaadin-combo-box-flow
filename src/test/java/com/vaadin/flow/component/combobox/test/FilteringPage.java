@@ -66,6 +66,12 @@ public class FilteringPage extends Div {
         itemFilterButton.setId("item-filter");
 
         add(comboBox, addButton, removeButton, itemFilterButton);
+
+        ComboBox<String> pageSizeBox = new ComboBox<>(60);
+        pageSizeBox.setDataProvider(dp);
+        pageSizeBox.setLabel("Page size 60");
+        pageSizeBox.setId("page-size-60");
+        add(new Div(), pageSizeBox);
     }
 
 }

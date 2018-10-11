@@ -271,11 +271,11 @@ public class ComboBoxView extends DemoView {
         // source-example-heading: Rendering items using ComponentTemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
 
-
         List<Song> listOfSongs = createListOfSongs();
-
         comboBox.setItems(listOfSongs);
+
         comboBox.setItemLabelGenerator(Song::getName);
+
         comboBox.setRenderer(new ComponentRenderer<>(item -> {
             VerticalLayout container = new VerticalLayout();
 
