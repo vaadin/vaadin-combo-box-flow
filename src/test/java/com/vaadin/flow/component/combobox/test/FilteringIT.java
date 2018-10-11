@@ -106,11 +106,9 @@ public class FilteringIT extends AbstractComboBoxIT {
                 + "should be no filtered items until server has responded.", 0,
                 items.size());
 
-        List<String> filteredItems = getNonEmptyOverlayContents();
-        Assert.assertEquals(
-                "Unexpected amount of items matching the ItemFilter (startsWith).",
-                11, filteredItems.size());
-        filteredItems.forEach(item -> Assert.assertThat(
+        waitUntil(driver -> getNonEmptyOverlayContents().size() == 11);
+
+        getNonEmptyOverlayContents().forEach(item -> Assert.assertThat(
                 "Unexpected item found after filtering.", item,
                 CoreMatchers.startsWith("Item 2")));
     }

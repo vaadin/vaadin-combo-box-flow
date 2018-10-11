@@ -157,9 +157,13 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
                 .id("template-selection-box");
         comboBox.openPopup();
         comboBox.setFilter("ha");
+
+        waitUntil(driver -> ((List<Map<String, ?>>) executeScript(
+                "return arguments[0].filteredItems", comboBox)).size() == 2);
+
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
                 "return arguments[0].filteredItems", comboBox);
-        Assert.assertEquals(2, items.size());
+
         Assert.assertEquals("Haircuts for Men", items.get(0).get("artist"));
         Assert.assertEquals("Haywyre", items.get(1).get("artist"));
     }

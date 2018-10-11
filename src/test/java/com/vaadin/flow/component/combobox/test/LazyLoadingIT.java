@@ -302,7 +302,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         filterBox.setFilter("10");
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 10);
+        waitUntil(driver -> getNonEmptyOverlayContents().size() > 5);
 
         getNonEmptyOverlayContents().forEach(rendered -> {
             Assert.assertThat(rendered,
