@@ -126,6 +126,16 @@ public class FilteringIT extends AbstractComboBoxIT {
         assertClientSideFilter(false, "3", 17);
     }
 
+    @Test
+    public void changeFilterFromEmptyAndBackToEmptyWithinDebounceTimeout_itemsLoaded() {
+        clickButton("add-items");
+        box.openPopup();
+        box.setFilter("0");
+        box.setFilter("");
+        waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
+        assertRendered("Item 0");
+    }
+
     private void assertClientSideFilter(boolean clientSide) {
         assertClientSideFilter(clientSide, "3", 13);
     }

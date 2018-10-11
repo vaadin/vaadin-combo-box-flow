@@ -45,7 +45,16 @@ window.Vaadin.Flow.comboBoxConnector = {
           this._debouncer = Polymer.Debouncer.debounce(
             this._debouncer,
             Polymer.Async.timeOut.after(500),
-            () => comboBox.$server.setRequestedRange(0, upperLimit, params.filter));
+            () => {
+              comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+              if (params.filter === '') {
+                // Fixes the case when the filter changes 
+                // from '' to something else and back to '' 
+                // within debounce timeout, and the
+                // DataCommunicator thinks it doesn't need to send data
+                comboBox.$server.resetDataCommunicator();
+              }
+            });
         }
         else {
           comboBox.$server.setRequestedRange(0, upperLimit, params.filter);

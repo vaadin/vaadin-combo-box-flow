@@ -817,6 +817,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         filterSlot.accept(filter);
     }
 
+    @ClientCallable
+    private void resetDataCommunicator() {
+        dataCommunicator.reset();
+    }
+
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
