@@ -74,11 +74,11 @@ window.Vaadin.Flow.comboBoxConnector = {
         throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
       }
 
-      const firstPage = index / comboBox.pageSize;
+      const firstPageToSet = index / comboBox.pageSize;
       const updatedPageCount = Math.ceil(items.length / comboBox.pageSize);
 
       for (let i = 0; i < updatedPageCount; i++) {
-        let page = firstPage + i;
+        let page = firstPageToSet + i;
         let slice = items.slice(i * comboBox.pageSize, (i + 1) * comboBox.pageSize);
 
         cache[page] = slice;
