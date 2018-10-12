@@ -13,3 +13,5 @@ reference-screenshots
 # Idea files
 *.iml
 .idea/
+
+**/bower_components/**
