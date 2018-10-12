@@ -108,7 +108,7 @@ window.Vaadin.Flow.comboBoxConnector = {
       cache = {};
       firstPage = undefined;
       comboBox.clearCache();
-      comboBox._pendingRequests = {}; // Should be done by clearCache()
+      comboBox._pendingRequests = {}; // TODO: This can be removed as soon as there's a webjar release newer than 4.2.0-alpha4 (this will be handled by clearCache())
     };
 
     comboBox.$connector.confirm = function (id) {
