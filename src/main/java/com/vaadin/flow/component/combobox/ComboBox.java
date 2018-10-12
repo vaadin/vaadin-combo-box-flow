@@ -302,14 +302,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public void setValue(T value) {
         super.setValue(value);
 
-        if (value != null && getKeyMapper().has(value)) {
-            value = getKeyMapper().get(getKeyMapper().key(value));
+        DataKeyMapper<T> keyMapper = getKeyMapper();
+        if (value != null && keyMapper.has(value)) {
+            value = keyMapper.get(keyMapper.key(value));
         }
 
         // This ensures that the selection works even with lazy loading when the
         // item is not yet loaded
         JsonObject json = Json.createObject();
-        json.put("key", getKeyMapper().key(value));
+        json.put("key", keyMapper.key(value));
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
     }
