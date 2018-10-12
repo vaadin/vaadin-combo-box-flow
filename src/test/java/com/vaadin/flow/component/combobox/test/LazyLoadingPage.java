@@ -86,7 +86,12 @@ public class LazyLoadingPage extends Div {
         comboBox.setId("pagesize");
         comboBox.setDataProvider(
                 DataProvider.ofCollection(generateStrings(1000)));
-        add(comboBox);
+
+        NativeButton pageSizeButton = new NativeButton("set pagesize 100",
+                e -> comboBox.setPageSize(100));
+        pageSizeButton.setId("change-pagesize");
+
+        add(comboBox, pageSizeButton);
     }
 
     private void createListDataProviderWithBeans() {

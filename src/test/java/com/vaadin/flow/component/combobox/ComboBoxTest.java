@@ -237,6 +237,25 @@ public class ComboBoxTest {
         Assert.assertFalse(comboBox.isAllowCustomValue());
     }
 
+    @Test
+    public void getPageSize_default50() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertEquals(50, comboBox.getPageSize());
+    }
+
+    @Test
+    public void setPageSize_getPageSize() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setPageSize(111);
+        Assert.assertEquals(111, comboBox.getPageSize());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setPageSizeZero_throws() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setPageSize(0);
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);

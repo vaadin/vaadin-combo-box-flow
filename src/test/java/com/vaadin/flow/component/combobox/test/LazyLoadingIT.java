@@ -194,6 +194,26 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void loadItems_changePageSize() {
+        pagesizeBox.openPopup();
+        scrollToItem(pagesizeBox, 180);
+
+        clickButton("change-pagesize");
+        pagesizeBox.openPopup();
+        assertLoadedItemsCount(
+                "After opening the ComboBox, the first 'pageSize' amount "
+                        + "of items should be loaded (with updated pageSize: 100).",
+                100, pagesizeBox);
+
+        scrollToItem(pagesizeBox, 100);
+
+        assertLoadedItemsCount(
+                "Expected two pages to be loaded (with updated pageSize 100).",
+                200, pagesizeBox);
+        assertRendered("Item 100");
+    }
+
+    @Test
     public void loadItems_changeItemLabelGenerator() {
         beanBox.openPopup();
         clickButton("item-label-generator");

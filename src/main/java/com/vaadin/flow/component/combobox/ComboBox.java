@@ -61,9 +61,8 @@ import elemental.json.JsonValue;
  * <p>
  * ComboBox supports lazy loading. This means that when using large data sets,
  * items are requested from the server one "page" at a time when the user
- * scrolls down the overlay. By default the number of items in one page
- * ({@code pageSize}) is 50, but this can be overridden in the constructor
- * {@link #ComboBox(int)}.
+ * scrolls down the overlay. The number of items in one page is by default 50,
+ * and can be changed with {@link #setPageSize(int)}.
  * <p>
  * ComboBox can do filtering either in the browser or in the server. When
  * ComboBox has only a relatively small set of items, the filtering will happen
@@ -217,6 +216,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * client-side filtering. If you provide more items than the page size, the
      * component has to fall back to server-side filtering.
      * 
+     * @see {@link #setPageSize(int)}
+     * 
      * @param pageSize
      *            the amount of items to request at a time for lazy loading
      */
@@ -356,7 +357,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Note that defining a custom filter will force the component to make
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
-     * the {@link #ComboBox(int) pageSize}.
+     * the {@link #setPageSize(int) pageSize}.
      * 
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -377,7 +378,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Note that defining a custom filter will force the component to make
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
-     * the {@link #ComboBox(int) pageSize}.
+     * the {@link #setPageSize(int) pageSize}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -510,7 +511,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Note that defining a custom filter will force the component to make
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
-     * the {@link #ComboBox(int) pageSize}.
+     * the {@link #setPageSize(int) pageSize}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -565,6 +566,50 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public ItemLabelGenerator<T> getItemLabelGenerator() {
         return itemLabelGenerator;
+    }
+
+    /**
+     * Sets the page size, which is the number of items fetched at a time from
+     * the data provider.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     * <p>
+     * Setting the page size after the ComboBox has been rendered effectively
+     * resets the component, and the current page(s) and sent over again.
+     * <p>
+     * The default page size is 50.
+     *
+     * @param pageSize
+     *            the maximum number of items sent per request, should be
+     *            greater than zero
+     */
+    public void setPageSize(int pageSize) {
+        if (pageSize < 1) {
+            throw new IllegalArgumentException(
+                    "Page size should be greater than zero.");
+        }
+        super.setPageSize(pageSize);
+        reset();
+    }
+
+    /**
+     * Gets the page size, which is the number of items fetched at a time from
+     * the data provider.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     * <p>
+     * The default page size is 50.
+     * 
+     * @see {@link #setPageSize(int)}
+     * 
+     * @return the maximum number of items sent per request
+     */
+    public int getPageSize() {
+        return getElement().getProperty("pageSize", 50);
     }
 
     @Override
@@ -846,6 +891,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private void reset() {
         if (dataCommunicator != null) {
+            dataCommunicator.setRequestedRange(0, 0);
             dataCommunicator.reset();
         }
         runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
