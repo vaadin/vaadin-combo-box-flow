@@ -895,6 +895,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataCommunicator.reset();
         }
         runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+                // If-statement is needed because on the first attach this
+                // JavaScript is called before initializing the connector.
                 "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
