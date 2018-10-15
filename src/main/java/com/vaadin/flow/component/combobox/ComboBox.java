@@ -402,9 +402,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setDataProvider(DataProvider<T, String> dataProvider) {
-        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
-            userProvidedFilter = UserProvidedFilter.YES;
-        }
         setDataProvider(dataProvider, SerializableFunction.identity());
     }
 
