@@ -530,8 +530,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(listDataProvider,
                 "List data provider cannot be null");
 
-        // Must do getItemLabelGenerator() for each operation since it might
-        // not be the same as when this method was invoked
         setDataProvider(listDataProvider,
                 filterText -> item -> itemFilter.test(item, filterText));
     }
