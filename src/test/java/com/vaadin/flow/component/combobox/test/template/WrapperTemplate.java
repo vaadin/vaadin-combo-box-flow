@@ -13,24 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.combobox.test;
+package com.vaadin.flow.component.combobox.test.template;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Tag("combo-box-in-a-template")
-@HtmlImport("src/combo-box-in-a-template.html")
-public class ComboBoxInATemplate extends PolymerTemplate<TemplateModel> {
+@Tag("wrapper-template")
+@HtmlImport("src/wrapper-template.html")
+public class WrapperTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id
-    ComboBox<String> comboBox;
+    ComboBoxInATemplate comboBoxInATemplate;
 
-    public ComboBox<String> getComboBox() {
-        return comboBox;
-    }
-
+    @Id
+    ComboBoxInATemplate2 comboBoxInATemplate2;
 }
