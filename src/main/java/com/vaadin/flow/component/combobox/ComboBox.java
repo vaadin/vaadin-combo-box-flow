@@ -231,8 +231,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
                 .put("label", generateLabel(item)));
 
-        setItemValuePath("key");
-        setItemIdPath("key");
+        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
+                .put("value", getKeyMapper().key(item)));
+
+        setItemValuePath("value");
+        setItemIdPath("value");
         setPageSize(pageSize);
     }
 
@@ -330,7 +333,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // This ensures that the selection works even with lazy loading when the
         // item is not yet loaded
         JsonObject json = Json.createObject();
-        json.put("key", keyMapper.key(value));
+        json.put("value", keyMapper.key(value));
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
     }
