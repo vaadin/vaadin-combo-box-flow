@@ -16,11 +16,7 @@
 package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -234,6 +230,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItemValuePath("key");
         setItemIdPath("key");
         setPageSize(pageSize);
+        setItems(Collections.emptyList());
     }
 
     /**
@@ -241,6 +238,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public ComboBox() {
         this(50);
+        setItems(Collections.emptyList());
     }
 
     /**
@@ -252,6 +250,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     public ComboBox(String label) {
         this();
         setLabel(label);
+        setItems(Collections.emptyList());
     }
 
     /**
