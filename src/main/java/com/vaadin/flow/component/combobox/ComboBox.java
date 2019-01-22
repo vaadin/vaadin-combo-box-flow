@@ -144,7 +144,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         @Override
         public void set(int start, List<JsonValue> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JsonUtils.asArray()), ComboBox.this.filter);
         }
 
         @Override
@@ -154,9 +154,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void commit(int updateId) {
-            enqueue("$connector.confirm", updateId);
+            enqueue("$connector.confirm", updateId, ComboBox.this.filter);
             queue.forEach(Runnable::run);
             queue.clear();
+
+            ComboBox.this.filter = null;
         }
 
         private void enqueue(String name, Serializable... arguments) {
@@ -192,6 +194,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private Renderer<T> renderer;
     private boolean renderScheduled;
+
+    // Filter set by the client when requesting data. It's sent back to client together with
+    // the response so client may know for what filter data is provided.
+    private String filter;
 
     private DataCommunicator<T> dataCommunicator;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
@@ -919,6 +925,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
+        this.filter = filter;
+
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
     }

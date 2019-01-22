@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.util.List;
 import java.util.Map;
@@ -43,12 +44,11 @@ public class AutoFocusFilterIT extends AbstractComponentIT {
 
         comboBox.sendKeys("2");
 
-        List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
-                "return arguments[0].filteredItems", comboBox);
-
-        Assert.assertEquals(
-                "_inputElementValue must be empty.",
-                2, items.size());
+        waitUntil(driver -> getItems(comboBox).size() == 2);
     }
 
+    private List<Map<String, ?>> getItems(WebElement comboBox) {
+        return (List<Map<String, ?>>) executeScript(
+                "return arguments[0].filteredItems", comboBox);
+    }
 }
