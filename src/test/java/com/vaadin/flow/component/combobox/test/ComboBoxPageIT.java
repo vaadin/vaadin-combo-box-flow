@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.List;
+
 import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
@@ -22,8 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 
