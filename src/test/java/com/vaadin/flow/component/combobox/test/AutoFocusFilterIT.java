@@ -23,13 +23,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
 import java.util.Map;
 
 @TestPath("auto-focus-filter")
-public class AutoFocusFilterIT extends AbstractComponentIT {
+public class AutoFocusFilterIT extends AbstractComboBoxIT {
     @Before
     public void init() {
         open();
@@ -39,16 +40,13 @@ public class AutoFocusFilterIT extends AbstractComponentIT {
 
     @Test
     public void filter_itemsShouldBeThere() {
-        open();
         ComboBoxElement comboBox = $(ComboBoxElementUpdated.class).first();
 
         comboBox.sendKeys("2");
 
-        waitUntil(driver -> getItems(comboBox).size() == 2);
+        waitForItems(comboBox, items -> items.size() == 2
+                && "Option 2".equals(getItem(items, 0))
+                && "Another Option 2".equals(getItem(items, 1)));
     }
 
-    private List<Map<String, ?>> getItems(WebElement comboBox) {
-        return (List<Map<String, ?>>) executeScript(
-                "return arguments[0].filteredItems", comboBox);
-    }
 }

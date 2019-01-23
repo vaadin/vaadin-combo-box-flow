@@ -31,8 +31,8 @@ public class AutoFocusFilterPage extends Div {
     public AutoFocusFilterPage() {
         List<String> data = Arrays.asList("Option 2", "Option 3", "Option 4", "Option 5", "Another Option 2");
 
-        ComboBox<String> cv = new ComboBox<>("Choose option");
-        cv.setDataProvider((ComboBox.FetchItemsCallback<String>) (filter, offset, limit) -> {
+        ComboBox<String> comboBox = new ComboBox<>("Choose option");
+        comboBox.setDataProvider((ComboBox.FetchItemsCallback<String>) (filter, offset, limit) -> {
             if (filter.isEmpty())
                 return Stream.of("");
             return data.stream().filter(s -> s.contains(filter)).skip(offset).limit(limit);
@@ -42,8 +42,8 @@ public class AutoFocusFilterPage extends Div {
             return (int) data.stream().filter(s -> s.contains(filter)).count();
         });
 
-        cv.setAutofocus(true);
-        this.add(cv);
+        comboBox.setAutofocus(true);
+        this.add(comboBox);
     }
 }
 

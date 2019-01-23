@@ -15,8 +15,11 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -27,6 +30,7 @@ import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.testbench.TestBenchElement;
 
 import elemental.json.JsonObject;
+import org.openqa.selenium.WebElement;
 
 @Ignore
 public class AbstractComboBoxIT extends AbstractComponentIT {
@@ -130,4 +134,48 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         $("button").id(id).click();
     }
 
+    protected List<?> getItems(WebElement combo) {
+        executeScript("arguments[0].opened=true", combo);
+        List<?> items = (List<?>) getCommandExecutor()
+                .executeScript("return arguments[0].filteredItems;", combo);
+        executeScript("arguments[0].opened=false", combo);
+        return items;
+    }
+
+    protected void assertItem(List<?> items, int index, String caption) {
+        Map<?, ?> map = (Map<?, ?>) items.get(index);
+        Assert.assertEquals(caption, map.get("label"));
+    }
+
+    protected Object getItem(List<?> items, int index) {
+        Map<?, ?> map = (Map<?, ?>) items.get(index);
+        return map.get("label");
+    }
+
+    protected String getSelectedItemLabel(WebElement combo) {
+        return String.valueOf(executeScript(
+                "return arguments[0].selectedItem ? arguments[0].selectedItem.label : \"\"",
+                combo));
+    }
+
+    /**
+     * Wait for the items of the specified combobox to fulfill the specified condition.
+     * @param combo The combobox element.
+     * @param condition The condition to wait for.
+     * @return The last list of items fetched from the combobox web element.
+     */
+    protected List<?> waitForItems(WebElement combo, Function<List<?>, Boolean> condition) {
+        final List items = new ArrayList();
+
+        waitUntil(driver -> {
+            List comboItems = getItems(combo);
+
+            items.clear();
+            items.addAll(comboItems);
+
+            return condition.apply(comboItems);
+        });
+
+        return items;
+    }
 }
