@@ -41,7 +41,7 @@ public class FocusFilterIT extends AbstractComboBoxIT {
 
     @Test
     public void filter_itemsShouldBeThere() {
-        open();
+        // First combobox.
         ComboBoxElement comboBox = $(ComboBoxElementUpdated.class).first();
 
         comboBox.sendKeys("2");
@@ -55,6 +55,29 @@ public class FocusFilterIT extends AbstractComboBoxIT {
         comboBox.sendKeys("3");
 
         waitForItems(comboBox, items -> items.size() == 1 && "Option 3".equals(getItem(items, 0)));
+
+        // Second combobox.
+        comboBox = $(ComboBoxElementUpdated.class).get(1);
+
+        comboBox.sendKeys("M");
+
+        waitForItems(comboBox, items -> items.size() == 3
+                && "Google Chrome".equals(getItem(items, 0))
+                && "Mozilla Firefox".equals(getItem(items, 1))
+                && "Microsoft Edge".equals(getItem(items, 2))
+        );
+
+        comboBox.closePopup();
+        comboBox.openPopup();
+
+        waitForItems(comboBox, items -> items.size() == 5
+                && "Google Chrome".equals(getItem(items, 0))
+                && "Mozilla Firefox".equals(getItem(items, 1))
+                && "Opera".equals(getItem(items, 2))
+                && "Apple Safari".equals(getItem(items, 3))
+                && "Microsoft Edge".equals(getItem(items, 4))
+        );
+
     }
 
 }
