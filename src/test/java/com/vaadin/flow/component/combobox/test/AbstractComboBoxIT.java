@@ -168,7 +168,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         final List items = new ArrayList();
 
         waitUntil(driver -> {
-            List comboItems = getItems(combo);
+            List comboItems = (List<?>) getCommandExecutor()
+                    .executeScript("return arguments[0].filteredItems;", combo);
 
             items.clear();
             items.addAll(comboItems);
