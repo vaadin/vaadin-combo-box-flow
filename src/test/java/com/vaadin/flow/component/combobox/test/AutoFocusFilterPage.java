@@ -19,23 +19,24 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Route("auto-focus-filter")
 public class AutoFocusFilterPage extends Div {
 
     public AutoFocusFilterPage() {
-        List<String> data = Arrays.asList("Option 2", "Option 3", "Option 4", "Option 5", "Another Option 2");
+        List<String> data = Arrays.asList("Option 2", "Option 3", "Option 4",
+                "Option 5", "Another Option 2");
 
         ComboBox<String> comboBox = new ComboBox<>("Choose option");
-        comboBox.setDataProvider((ComboBox.FetchItemsCallback<String>) (filter, offset, limit) -> {
+        comboBox.setDataProvider((ComboBox.FetchItemsCallback<String>) (filter,
+                offset, limit) -> {
             if (filter.isEmpty())
                 return Stream.of("");
-            return data.stream().filter(s -> s.contains(filter)).skip(offset).limit(limit);
+            return data.stream().filter(s -> s.contains(filter)).skip(offset)
+                    .limit(limit);
         }, (filter) -> {
             if (filter.isEmpty())
                 return 1;
@@ -46,4 +47,3 @@ public class AutoFocusFilterPage extends Div {
         this.add(comboBox);
     }
 }
-

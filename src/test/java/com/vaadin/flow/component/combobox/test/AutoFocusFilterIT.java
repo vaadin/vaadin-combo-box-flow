@@ -17,17 +17,10 @@ package com.vaadin.flow.component.combobox.test;
 
 import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-
-import java.util.List;
-import java.util.Map;
 
 @TestPath("auto-focus-filter")
 public class AutoFocusFilterIT extends AbstractComboBoxIT {
@@ -44,9 +37,10 @@ public class AutoFocusFilterIT extends AbstractComboBoxIT {
 
         comboBox.sendKeys("2");
 
-        waitForItems(comboBox, items -> items.size() == 2
-                && "Option 2".equals(getItem(items, 0))
-                && "Another Option 2".equals(getItem(items, 1)));
+        waitForItems(comboBox,
+                items -> items.size() == 2
+                        && "Option 2".equals(getItemLabel(items, 0))
+                        && "Another Option 2".equals(getItemLabel(items, 1)));
     }
 
 }

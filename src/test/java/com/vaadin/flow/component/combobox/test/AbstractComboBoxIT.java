@@ -15,22 +15,20 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.testbench.TestBenchElement;
+import elemental.json.JsonObject;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.openqa.selenium.WebElement;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.junit.Assert;
-import org.junit.Ignore;
-
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.testbench.TestBenchElement;
-
-import elemental.json.JsonObject;
-import org.openqa.selenium.WebElement;
 
 @Ignore
 public class AbstractComboBoxIT extends AbstractComponentIT {
@@ -147,9 +145,9 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         Assert.assertEquals(caption, map.get("label"));
     }
 
-    protected Object getItem(List<?> items, int index) {
+    protected String getItemLabel(List<?> items, int index) {
         Map<?, ?> map = (Map<?, ?>) items.get(index);
-        return map.get("label");
+        return (String) map.get("label");
     }
 
     protected String getSelectedItemLabel(WebElement combo) {
@@ -159,24 +157,22 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     /**
-     * Wait for the items of the specified combobox to fulfill the specified condition.
-     * @param combo The combobox element.
-     * @param condition The condition to wait for.
-     * @return The last list of items fetched from the combobox web element.
+     * Wait for the items of the specified combobox to fulfill the specified
+     * condition.
+     * 
+     * @param combo
+     *            The combobox element.
+     * @param condition
+     *            The condition to wait for.
      */
-    protected List<?> waitForItems(WebElement combo, Function<List<?>, Boolean> condition) {
-        final List items = new ArrayList();
+    protected void waitForItems(WebElement combo,
+            Function<List<?>, Boolean> condition) {
 
         waitUntil(driver -> {
             List comboItems = (List<?>) getCommandExecutor()
                     .executeScript("return arguments[0].filteredItems;", combo);
 
-            items.clear();
-            items.addAll(comboItems);
-
             return condition.apply(comboItems);
         });
-
-        return items;
     }
 }
