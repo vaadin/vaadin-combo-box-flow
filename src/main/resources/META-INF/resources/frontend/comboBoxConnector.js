@@ -21,8 +21,8 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
 
       if (comboBox._clientSideFilter) {
-        // Data size is less than page size and client has all the data,
-        // so client-side filtering is used
+        // For clientside filter we first make sure we have all data which we also
+        // filter based on comboBox.filter. While later we only filter clientside data.
 
         if (currentCachedPage) {
           performClientSideFilter(currentCachedPage, callback)
