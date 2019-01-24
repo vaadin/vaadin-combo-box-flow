@@ -24,10 +24,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Route("focus-filter")
-public class FocusFilterPage extends Div {
+@Route("clientside-filter")
+public class ClientSideFilterPage extends Div {
 
-    public FocusFilterPage() {
+    public ClientSideFilterPage() {
         ComboBox<String> cb = new ComboBox<>("Choose option","Option 2","Option 3","Option 4","Option 5");
         this.add(cb);
         cb.focus();

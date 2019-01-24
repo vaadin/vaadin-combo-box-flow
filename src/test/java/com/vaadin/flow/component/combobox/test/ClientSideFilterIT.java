@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@TestPath("focus-filter")
-public class FocusFilterIT extends AbstractComboBoxIT {
+@TestPath("clientside-filter")
+public class ClientSideFilterIT extends AbstractComboBoxIT {
     @Before
     public void init() {
         open();
@@ -46,7 +46,7 @@ public class FocusFilterIT extends AbstractComboBoxIT {
 
         comboBox.sendKeys("2");
 
-        waitForItems(comboBox, items -> items.size() == 1 && "Option 2".equals(getItem(items, 0)));
+        waitForItems(comboBox, items -> items.size() == 1 && "Option 2".equals(getItemLabel(items, 0)));
 
         comboBox.sendKeys(Keys.BACK_SPACE);
 
@@ -54,7 +54,7 @@ public class FocusFilterIT extends AbstractComboBoxIT {
 
         comboBox.sendKeys("3");
 
-        waitForItems(comboBox, items -> items.size() == 1 && "Option 3".equals(getItem(items, 0)));
+        waitForItems(comboBox, items -> items.size() == 1 && "Option 3".equals(getItemLabel(items, 0)));
 
         // Second combobox.
         comboBox = $(ComboBoxElementUpdated.class).get(1);
@@ -62,20 +62,20 @@ public class FocusFilterIT extends AbstractComboBoxIT {
         comboBox.sendKeys("M");
 
         waitForItems(comboBox, items -> items.size() == 3
-                && "Google Chrome".equals(getItem(items, 0))
-                && "Mozilla Firefox".equals(getItem(items, 1))
-                && "Microsoft Edge".equals(getItem(items, 2))
+                && "Google Chrome".equals(getItemLabel(items, 0))
+                && "Mozilla Firefox".equals(getItemLabel(items, 1))
+                && "Microsoft Edge".equals(getItemLabel(items, 2))
         );
 
         comboBox.closePopup();
         comboBox.openPopup();
 
         waitForItems(comboBox, items -> items.size() == 5
-                && "Google Chrome".equals(getItem(items, 0))
-                && "Mozilla Firefox".equals(getItem(items, 1))
-                && "Opera".equals(getItem(items, 2))
-                && "Apple Safari".equals(getItem(items, 3))
-                && "Microsoft Edge".equals(getItem(items, 4))
+                && "Google Chrome".equals(getItemLabel(items, 0))
+                && "Mozilla Firefox".equals(getItemLabel(items, 1))
+                && "Opera".equals(getItemLabel(items, 2))
+                && "Apple Safari".equals(getItemLabel(items, 3))
+                && "Microsoft Edge".equals(getItemLabel(items, 4))
         );
 
     }
