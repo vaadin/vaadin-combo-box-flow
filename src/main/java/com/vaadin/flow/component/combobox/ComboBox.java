@@ -45,7 +45,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.Json;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
@@ -140,7 +139,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         @Override
         public void set(int start, List<JsonValue> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JsonUtils.asArray()),
+                    ComboBox.this.lastFilter);
         }
 
         @Override
@@ -150,9 +150,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void commit(int updateId) {
-            enqueue("$connector.confirm", updateId);
+            enqueue("$connector.confirm", updateId, ComboBox.this.lastFilter);
             queue.forEach(Runnable::run);
             queue.clear();
+
+            ComboBox.this.lastFilter = null;
         }
 
         private void enqueue(String name, Serializable... arguments) {
@@ -189,6 +191,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private Renderer<T> renderer;
     private boolean renderScheduled;
 
+    // Filter set by the client when requesting data. It's sent back to client
+    // together with the response so client may know for what filter data is provided.
+    private String lastFilter;
+
     private DataCommunicator<T> dataCommunicator;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
@@ -215,11 +221,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * The page size is also the largest number of items that can support
      * client-side filtering. If you provide more items than the page size, the
      * component has to fall back to server-side filtering.
-     * 
-     * @see {@link #setPageSize(int)}
-     * 
+     *
      * @param pageSize
      *            the amount of items to request at a time for lazy loading
+     * @see {@link #setPageSize(int)}
      */
     public ComboBox(int pageSize) {
         super(null, null, String.class, ComboBox::presentationToModel,
@@ -323,6 +328,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         if (value == null) {
             getElement().setProperty("selectedItem", null);
+            getElement().setProperty("value", "");
+            getElement().setProperty("_inputElementValue", "");
             return;
         }
 
@@ -332,6 +339,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         json.put("key", keyMapper.key(value));
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
+
+        // Workaround for property not updating in certain scenario
+        // https://github.com/vaadin/flow/issues/4862
+        runBeforeClientResponse(
+                ui -> ui.getPage().executeJavaScript("$0.value=$1",
+                        getElement(), getElement().getProperty("value")));
     }
 
     /**
@@ -381,7 +394,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
      * the {@link #setPageSize(int) pageSize}.
-     * 
+     *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
      *            into the ComboBox
@@ -456,6 +469,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
             userProvidedFilter = UserProvidedFilter.YES;
         }
+
+        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+                "window.Vaadin.Flow.comboBoxConnector.initLazy($0);",
+                getElement()));
 
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
@@ -541,7 +558,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            a callback for fetching items
      * @param sizeCallback
      *            a callback for getting the count of items
-     *
      * @see CallbackDataProvider
      * @see #setDataProvider(DataProvider)
      */
@@ -581,7 +597,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     /**
      * Gets the data provider used by this ComboBox.
-     * 
+     *
      * @return the data provider used by this ComboBox
      */
     public DataProvider<T, ?> getDataProvider() {
@@ -652,10 +668,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * component has to fall back to server-side filtering.
      * <p>
      * The default page size is 50.
-     * 
-     * @see {@link #setPageSize(int)}
-     * 
+     *
      * @return the maximum number of items sent per request
+     * @see {@link #setPageSize(int)}
      */
     public int getPageSize() {
         return getElement().getProperty("pageSize", 50);
@@ -848,11 +863,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * value set listener is removed.
      * </p>
      *
-     * @see #setAllowCustomValue(boolean)
-     *
      * @param listener
      *            the listener to be notified when a new value is filled
      * @return a {@link Registration} for removing the event listener
+     * @see #setAllowCustomValue(boolean)
      */
     @Override
     public Registration addCustomValueSetListener(
@@ -908,6 +922,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
+        this.lastFilter = filter;
+
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
     }
