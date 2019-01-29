@@ -49,7 +49,7 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
 
         comboBox.openPopup();
 
-        waitForItems(comboBox, items -> items.size() == 2
+        waitForItems(comboBox, items -> items != null && items.size() == 2
                 && "foo".equals(getItemLabel(items, 0))
                 && "bar".equals(getItemLabel(items, 1))
         );

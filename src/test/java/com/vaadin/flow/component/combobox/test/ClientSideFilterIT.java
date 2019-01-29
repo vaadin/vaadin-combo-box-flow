@@ -17,18 +17,11 @@ package com.vaadin.flow.component.combobox.test;
 
 import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @TestPath("clientside-filter")
 public class ClientSideFilterIT extends AbstractComboBoxIT {
@@ -46,7 +39,8 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         comboBox.sendKeys("2");
 
-        waitForItems(comboBox, items -> items.size() == 1 && "Option 2".equals(getItemLabel(items, 0)));
+        waitForItems(comboBox, items -> items.size() == 1
+                && "Option 2".equals(getItemLabel(items, 0)));
 
         comboBox.sendKeys(Keys.BACK_SPACE);
 
@@ -54,29 +48,28 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         comboBox.sendKeys("3");
 
-        waitForItems(comboBox, items -> items.size() == 1 && "Option 3".equals(getItemLabel(items, 0)));
+        waitForItems(comboBox, items -> items.size() == 1
+                && "Option 3".equals(getItemLabel(items, 0)));
 
         // Second combobox.
         comboBox = $(ComboBoxElementUpdated.class).get(1);
 
-        comboBox.sendKeys("M");
+        comboBox.sendKeys("mo");
 
-        waitForItems(comboBox, items -> items.size() == 3
-                && "Google Chrome".equals(getItemLabel(items, 0))
-                && "Mozilla Firefox".equals(getItemLabel(items, 1))
-                && "Microsoft Edge".equals(getItemLabel(items, 2))
-        );
+        waitForItems(comboBox,
+                items -> items.size() == 1
+                        && "Mozilla Firefox".equals(getItemLabel(items, 0)));
 
         comboBox.closePopup();
         comboBox.openPopup();
 
-        waitForItems(comboBox, items -> items.size() == 5
-                && "Google Chrome".equals(getItemLabel(items, 0))
-                && "Mozilla Firefox".equals(getItemLabel(items, 1))
-                && "Opera".equals(getItemLabel(items, 2))
-                && "Apple Safari".equals(getItemLabel(items, 3))
-                && "Microsoft Edge".equals(getItemLabel(items, 4))
-        );
+        waitForItems(comboBox,
+                items -> items.size() == 5
+                        && "Google Chrome".equals(getItemLabel(items, 0))
+                        && "Mozilla Firefox".equals(getItemLabel(items, 1))
+                        && "Opera".equals(getItemLabel(items, 2))
+                        && "Apple Safari".equals(getItemLabel(items, 3))
+                        && "Microsoft Edge".equals(getItemLabel(items, 4)));
 
     }
 

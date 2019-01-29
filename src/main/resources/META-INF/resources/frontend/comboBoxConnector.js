@@ -9,7 +9,6 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     let pageCallbacks = {};
     let cache = {};
-    let currentCachedPage;
     let lastFilter = '';
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
@@ -24,8 +23,8 @@ window.Vaadin.Flow.comboBoxConnector = {
         // For clientside filter we first make sure we have all data which we also
         // filter based on comboBox.filter. While later we only filter clientside data.
 
-        if (currentCachedPage) {
-          performClientSideFilter(currentCachedPage, callback)
+        if (cache[0]) {
+          performClientSideFilter(cache[0], callback)
           return;
 
         } else {
@@ -137,7 +136,6 @@ window.Vaadin.Flow.comboBoxConnector = {
     comboBox.$connector.reset = function () {
       pageCallbacks = {};
       cache = {};
-      currentCachedPage = undefined;
       comboBox.clearCache();
     }
 
@@ -167,15 +165,15 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     const commitPage = function (page, callback) {
       let data = cache[page];
-      delete cache[page];
 
       if (comboBox._clientSideFilter) {
-        // Keep the data for client-side filtering
-        currentCachedPage = data;
-
-        performClientSideFilter(currentCachedPage, callback)
+        performClientSideFilter(data, callback)
 
       } else {
+        // Remove the data if server-side filtering, but keep it for client-side
+        // filtering
+        delete cache[page];
+
         // FIXME: It may be that we ought to provide data.length instead of
         // comboBox.size and remove updateSize function.
         callback(data, comboBox.size);
@@ -188,8 +186,12 @@ window.Vaadin.Flow.comboBoxConnector = {
     // that may not reflect user's input.
     const performClientSideFilter = function (page, callback) {
 
-      const filteredItems = page.filter(item =>
-        comboBox.$connector.filter(item, comboBox.filter));
+      let filteredItems = page;
+
+      if (comboBox.filter) {
+        filteredItems = page.filter(item =>
+          comboBox.$connector.filter(item, comboBox.filter));
+      }
 
       callback(filteredItems, filteredItems.length);
     }
