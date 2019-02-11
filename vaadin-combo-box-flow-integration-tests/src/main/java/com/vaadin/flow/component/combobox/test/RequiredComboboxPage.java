@@ -32,9 +32,9 @@ public class RequiredComboboxPage extends Div {
 
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("foo", "bar");
-        comboBox.addValueChangeListener(event -> message.setText(String.format(
-                "Value changed from '%s' to '%s'", event.getOldValue(),
-                event.getValue(), comboBox.getValue())));
+        comboBox.addValueChangeListener(event -> message
+                .setText(String.format("Value changed from '%s' to '%s'",
+                        event.getOldValue(), event.getValue())));
 
         binder.forField(comboBox).asRequired()
                 .withValidator(value -> !"foo".equals(value),
