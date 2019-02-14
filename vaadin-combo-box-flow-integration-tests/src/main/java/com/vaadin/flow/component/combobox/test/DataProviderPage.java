@@ -36,8 +36,9 @@ public class DataProviderPage extends Div {
     static final String SET_VALUE_USING_REFERENCE_BUTTON_ID = "setValueUsingReferenceButton";
     static final String SET_VALUE_USING_EQUALS_BUTTON_ID = "setValueUsingEqualsButton";
 
-    private List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
-            new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
+    private transient List<TestItem> list = Arrays.asList(
+            new TestItem(1, "a", "First"), new TestItem(2, "b", "Second"),
+            new TestItem(3, "c", "Third"));
 
     public DataProviderPage() {
         createDataProviderWithGetId();
@@ -89,17 +90,17 @@ public class DataProviderPage extends Div {
         ComboBox<String> cb = new ComboBox<>();
         cb.setId("combo-box-with-reduce-data-set");
 
-        List<String> list = new ArrayList<>();
-        list.add("foo");
-        list.add("bar");
+        List<String> items = new ArrayList<>();
+        items.add("foo");
+        items.add("bar");
         DataProvider<String, String> dp = DataProvider.fromFilteringCallbacks(
-                q -> list.stream().skip(q.getOffset()).limit(q.getLimit()),
-                q -> list.size());
+                q -> items.stream().skip(q.getOffset()).limit(q.getLimit()),
+                q -> items.size());
         cb.setDataProvider(dp);
 
         NativeButton refreshAllWithSmallerDataSetButton = new NativeButton(
                 "Refresh all with smaller data set", event -> {
-                    list.remove("foo");
+                    items.remove("foo");
                     dp.refreshAll();
                 });
         refreshAllWithSmallerDataSetButton
