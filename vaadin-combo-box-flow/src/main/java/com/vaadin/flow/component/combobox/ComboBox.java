@@ -500,8 +500,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 .setDataProvider(dataProvider,
                         convertOrNull.apply(getFilterString()));
 
-        filterSlot = filter -> providerFilterSlot
-                .accept(convertOrNull.apply(filter));
+        filterSlot = filter -> {
+            if (!Objects.equals(filter, lastFilter)) {
+                providerFilterSlot.accept(convertOrNull.apply(filter));
+                lastFilter = filter;
+            }
+        };
 
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
 
@@ -937,10 +941,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
         dataCommunicator.setRequestedRange(start, length);
-        if (!Objects.equals(filter, lastFilter)) {
-            lastFilter = filter;
-            filterSlot.accept(filter);
-        }
+        filterSlot.accept(filter);
     }
 
     @ClientCallable
