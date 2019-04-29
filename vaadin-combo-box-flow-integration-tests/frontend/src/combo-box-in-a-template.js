@@ -13,14 +13,13 @@
   ~ License for the specific language governing permissions and limitations under
   ~ the License.
   */
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
-class ComboBoxInATemplate extends Polymer.Element {
+
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+
+class ComboBoxInATemplate extends PolymerElement {
   static get template() {
-    return Polymer.html`
+    return html`
         <vaadin-combo-box id="comboBox"></vaadin-combo-box>
 `;
   }
