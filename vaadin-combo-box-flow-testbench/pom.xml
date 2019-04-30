@@ -10,7 +10,7 @@
         <version>2.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-combo-box-flow-testbench</artifactId>
+    <artifactId>vaadin-combo-box-testbench</artifactId>
     <packaging>jar</packaging>
 
     <name>Vaadin Combo Box Testbench API</name>
