@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-combo-box-flow-testbench</artifactId>
+            <artifactId>vaadin-combo-box-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
