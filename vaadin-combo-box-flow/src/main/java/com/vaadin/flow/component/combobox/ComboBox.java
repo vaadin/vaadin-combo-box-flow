@@ -83,7 +83,7 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @HtmlImport("frontend://flow-component-renderer.html")
-@JavaScript("frontend://flow-component-renderer.js")
+@JsModule("@vaadin/flow-frontend/flow-component-renderer.js")
 @JavaScript("frontend://comboBoxConnector.js")
 @JsModule("frontend://comboBoxConnector-es6.js")
 @SuppressWarnings("serial")
