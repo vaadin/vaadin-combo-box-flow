@@ -58,13 +58,17 @@ public class CustomValueIT extends AbstractComboBoxIT {
 
     @Test
     public void typeAndEnterExistingValue_noCustomValueChanges() {
-        combo.sendKeys("foo", Keys.ENTER);
+        combo.sendKeys("foo");
+        assertRendered("foo");
+        combo.sendKeys(Keys.ENTER);
         assertCustomValueChanges();
     }
 
     @Test
     public void typeAndEnterExistingValue_valueChanged() {
-        combo.sendKeys("foo", Keys.ENTER);
+        combo.sendKeys("foo");
+        assertRendered("foo");
+        combo.sendKeys(Keys.ENTER);
         assertValueChanges("foo");
     }
 
@@ -79,7 +83,9 @@ public class CustomValueIT extends AbstractComboBoxIT {
 
     @Test
     public void enterExistingValue_clearAndEnter_noCustomValueChange() {
-        combo.sendKeys("foo", Keys.ENTER);
+        combo.sendKeys("foo");
+        assertRendered("foo");
+        combo.sendKeys(Keys.ENTER);
         repeatKey(Keys.BACK_SPACE, 3);
         combo.sendKeys(Keys.ENTER);
         assertCustomValueChanges();
@@ -87,7 +93,9 @@ public class CustomValueIT extends AbstractComboBoxIT {
 
     @Test
     public void enterExistingValue_clearAndEnter_valueChangedToNull() {
-        combo.sendKeys("foo", Keys.ENTER);
+        combo.sendKeys("foo");
+        assertRendered("foo");
+        combo.sendKeys(Keys.ENTER);
         repeatKey(Keys.BACK_SPACE, 3);
         combo.sendKeys(Keys.ENTER);
         assertValueChanges("foo", "null");
