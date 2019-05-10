@@ -144,23 +144,35 @@ public class CustomValueIT extends AbstractComboBoxIT {
     }
 
     private void assertCustomValueChanges(String... expected) {
-        String[] customValueChanges = $(TestBenchElement.class)
-                .id("custom-value-messages").$("p").all().stream()
-                .map(TestBenchElement::getText).toArray(String[]::new);
-        Assert.assertArrayEquals(
-                "Unexpected custom value changes for ComboBox: "
-                        + String.join(", ", customValueChanges),
-                expected, customValueChanges);
+        assertMessages(true, expected);
     }
 
     private void assertValueChanges(String... expected) {
-        String[] valueMessages = $(TestBenchElement.class).id("value-messages")
-                .$("p").all().stream().map(TestBenchElement::getText)
-                .toArray(String[]::new);
+        assertMessages(false, expected);
+    }
+
+    private String[] messages;
+
+    private void assertMessages(boolean customValues, String... expected) {
+        String containerId = customValues ? "custom-value-messages"
+                : "value-messages";
+        String valueName = customValues ? "custom value" : "value";
+
+        try {
+            waitUntil(driver -> {
+                messages = $(TestBenchElement.class).id(containerId).$("p")
+                        .all().stream().map(TestBenchElement::getText)
+                        .toArray(String[]::new);
+                return messages.length == expected.length;
+            }, 5);
+        } catch (Exception e) {
+            Assert.fail(String.format(
+                    "\nExpected %s changes: [%s]\nbut was: [%s]\n", valueName,
+                    String.join(", ", expected), String.join(", ", messages)));
+        }
         Assert.assertArrayEquals(
-                "Unexpected value changes for ComboBox: "
-                        + String.join(", ", valueMessages),
-                expected, valueMessages);
+                String.format("Unexpected %s changes for ComboBox", valueName),
+                expected, messages);
     }
 
     private void repeatKey(Keys key, int amount) {
