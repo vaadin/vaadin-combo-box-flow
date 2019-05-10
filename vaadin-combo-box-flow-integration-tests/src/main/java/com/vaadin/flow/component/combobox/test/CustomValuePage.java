@@ -40,13 +40,10 @@ public class CustomValuePage extends Div {
         valueMessages.setId("value-messages");
 
         combo.setItems(items);
-        combo.addCustomValueSetListener(e -> {
-            customValueMessages.add(new Paragraph(e.getDetail()));
-        });
-        combo.addValueChangeListener(e -> {
-            valueMessages.add(new Paragraph(
-                    e.getValue() == null ? "null" : e.getValue()));
-        });
+        combo.addCustomValueSetListener(
+                e -> customValueMessages.add(new Paragraph(e.getDetail())));
+        combo.addValueChangeListener(e -> valueMessages.add(
+                new Paragraph(e.getValue() == null ? "null" : e.getValue())));
 
         add(combo, new H3("custom value changes:"), customValueMessages,
                 new H3("combo box value changes:"), valueMessages);
@@ -65,9 +62,7 @@ public class CustomValuePage extends Div {
     }
 
     private void setComboBoxToSetCustomValuesAsValue(ComboBox<String> combo) {
-        combo.addCustomValueSetListener(e -> {
-            combo.setValue(e.getDetail());
-        });
+        combo.addCustomValueSetListener(e -> combo.setValue(e.getDetail()));
     }
 
     private void setComboBoxToAddCustomValuesToData(ComboBox<String> combo) {
