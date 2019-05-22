@@ -141,6 +141,18 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void loadItems_setEmptyDataSet_open_loadingStateResolved() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("combo");
+        combo.openPopup();
+        assertRendered("foo");
+        combo.closePopup();
+        clickButton("set-empty-data-provider");
+        combo.openPopup();
+        assertLoadingStateResolved(combo);
+        assertLoadedItemsCount("Expected no items to be loaded", 0, combo);
+    }
+
+    @Test
     public void setValueProgrammatically() {
         WebElement combo = findElement(By.id("external-selected-item"));
         Assert.assertEquals("foo", getSelectedItemLabel(combo));
