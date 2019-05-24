@@ -116,12 +116,7 @@ public class ComboBoxPage extends Div {
                 event -> comboBox.setValue("baz"));
         setValue.setId("update-value");
 
-        NativeButton setEmptyDataProvider = new NativeButton(
-                "Set empty data provider", e -> comboBox.setItems());
-        setEmptyDataProvider.setId("set-empty-data-provider");
-
-        add(comboBox, setProvider, setItemCaptionGenerator, setValue,
-                setEmptyDataProvider);
+        add(comboBox, setProvider, setItemCaptionGenerator, setValue);
     }
 
     private void createWithValueChangeListener() {
