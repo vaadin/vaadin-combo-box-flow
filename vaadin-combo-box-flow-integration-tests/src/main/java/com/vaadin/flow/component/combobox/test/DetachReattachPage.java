@@ -37,7 +37,7 @@ public class DetachReattachPage extends Div {
             add(comboBox);
             remove(comboBox);
         });
-        attach.setId("attach-detach");
+        attachDetach.setId("attach-detach");
 
         add(comboBox, detach, attach, attachDetach);
     }

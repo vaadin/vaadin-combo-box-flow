@@ -183,7 +183,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void initialize() {
-            // NO-OP
+            initConnector();
         }
     };
 
@@ -247,7 +247,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItemIdPath("key");
         setPageSize(pageSize);
 
-        addAttachListener(e -> initConnector());
+        initConnector();
 
         runBeforeClientResponse(ui -> {
             // If user didn't provide any data, initialize with empty data set.
