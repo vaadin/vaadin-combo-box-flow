@@ -936,8 +936,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        getElement().callJsFunction("$connector.enableClientValidation",
-                !requiredIndicatorVisible);
+        runBeforeClientResponse(ui -> getElement().callJsFunction(
+                "$connector.enableClientValidation",
+                !requiredIndicatorVisible));
     }
 
     /**
