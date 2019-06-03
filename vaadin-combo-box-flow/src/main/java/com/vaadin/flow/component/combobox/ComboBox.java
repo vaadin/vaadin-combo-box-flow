@@ -499,7 +499,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                     getElement().getNode());
         }
 
-        getElement().callJsFunction("$connector.reset");
         scheduleRender();
         setValue(null);
 
@@ -1029,10 +1028,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void initConnector() {
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.getPage().executeJs(
-                        "window.Vaadin.Flow.comboBoxConnector.initLazy($0)",
-                        getElement()));
+        getElement().executeJs(
+                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
     }
 
     private DataKeyMapper<T> getKeyMapper() {
