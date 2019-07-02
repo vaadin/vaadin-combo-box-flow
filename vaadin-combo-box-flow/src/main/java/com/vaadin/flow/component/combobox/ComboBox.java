@@ -309,7 +309,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private static <T> T presentationToModel(ComboBox<T> comboBox,
-            String presentation) {
+                                             String presentation) {
         if (presentation == null || comboBox.dataCommunicator == null) {
             return comboBox.getEmptyValue();
         }
@@ -317,7 +317,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private static <T> String modelToPresentation(ComboBox<T> comboBox,
-            T model) {
+                                                  T model) {
         if (model == null) {
             return null;
         }
@@ -463,7 +463,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the data items to display
      */
     public void setItems(ItemFilter<T> itemFilter,
-            @SuppressWarnings("unchecked") T... items) {
+                         @SuppressWarnings("unchecked") T... items) {
         setItems(itemFilter, Arrays.asList(items));
     }
 
@@ -506,7 +506,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public <C> void setDataProvider(DataProvider<T, C> dataProvider,
-            SerializableFunction<String, C> filterConverter) {
+                                    SerializableFunction<String, C> filterConverter) {
         Objects.requireNonNull(dataProvider,
                 "The data provider can not be null");
         Objects.requireNonNull(filterConverter,
@@ -519,7 +519,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
-                            .callJsFunction("$connector.updateData", data),
+                    .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
         }
 
@@ -593,8 +593,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // Cannot use the case insensitive contains shorthand from
         // ListDataProvider since it wouldn't react to locale changes
         ItemFilter<T> defaultItemFilter = (item,
-                filterText) -> generateLabel(item).toLowerCase(getLocale())
-                        .contains(filterText.toLowerCase(getLocale()));
+                                           filterText) -> generateLabel(item).toLowerCase(getLocale())
+                .contains(filterText.toLowerCase(getLocale()));
 
         setDataProvider(defaultItemFilter, listDataProvider);
     }
@@ -617,7 +617,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @see #setDataProvider(DataProvider)
      */
     public void setDataProvider(FetchItemsCallback<T> fetchItems,
-            SerializableFunction<String, Integer> sizeCallback) {
+                                SerializableFunction<String, Integer> sizeCallback) {
         userProvidedFilter = UserProvidedFilter.YES;
         setDataProvider(new CallbackDataProvider<>(
                 q -> fetchItems.fetchItems(q.getFilter().orElse(""),
@@ -645,7 +645,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            the list data provider to use, not <code>null</code>
      */
     public void setDataProvider(ItemFilter<T> itemFilter,
-            ListDataProvider<T> listDataProvider) {
+                                ListDataProvider<T> listDataProvider) {
         Objects.requireNonNull(listDataProvider,
                 "List data provider cannot be null");
 
@@ -806,7 +806,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
-     * 
+     *
      * @param allowCustomValue
      *            {@code true} to enable custom value set events, {@code false}
      *            to disable them
@@ -982,7 +982,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The clear button is an icon, which can be clicked to set the combo box
      * value to {@code null}.
-     * 
+     *
      * @param clearButtonVisible
      *            {@code true} to display the clear button, {@code false} to
      *            hide it
@@ -995,7 +995,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     /**
      * Gets whether this combo box displays a clear button when a value is
      * selected.
-     * 
+     *
      * @return {@code true} if this combo box displays a clear button,
      *         {@code false} otherwise
      * @see #setClearButtonVisible(boolean)
@@ -1066,6 +1066,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void initConnector() {
         getElement().executeJs(
                 "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(
+                "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
     private DataKeyMapper<T> getKeyMapper() {
