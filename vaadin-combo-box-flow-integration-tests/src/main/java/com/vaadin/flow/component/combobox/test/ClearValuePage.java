@@ -32,6 +32,8 @@ public class ClearValuePage extends Div {
     static final String BUTTON_CUSTOM_VALUE_SET_NULL_ID = "buttonSetNullCustom";
     static final String BUTTON_CUSTOM_VALUE_CLEAR_ID = "buttonClearCustom";
 
+    static final String COMBO_BOX_WITH_CLEAR_BUTTON_ID = "comboBoxWithClearButton";
+
     public ClearValuePage() {
         ComboBox<String> comboBox = new ComboBox<>("Ordinary combo box", "one",
                 INITIAL_VALUE, "three");
@@ -63,7 +65,14 @@ public class ClearValuePage extends Div {
                 event -> comboBoxWithAllowCustomValue.clear());
         clearCustom.setId(BUTTON_CUSTOM_VALUE_CLEAR_ID);
 
+        ComboBox<String> comboBoxWithClearButton = new ComboBox<>("Combo box with clear button", "one",
+                INITIAL_VALUE, "three");
+        comboBoxWithClearButton.setValue(INITIAL_VALUE);
+        comboBoxWithClearButton.setClearButtonVisible(true);
+        comboBoxWithClearButton.setId(COMBO_BOX_WITH_CLEAR_BUTTON_ID);
+
         add(new Div(comboBox, setNull, clear), new Div(
-                comboBoxWithAllowCustomValue, setNullCustom, clearCustom));
+                comboBoxWithAllowCustomValue, setNullCustom, clearCustom),
+                new Div(comboBoxWithClearButton));
     }
 }
