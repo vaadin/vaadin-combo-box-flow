@@ -19,6 +19,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +50,15 @@ public class ClearValueIT extends AbstractComponentIT {
                 comboBoxId), ClearValuePage.INITIAL_VALUE,
                 comboBox.getSelectedText());
 
-        comboBox.$("vaadin-text-field").get(0).$("[part~='clear-button']").get(0).click();
+        comboBox.$("vaadin-text-field").get(0)
+                .$("[part~='clear-button']").get(0).click();
         comboBox.openPopup();
+
+        Assert.assertEquals(String.format(
+                "Combo box with id '%s' should have its value empty after the test",
+                comboBoxId),"null",
+                $(TestBenchElement.class).id("value-messages")
+                        .$("p").first().getText());
 
         Assert.assertEquals(String.format(
                 "Combo box with id '%s' should have its value empty after the test",
