@@ -52,17 +52,12 @@ public class ClearValueIT extends AbstractComponentIT {
 
         comboBox.$("vaadin-text-field").get(0)
                 .$("[part~='clear-button']").get(0).click();
-        comboBox.openPopup();
 
         Assert.assertEquals(String.format(
                 "Combo box with id '%s' should have its value empty after the test",
                 comboBoxId),"null",
                 $(TestBenchElement.class).id("value-messages")
                         .$("p").first().getText());
-
-        Assert.assertEquals(String.format(
-                "Combo box with id '%s' should have its value empty after the test",
-                comboBoxId), "", comboBox.getSelectedText());
     }
 
     @Test
