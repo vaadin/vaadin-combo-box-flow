@@ -1,10 +1,27 @@
+// Error handling functions
+const tryCatchWrapper = function(originalFunction) {
+    return function() {
+        try {
+            originalFunction.apply(this, arguments);
+        } catch (error) {
+            logError(error.message);
+        }
+    }
+}
+
+function logError(message) {
+    console.error("There seems to be an error in the ComboBox:\n" + message + "\n" +
+       "Please submit an issue to https://github.com/vaadin/vaadin-combo-box-flow/issues/new!");
+}
+
+
 // Not using ES6 imports in this file yet because the connector in V14 must
 // still work in Legacy bower projects. See: `ironListConnector-es6.js` for
 // the Polymer3 approach.
 window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
 window.Vaadin.Flow.comboBoxConnector = {
-  initLazy: function (comboBox) {
+  initLazy: tryCatchWrapper(function (comboBox) {
 
     // Check whether the connector was already initialized for the ComboBox
     if (comboBox.$connector) {
@@ -29,7 +46,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     let cache = {};
     let lastFilter = '';
 
-    comboBox.dataProvider = function (params, callback) {
+    comboBox.dataProvider = tryCatchWrapper(function (params, callback) {
 
       if (params.pageSize != comboBox.pageSize) {
         throw 'Invalid pageSize';
@@ -87,14 +104,14 @@ window.Vaadin.Flow.comboBoxConnector = {
 
         pageCallbacks[params.page] = callback;
       }
-    }
+    })
 
-    comboBox.$connector.filter = function (item, filter) {
+    comboBox.$connector.filter = tryCatchWrapper(function (item, filter) {
       filter = filter ? filter.toString().toLowerCase() : '';
       return comboBox._getItemLabel(item).toString().toLowerCase().indexOf(filter) > -1;
-    }
+    })
 
-    comboBox.$connector.set = function (index, items, filter) {
+    comboBox.$connector.set = tryCatchWrapper(function (index, items, filter) {
       if (filter != lastFilter) {
         return;
       }
@@ -119,9 +136,9 @@ window.Vaadin.Flow.comboBoxConnector = {
 
         cache[page] = slice;
       }
-    };
+    });
 
-    comboBox.$connector.updateData = function (items) {
+    comboBox.$connector.updateData = tryCatchWrapper(function (items) {
       // IE11 doesn't work with the transpiled version of the forEach.
       for (let i = 0; i < items.length; i++) {
         let item = items[i];
@@ -133,7 +150,7 @@ window.Vaadin.Flow.comboBoxConnector = {
           }
         }
       }
-    }
+    })
 
     comboBox.$connector.updateSize = function (newSize) {
       if (!comboBox._clientSideFilter) {
@@ -149,13 +166,13 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
     }
 
-    comboBox.$connector.reset = function () {
+    comboBox.$connector.reset = tryCatchWrapper(function () {
       pageCallbacks = {};
       cache = {};
       comboBox.clearCache();
-    }
+    })
 
-    comboBox.$connector.confirm = function (id, filter) {
+    comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
 
       if (filter != lastFilter) {
         return;
@@ -177,9 +194,9 @@ window.Vaadin.Flow.comboBoxConnector = {
 
       // Let server know we're done
       comboBox.$server.confirmUpdate(id);
-    }
+    })
 
-    comboBox.$connector.enableClientValidation = function( enable ){
+    comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
         let input = null;
         if ( comboBox.$ ){
             input = comboBox.$["input"];
@@ -199,9 +216,9 @@ window.Vaadin.Flow.comboBoxConnector = {
                 comboBox.$connector.enableClientValidation(enable);
                 }, 10);
         }
-    }
+    })
 
-    const disableClientValidation =  function (combo){
+    const disableClientValidation =  tryCatchWrapper(function (combo){
         if ( typeof combo.$checkValidity == 'undefined'){
             combo.$checkValidity = combo.checkValidity;
             combo.checkValidity = function() { return true; };
@@ -210,23 +227,23 @@ window.Vaadin.Flow.comboBoxConnector = {
             combo.$validate = combo.validate;
             combo.validate = function() { return true; };
         }
-    }
+    })
 
-    const disableTextFieldClientValidation =  function (field, comboBox){
+    const disableTextFieldClientValidation =  tryCatchWrapper(function (field, comboBox){
         if ( typeof field.$checkValidity == 'undefined'){
             field.$checkValidity = field.checkValidity;
             field.checkValidity = function() { return !comboBox.invalid; };
         }
-    }
+    })
 
-    const enableTextFieldClientValidation = function (field){
+    const enableTextFieldClientValidation = tryCatchWrapper(function (field){
         if ( field.$checkValidity ){
             field.checkValidity = field.$checkValidity;
             delete field.$checkValidity;
         }
-     }
+     })
 
-    const enableClientValidation = function (combo){
+    const enableClientValidation = tryCatchWrapper(function (combo){
         if ( combo.$checkValidity ){
             combo.checkValidity = combo.$checkValidity;
             delete combo.$checkValidity;
@@ -235,9 +252,9 @@ window.Vaadin.Flow.comboBoxConnector = {
             combo.validate = combo.$validate;
             delete combo.$validate;
         }
-     }
+     })
 
-    const commitPage = function (page, callback) {
+    const commitPage = tryCatchWrapper(function (page, callback) {
       let data = cache[page];
 
       if (comboBox._clientSideFilter) {
@@ -252,13 +269,13 @@ window.Vaadin.Flow.comboBoxConnector = {
         // comboBox.size and remove updateSize function.
         callback(data, comboBox.size);
       }
-    }
+    })
 
     // Perform filter on client side (here) using the items from specified page
     // and submitting the filtered items to specified callback.
     // The filter used is the one from combobox, not the lastFilter stored since
     // that may not reflect user's input.
-    const performClientSideFilter = function (page, callback) {
+    const performClientSideFilter = tryCatchWrapper(function (page, callback) {
 
       let filteredItems = page;
 
@@ -268,13 +285,13 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
 
       callback(filteredItems, filteredItems.length);
-    }
+    })
 
     // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
-    comboBox.addEventListener('opened-changed', e =>
-      e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {}));
+    comboBox.addEventListener('opened-changed', tryCatchWrapper(e =>
+      e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {})));
 
     // Prevent setting the custom value as the 'value'-prop automatically
     comboBox.addEventListener('custom-value-set', e => e.preventDefault());
-  }
+  })
 }
