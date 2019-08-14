@@ -37,7 +37,7 @@ public class ComponentRendererPage extends Div {
         dataProviderAfterRenderer();
     }
 
-    private ComponentRenderer<VerticalLayout, ComboBoxView.Song> renderer = new ComponentRenderer<>(
+    private ComponentRenderer<VerticalLayout, Song> renderer = new ComponentRenderer<>(
             item -> {
                 VerticalLayout container = new VerticalLayout();
 
@@ -52,10 +52,10 @@ public class ComponentRendererPage extends Div {
             });
 
     private void itemsBeforeRenderer() {
-        ComboBox<ComboBoxView.Song> comboBox = new ComboBox<>();
-        List<ComboBoxView.Song> listOfSongs = createListOfSongs();
+        ComboBox<Song> comboBox = new ComboBox<>();
+        List<Song> listOfSongs = createListOfSongs();
         comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(ComboBoxView.Song::getName);
+        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.setRenderer(renderer);
 
@@ -65,12 +65,12 @@ public class ComponentRendererPage extends Div {
     }
 
     private void itemsAfterRenderer() {
-        ComboBox<ComboBoxView.Song> comboBox = new ComboBox<>();
-        List<ComboBoxView.Song> listOfSongs = createListOfSongs();
+        ComboBox<Song> comboBox = new ComboBox<>();
+        List<Song> listOfSongs = createListOfSongs();
         comboBox.setRenderer(renderer);
 
         comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(ComboBoxView.Song::getName);
+        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
         comboBox.setId("after-renderer");
@@ -78,11 +78,11 @@ public class ComponentRendererPage extends Div {
     }
 
     private void dataProviderBeforeRenderer() {
-        ComboBox<ComboBoxView.Song> comboBox = new ComboBox<>();
-        List<ComboBoxView.Song> listOfSongs = createListOfSongs();
+        ComboBox<Song> comboBox = new ComboBox<>();
+        List<Song> listOfSongs = createListOfSongs();
         comboBox.setDataProvider(
-                new ListDataProvider<ComboBoxView.Song>(listOfSongs));
-        comboBox.setItemLabelGenerator(ComboBoxView.Song::getName);
+                new ListDataProvider<Song>(listOfSongs));
+        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.setRenderer(renderer);
 
@@ -92,26 +92,26 @@ public class ComponentRendererPage extends Div {
     }
 
     private void dataProviderAfterRenderer() {
-        ComboBox<ComboBoxView.Song> comboBox = new ComboBox<>();
-        List<ComboBoxView.Song> listOfSongs = createListOfSongs();
+        ComboBox<Song> comboBox = new ComboBox<>();
+        List<Song> listOfSongs = createListOfSongs();
         comboBox.setRenderer(renderer);
 
         comboBox.setDataProvider(
-                new ListDataProvider<ComboBoxView.Song>(listOfSongs));
-        comboBox.setItemLabelGenerator(ComboBoxView.Song::getName);
+                new ListDataProvider<Song>(listOfSongs));
+        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
         comboBox.setId("dp-after-renderer");
         add(comboBox);
     }
 
-    private List<ComboBoxView.Song> createListOfSongs() {
-        List<ComboBoxView.Song> listOfSongs = new ArrayList<>();
-        listOfSongs.add(new ComboBoxView.Song("A V Club Disagrees",
+    private List<Song> createListOfSongs() {
+        List<Song> listOfSongs = new ArrayList<>();
+        listOfSongs.add(new Song("A V Club Disagrees",
                 "Haircuts for Men", "Physical Fitness"));
         listOfSongs.add(
-                new ComboBoxView.Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
-        listOfSongs.add(new ComboBoxView.Song("Voices of a Distant Star",
+                new Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
+        listOfSongs.add(new Song("Voices of a Distant Star",
                 "Killigrew", "Animus II"));
         return listOfSongs;
     }
