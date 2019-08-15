@@ -15,25 +15,22 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import elemental.json.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.combobox.demo.ComboBoxView;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.demo.TabbedComponentDemoTest;
-
-import elemental.json.JsonObject;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
- * Integration tests for the {@link ComboBoxView}.
+ * Integration tests for the {@link ComboBoxDemoPage}.
  */
 public class ComboBoxIT extends TabbedComponentDemoTest {
 
