@@ -40,9 +40,11 @@ import java.util.stream.IntStream;
 
 import com.github.javafaker.Faker;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -56,8 +58,8 @@ import com.vaadin.flow.router.Route;
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-combo-box")
-public class ComboBoxDemoPage extends DemoView {
+@Route("vaadin-combo-box-test-demo")
+public class ComboBoxDemoPage extends VerticalLayout {
 
     /**
      * Example object.
@@ -116,8 +118,7 @@ public class ComboBoxDemoPage extends DemoView {
 
     private static final String WIDTH_STRING = "250px";
 
-    @Override
-    public void initView() {
+    public ComboBoxDemoPage() {
         createStringComboBox();
         createWithClearButton();
         createDisabledComboBox();
@@ -150,7 +151,7 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("string-selection-box");
-        addCard("String selection", comboBox, message);
+        add(new Div( new H2("String selection"), comboBox, message));
     }
 
     private void createWithClearButton() {
@@ -167,7 +168,7 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("clear-button-box");
-        addCard("Clear button", comboBox);
+        add(new Div( new H2("Clear button"), comboBox));
     }
 
     private void createObjectComboBox() {
@@ -196,7 +197,7 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("object-selection-box");
-        addCard("Object selection", comboBox, message);
+        add(new Div( new H2("Object selection"), comboBox, message));
     }
 
     private void createComboBoxWithObjectStringSimpleValue() {
@@ -228,7 +229,7 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("value-selection-box");
-        addCard("Value selection from objects", comboBox, message);
+        add(new Div( new H2("Value selection from objects"), comboBox, message));
     }
 
     private void createDisabledComboBox() {
@@ -249,7 +250,7 @@ public class ComboBoxDemoPage extends DemoView {
         });
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("disabled-combo-box");
-        addCard("Disabled ComboBox", comboBox, message);
+        add(new Div( new H2("Disabled ComboBox"), comboBox, message));
     }
 
     private void createComboBoxUsingTemplateRenderer() {
@@ -297,8 +298,8 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
-        addCard("Using templates", "Rendering items using TemplateRenderer",
-                comboBox, message);
+        add(new Div( new H2("Using templates"), new H2("Rendering items using TemplateRenderer"),
+                comboBox, message));
     }
 
     private void createComboBoxUsingComponentRenderer() {
@@ -356,9 +357,9 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("component-selection-box");
-        addCard("Using components",
-                "Rendering items using ComponentTemplateRenderer", comboBox,
-                message);
+        add(new Div( new H2("Using components"),
+                new H2("Rendering items using ComponentTemplateRenderer"), comboBox,
+                message));
     }
 
     private void createComboBoxWithInMemoryLazyLoading() {
@@ -376,8 +377,8 @@ public class ComboBoxDemoPage extends DemoView {
         // end-source-example
 
         comboBox.setId("lazy-loading-box");
-        addCard("Lazy Loading", "Lazy loading between client and server",
-                comboBox);
+        add(new Div( new H2("Lazy Loading"), new H2("Lazy loading between client and server"),
+                comboBox));
     }
 
     private void createComboBoxWithCallbackLazyLoading() {
@@ -401,7 +402,7 @@ public class ComboBoxDemoPage extends DemoView {
         // end-source-example
         //@formatter:on
         comboBox.setId("callback-box");
-        addCard("Lazy Loading", "Lazy loading with callbacks", comboBox);
+        add(new Div( new H2("Lazy Loading"), new H2("Lazy loading with callbacks"), comboBox));
     }
 
     private void createComboBoxWithCustomValues() {
@@ -431,8 +432,8 @@ public class ComboBoxDemoPage extends DemoView {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("custom-value-box");
-        addCard("Custom Values", "Allow users to input custom values", comboBox,
-                message);
+        add(new Div( new H2("Custom Values"), new H2("Allow users to input custom values"), comboBox,
+                message));
     }
 
     private List<String> getNames(int count) {

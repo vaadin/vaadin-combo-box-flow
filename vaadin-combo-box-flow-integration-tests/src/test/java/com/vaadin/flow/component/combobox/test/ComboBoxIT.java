@@ -302,6 +302,6 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return ("/vaadin-combo-box");
+        return ("/vaadin-combo-box-test-demo");
     }
 }
