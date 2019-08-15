@@ -32,15 +32,7 @@
 
 package com.vaadin.flow.component.combobox.test;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.github.javafaker.Faker;
-
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
@@ -49,9 +41,13 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * View for {@link ComboBox} demo.
@@ -151,7 +147,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("string-selection-box");
-        add(new Div( new H2("String selection"), comboBox, message));
+        add(new Div(new H2("String selection"), comboBox, message));
     }
 
     private void createWithClearButton() {
@@ -168,7 +164,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("clear-button-box");
-        add(new Div( new H2("Clear button"), comboBox));
+        add(new Div(new H2("Clear button"), comboBox));
     }
 
     private void createObjectComboBox() {
@@ -197,7 +193,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("object-selection-box");
-        add(new Div( new H2("Object selection"), comboBox, message));
+        add(new Div(new H2("Object selection"), comboBox, message));
     }
 
     private void createComboBoxWithObjectStringSimpleValue() {
@@ -229,7 +225,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("value-selection-box");
-        add(new Div( new H2("Value selection from objects"), comboBox, message));
+        add(new Div(new H2("Value selection from objects"), comboBox, message));
     }
 
     private void createDisabledComboBox() {
@@ -250,7 +246,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         });
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("disabled-combo-box");
-        add(new Div( new H2("Disabled ComboBox"), comboBox, message));
+        add(new Div(new H2("Disabled ComboBox"), comboBox, message));
     }
 
     private void createComboBoxUsingTemplateRenderer() {
@@ -298,8 +294,9 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
-        add(new Div( new H2("Using templates"), new H2("Rendering items using TemplateRenderer"),
-                comboBox, message));
+        add(new Div(new H2("Using templates"),
+                new H2("Rendering items using TemplateRenderer"), comboBox,
+                message));
     }
 
     private void createComboBoxUsingComponentRenderer() {
@@ -357,9 +354,9 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("component-selection-box");
-        add(new Div( new H2("Using components"),
-                new H2("Rendering items using ComponentTemplateRenderer"), comboBox,
-                message));
+        add(new Div(new H2("Using components"),
+                new H2("Rendering items using ComponentTemplateRenderer"),
+                comboBox, message));
     }
 
     private void createComboBoxWithInMemoryLazyLoading() {
@@ -377,8 +374,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
         // end-source-example
 
         comboBox.setId("lazy-loading-box");
-        add(new Div( new H2("Lazy Loading"), new H2("Lazy loading between client and server"),
-                comboBox));
+        add(new Div(new H2("Lazy Loading"),
+                new H2("Lazy loading between client and server"), comboBox));
     }
 
     private void createComboBoxWithCallbackLazyLoading() {
@@ -402,7 +399,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
         // end-source-example
         //@formatter:on
         comboBox.setId("callback-box");
-        add(new Div( new H2("Lazy Loading"), new H2("Lazy loading with callbacks"), comboBox));
+        add(new Div(new H2("Lazy Loading"),
+                new H2("Lazy loading with callbacks"), comboBox));
     }
 
     private void createComboBoxWithCustomValues() {
@@ -432,7 +430,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("custom-value-box");
-        add(new Div( new H2("Custom Values"), new H2("Allow users to input custom values"), comboBox,
+        add(new Div(new H2("Custom Values"),
+                new H2("Allow users to input custom values"), comboBox,
                 message));
     }
 
