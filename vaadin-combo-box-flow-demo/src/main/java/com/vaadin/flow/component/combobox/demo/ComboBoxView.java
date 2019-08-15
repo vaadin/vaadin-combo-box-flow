@@ -184,9 +184,8 @@ public class ComboBoxView extends DemoView {
          * Allow users to enter a value which doesn't exist in the data set, and
          * set it as the value of the ComboBox.
          */
-        comboBox.addCustomValueSetListener(event -> {
-            comboBox.setValue(event.getDetail());
-        });
+        comboBox.addCustomValueSetListener(event -> 
+            comboBox.setValue(event.getDetail()));
 
         comboBox.addValueChangeListener(event -> {
             if (event.getValue() == null) {
@@ -265,7 +264,8 @@ public class ComboBoxView extends DemoView {
 
     private void customOptionsDemo() {
         // begin-source-example
-        // source-example-heading: Customizing drop down items with ComponentRenderer
+        // source-example-heading: Customizing drop down items with
+        // ComponentRenderer
         ComboBox<Information> comboBox = new ComboBox<>();
         comboBox.setLabel("User");
         comboBox.setItems(
@@ -359,12 +359,6 @@ public class ComboBoxView extends DemoView {
         // end-source-example
         addCard("Styling", "Styling references", firstHorizontalLayout,
                 secondHorizontalLayout);
-    }
-
-    private List<String> getNames(int count) {
-        Faker faker = Faker.instance();
-        return IntStream.range(0, count).mapToObj(i -> faker.name().fullName())
-                .collect(Collectors.toList());
     }
 
     private List<Song> createListOfSongs() {
