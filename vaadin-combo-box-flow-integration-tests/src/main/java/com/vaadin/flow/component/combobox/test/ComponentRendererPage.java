@@ -37,7 +37,7 @@ public class ComponentRendererPage extends Div {
         dataProviderAfterRenderer();
     }
 
-    private ComponentRenderer<VerticalLayout, Song> renderer = new ComponentRenderer<>(
+    private ComponentRenderer<VerticalLayout, ComboBoxDemoPage.Song> renderer = new ComponentRenderer<>(
             item -> {
                 VerticalLayout container = new VerticalLayout();
 
@@ -52,10 +52,10 @@ public class ComponentRendererPage extends Div {
             });
 
     private void itemsBeforeRenderer() {
-        ComboBox<Song> comboBox = new ComboBox<>();
-        List<Song> listOfSongs = createListOfSongs();
+        ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
+        List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
         comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(Song::getName);
+        comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 
         comboBox.setRenderer(renderer);
 
@@ -65,12 +65,12 @@ public class ComponentRendererPage extends Div {
     }
 
     private void itemsAfterRenderer() {
-        ComboBox<Song> comboBox = new ComboBox<>();
-        List<Song> listOfSongs = createListOfSongs();
+        ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
+        List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
         comboBox.setRenderer(renderer);
 
         comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(Song::getName);
+        comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
         comboBox.setId("after-renderer");
@@ -78,11 +78,11 @@ public class ComponentRendererPage extends Div {
     }
 
     private void dataProviderBeforeRenderer() {
-        ComboBox<Song> comboBox = new ComboBox<>();
-        List<Song> listOfSongs = createListOfSongs();
+        ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
+        List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
         comboBox.setDataProvider(
-                new ListDataProvider<Song>(listOfSongs));
-        comboBox.setItemLabelGenerator(Song::getName);
+                new ListDataProvider<ComboBoxDemoPage.Song>(listOfSongs));
+        comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 
         comboBox.setRenderer(renderer);
 
@@ -92,26 +92,26 @@ public class ComponentRendererPage extends Div {
     }
 
     private void dataProviderAfterRenderer() {
-        ComboBox<Song> comboBox = new ComboBox<>();
-        List<Song> listOfSongs = createListOfSongs();
+        ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
+        List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
         comboBox.setRenderer(renderer);
 
         comboBox.setDataProvider(
-                new ListDataProvider<Song>(listOfSongs));
-        comboBox.setItemLabelGenerator(Song::getName);
+                new ListDataProvider<ComboBoxDemoPage.Song>(listOfSongs));
+        comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
         comboBox.setId("dp-after-renderer");
         add(comboBox);
     }
 
-    private List<Song> createListOfSongs() {
-        List<Song> listOfSongs = new ArrayList<>();
-        listOfSongs.add(new Song("A V Club Disagrees",
+    private List<ComboBoxDemoPage.Song> createListOfSongs() {
+        List<ComboBoxDemoPage.Song> listOfSongs = new ArrayList<>();
+        listOfSongs.add(new ComboBoxDemoPage.Song("A V Club Disagrees",
                 "Haircuts for Men", "Physical Fitness"));
         listOfSongs.add(
-                new Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
-        listOfSongs.add(new Song("Voices of a Distant Star",
+                new ComboBoxDemoPage.Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
+        listOfSongs.add(new ComboBoxDemoPage.Song("Voices of a Distant Star",
                 "Killigrew", "Animus II"));
         return listOfSongs;
     }
