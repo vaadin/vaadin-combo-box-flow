@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.demo;
 
-import com.github.javafaker.Faker;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
@@ -28,9 +27,9 @@ import com.vaadin.flow.component.combobox.demo.service.PersonService;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -40,8 +39,6 @@ import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * View for {@link ComboBox} demo.
@@ -264,8 +261,7 @@ public class ComboBoxView extends DemoView {
 
     private void customOptionsDemo() {
         // begin-source-example
-        // source-example-heading: Customizing drop down items with
-        // ComponentRenderer
+        // source-example-heading: Customizing drop down items with ComponentRenderer
         ComboBox<Information> comboBox = new ComboBox<>();
         comboBox.setLabel("User");
         comboBox.setItems(
@@ -335,30 +331,20 @@ public class ComboBoxView extends DemoView {
     }
 
     private void styling() {
-
-        Div firstDiv = new Div();
-        firstDiv.setText(
-                "To read about styling you can read the related tutorial in");
-        Anchor firstAnchor = new Anchor(
+        Paragraph p1 = new Paragraph("To read about styling you can read the related tutorial ");
+        p1.add(new Anchor(
                 "https://vaadin.com/docs/flow/theme/using-component-themes.html",
-                "Using Component Themes");
+                "Using Component Themes"));
 
-        Div secondDiv = new Div();
-        secondDiv.setText("To know about styling in html you can read the ");
-        Anchor secondAnchor = new Anchor("https://vaadin.com/components/"
+        Paragraph p2 = new Paragraph("To know about styling in HTML you can read the ");
+        p2.add(new Anchor("https://vaadin.com/components/"
                 + "vaadin-combo-box/html-examples/combo-box-styling-demos",
-                "HTML Styling Demos");
-
-        HorizontalLayout firstHorizontalLayout = new HorizontalLayout(firstDiv,
-                firstAnchor);
-        HorizontalLayout secondHorizontalLayout = new HorizontalLayout(
-                secondDiv, secondAnchor);
+                "HTML Styling Demos"));
         // begin-source-example
         // source-example-heading: Styling references
 
         // end-source-example
-        addCard("Styling", "Styling references", firstHorizontalLayout,
-                secondHorizontalLayout);
+        addCard("Styling", "Styling references", p1, p2);
     }
 
     private List<Song> createListOfSongs() {
