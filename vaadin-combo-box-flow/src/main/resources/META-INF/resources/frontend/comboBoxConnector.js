@@ -65,24 +65,26 @@ window.Vaadin.Flow.comboBoxConnector = {
         // This may happen after skipping pages by scrolling fast
         commitPage(params.page, callback);
       } else {
-        const upperLimit = params.pageSize * (params.page + 1);
+        const lowerLimit = params.pageSize * params.page;
+        const count = params.pageSize;
 
         if (filterChanged) {
           this._debouncer = Debouncer.debounce(
             this._debouncer,
             timeOut.after(500),
             () => {
-              comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+
+              comboBox.$server.setRequestedRange(lowerLimit, count, params.filter);
               if (params.filter === '') {
-                // Fixes the case when the filter changes 
-                // from '' to something else and back to '' 
+                // Fixes the case when the filter changes
+                // from '' to something else and back to ''
                 // within debounce timeout, and the
                 // DataCommunicator thinks it doesn't need to send data
                 comboBox.$server.resetDataCommunicator();
               }
             });
         } else {
-          comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+          comboBox.$server.setRequestedRange(lowerLimit, count, params.filter);
         }
 
         pageCallbacks[params.page] = callback;
@@ -250,7 +252,24 @@ window.Vaadin.Flow.comboBoxConnector = {
 
         // FIXME: It may be that we ought to provide data.length instead of
         // comboBox.size and remove updateSize function.
-        callback(data, comboBox.size);
+        if (!callback._called) {
+          // TODO: Move to dataProvider
+          Object.keys(comboBox._pendingRequests).forEach(key => {
+            if (comboBox._pendingRequests[key] !== callback) {
+              comboBox._pendingRequests[key]._called = true;
+              comboBox._pendingRequests[key]([], comboBox.size);
+            }
+          });
+          pageCallbacks = {};
+          callback(data, comboBox.size);
+
+          // Make the combo box request items for all visible items if necessary
+          // TODO: Use public APIs
+          const ironList = comboBox.$.overlay._selector;
+          comboBox.$.overlay.dispatchEvent(new CustomEvent('index-requested', {detail: {index: ironList.firstVisibleIndex}}));
+          comboBox.$.overlay.dispatchEvent(new CustomEvent('index-requested', {detail: {index: ironList.lastVisibleIndex}}));
+
+        }
       }
     }
 
