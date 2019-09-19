@@ -80,7 +80,7 @@ window.Vaadin.Flow.comboBoxConnector = {
           return;
         }
 
-        const lowerLimit = params.pageSize * params.page;
+        const startIndex = params.pageSize * params.page;
         const count = params.pageSize;
 
         if (filterChanged) {
@@ -89,7 +89,7 @@ window.Vaadin.Flow.comboBoxConnector = {
             timeOut.after(500),
             () => {
 
-              comboBox.$server.setRequestedRange(lowerLimit, count, params.filter);
+              comboBox.$server.setRequestedRange(startIndex, count, params.filter);
               if (params.filter === '') {
                 // Fixes the case when the filter changes
                 // from '' to something else and back to ''
@@ -99,7 +99,7 @@ window.Vaadin.Flow.comboBoxConnector = {
               }
             });
         } else {
-          comboBox.$server.setRequestedRange(lowerLimit, count, params.filter);
+          comboBox.$server.setRequestedRange(startIndex, count, params.filter);
         }
 
       }
@@ -264,10 +264,10 @@ window.Vaadin.Flow.comboBoxConnector = {
         // filtering
         delete cache[page];
 
+        clearPageCallBacks();
+
         // FIXME: It may be that we ought to provide data.length instead of
         // comboBox.size and remove updateSize function.
-
-        clearPageCallBacks();
         callback(data, comboBox.size);
 
         // Make the combo box request items for all visible items if necessary
