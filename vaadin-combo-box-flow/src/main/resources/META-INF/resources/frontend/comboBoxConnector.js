@@ -69,11 +69,25 @@ window.Vaadin.Flow.comboBoxConnector = {
         }
       }
 
-
       const filterChanged = params.filter !== lastFilter;
       if (filterChanged) {
         cache = {};
         lastFilter = params.filter;
+        this._debouncer = Debouncer.debounce(
+          this._debouncer,
+          timeOut.after(500),
+          () => {
+            clearActiveRangeCache();
+            comboBox.clearCache();
+            if (params.filter === '') {
+              // Fixes the case when the filter changes
+              // from '' to something else and back to ''
+              // within debounce timeout, and the
+              // DataCommunicator thinks it doesn't need to send data
+              comboBox.$server.resetDataCommunicator();
+            }
+          });
+        return;
       }
 
       if (cache[params.page]) {
@@ -96,26 +110,8 @@ window.Vaadin.Flow.comboBoxConnector = {
         const endIndex = Math.min(params.pageSize * (rangeMax + 1), comboBox.filteredItems.length);
         const count = endIndex - startIndex;
 
-        if (filterChanged) {
-          clearActiveRangeCache();
-          this._debouncer = Debouncer.debounce(
-            this._debouncer,
-            timeOut.after(500),
-            () => {
-              comboBox.$server.setRequestedRange(startIndex, count, params.filter);
-              if (params.filter === '') {
-                // Fixes the case when the filter changes
-                // from '' to something else and back to ''
-                // within debounce timeout, and the
-                // DataCommunicator thinks it doesn't need to send data
-                comboBox.$server.resetDataCommunicator();
-              }
-            });
-        } else {
-          comboBox.label = 'start' + startIndex + " count: " + count;
-          comboBox.$server.setRequestedRange(startIndex, count, params.filter);
-        }
-
+        comboBox.label = 'start' + startIndex + " count: " + count;
+        comboBox.$server.setRequestedRange(startIndex, count, params.filter);
       }
     }
 
