@@ -30,8 +30,12 @@ window.Vaadin.Flow.comboBoxConnector = {
     let lastFilter = '';
 
     const clearPageCallBacks = () => {
-      Object.keys(pageCallbacks).forEach(key => {
-        pageCallbacks[key]([], comboBox.size);
+      const placeHolder = new Vaadin.ComboBoxPlaceholder();
+      Object.keys(pageCallbacks).forEach(page => {
+        const pageStartIndex = parseInt(page) * comboBox.pageSize;
+        const maxItemsCountForPage = comboBox.filteredItems.length - pageStartIndex;
+        const pageSize = Math.min(comboBox.pageSize, maxItemsCountForPage);
+        pageCallbacks[page](Array.from(new Array(pageSize)).map(i => placeHolder), comboBox.size);
       });
       pageCallbacks = {};
     }
@@ -269,12 +273,6 @@ window.Vaadin.Flow.comboBoxConnector = {
         // FIXME: It may be that we ought to provide data.length instead of
         // comboBox.size and remove updateSize function.
         callback(data, comboBox.size);
-
-        // Make the combo box request items for all visible items if necessary
-        // TODO: Use public APIs
-        const ironList = comboBox.$.overlay._selector;
-        comboBox.$.overlay.dispatchEvent(new CustomEvent('index-requested', {detail: {index: ironList.firstVisibleIndex}}));
-        comboBox.$.overlay.dispatchEvent(new CustomEvent('index-requested', {detail: {index: ironList.lastVisibleIndex}}));
       }
     }
 
