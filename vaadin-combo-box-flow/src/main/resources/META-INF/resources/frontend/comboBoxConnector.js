@@ -25,23 +25,27 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     comboBox.$connector = {};
 
+    // holds pageIndex -> callback pairs of subsequent indexes (current active range)
     let pageCallbacks = {};
     let cache = {};
     let lastFilter = '';
 
-    const clearPageCallBacks = () => {
+    const clearActiveRangeCache = () => {
       const placeHolder = new Vaadin.ComboBoxPlaceholder();
       Object.keys(pageCallbacks).forEach(page => {
         const pageStartIndex = parseInt(page) * comboBox.pageSize;
         const maxItemsCountForPage = comboBox.filteredItems.length - pageStartIndex;
         const pageSize = Math.min(comboBox.pageSize, maxItemsCountForPage);
-        pageCallbacks[page](Array.from(new Array(pageSize)).map(i => placeHolder), comboBox.size);
+        pageSize >= 0 && pageCallbacks[page](Array.from(new Array(pageSize)).map(i => placeHolder), comboBox.size);
+      });
+
+      comboBox.filteredItems.forEach((item, index) => {
+        comboBox.filteredItems[index] = placeHolder;
       });
       pageCallbacks = {};
     }
 
     comboBox.dataProvider = function (params, callback) {
-
       if (params.pageSize != comboBox.pageSize) {
         throw 'Invalid pageSize';
       }
@@ -65,9 +69,9 @@ window.Vaadin.Flow.comboBoxConnector = {
         }
       }
 
+
       const filterChanged = params.filter !== lastFilter;
       if (filterChanged) {
-        clearPageCallBacks();
         cache = {};
         lastFilter = params.filter;
       }
@@ -76,23 +80,28 @@ window.Vaadin.Flow.comboBoxConnector = {
         // This may happen after skipping pages by scrolling fast
         commitPage(params.page, callback);
       } else {
-        const hasActiveRequest = !!Object.keys(pageCallbacks).length;
-        pageCallbacks[params.page] = callback;
 
-        if (hasActiveRequest) {
-          // There's an ongoing request, wait for it to finish first
+        pageCallbacks[params.page] = callback
+
+        const activePages = Object.keys(pageCallbacks).map(page => parseInt(page));
+        const rangeMin = Math.min(...activePages);
+        const rangeMax = Math.max(...activePages);
+        if (rangeMax - rangeMin + 1 !== activePages.length) {
+          // Wasn't a sequential page index, clear the cache so combo-box will request for new pages
+          clearActiveRangeCache();
           return;
         }
 
-        const startIndex = params.pageSize * params.page;
-        const count = params.pageSize;
+        const startIndex = params.pageSize * rangeMin;
+        const endIndex = Math.min(params.pageSize * (rangeMax + 1), comboBox.filteredItems.length);
+        const count = endIndex - startIndex;
 
         if (filterChanged) {
+          clearActiveRangeCache();
           this._debouncer = Debouncer.debounce(
             this._debouncer,
             timeOut.after(500),
             () => {
-
               comboBox.$server.setRequestedRange(startIndex, count, params.filter);
               if (params.filter === '') {
                 // Fixes the case when the filter changes
@@ -103,6 +112,7 @@ window.Vaadin.Flow.comboBoxConnector = {
               }
             });
         } else {
+          comboBox.label = 'start' + startIndex + " count: " + count;
           comboBox.$server.setRequestedRange(startIndex, count, params.filter);
         }
 
@@ -170,7 +180,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
 
     comboBox.$connector.reset = function () {
-      clearPageCallBacks();
+      clearActiveRangeCache();
       cache = {};
       comboBox.clearCache();
     }
@@ -184,12 +194,13 @@ window.Vaadin.Flow.comboBoxConnector = {
       // We're done applying changes from this batch, resolve outstanding
       // callbacks
       let outstandingRequests = Object.getOwnPropertyNames(pageCallbacks);
+      //TODO: Exclude callbacks that have already been invoked with data
       for (let i = 0; i < outstandingRequests.length; i++) {
         let page = outstandingRequests[i];
 
         if (cache[page]) {
           let callback = pageCallbacks[page];
-          delete pageCallbacks[page];
+          // delete pageCallbacks[page];
 
           commitPage(page, callback);
         }
@@ -267,8 +278,6 @@ window.Vaadin.Flow.comboBoxConnector = {
         // Remove the data if server-side filtering, but keep it for client-side
         // filtering
         delete cache[page];
-
-        clearPageCallBacks();
 
         // FIXME: It may be that we ought to provide data.length instead of
         // comboBox.size and remove updateSize function.
