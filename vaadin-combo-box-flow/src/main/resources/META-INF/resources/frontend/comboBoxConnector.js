@@ -102,7 +102,7 @@ window.Vaadin.Flow.comboBoxConnector = {
         }
 
         const startIndex = params.pageSize * rangeMin;
-        const endIndex = Math.min(params.pageSize * (rangeMax + 1), comboBox.filteredItems.length);
+        const endIndex = params.pageSize * (rangeMax + 1);
         const count = endIndex - startIndex;
 
         comboBox.label = 'start' + startIndex + " count: " + count;
