@@ -83,20 +83,21 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         scrollToItem(stringBox, 100);
 
-        waitUntil(e -> getOverlayContents().contains("Item 100"));
+        waitUntil(e -> getOverlayContents().contains("Item 112"));
         assertLoadedItemsCount(
                 "There should be 150 items after loading three pages", 150,
                 stringBox);
-        assertRendered("Item 115");
+        assertRendered("Item 112");
     }
 
     @Test
     public void openPopup_scrollToEnd_onlyFirstAndLastPagesLoaded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 1000);
+        waitUntil(e -> getOverlayContents().contains("Item 999"));
         assertLoadedItemsCount(
-                "Expected the first and the last pages to be loaded (100 items).",
-                100, stringBox);
+                "Expected the first and the last pages to be loaded (50 items).",
+                50, stringBox);
         assertRendered("Item 999");
     }
 
@@ -107,8 +108,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         scrollToItem(stringBox, 920);
 
         assertLoadedItemsCount(
-                "Expected the first and the two last pages to be loaded (150 items).",
-                150, stringBox);
+                "Expected the two last pages to be loaded (100 items).",
+                100, stringBox);
         assertRendered("Item 920");
     }
 
@@ -416,9 +417,10 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         clickButton("component-renderer");
         beanBox.openPopup();
         scrollToItem(beanBox, 300);
-        waitUntil(e -> getOverlayContents().contains("<h4>Person 300</h4>"));
+        
+        waitUntil(e -> getOverlayContents().contains("<flow-component-renderer appid=\"ROOT\"><h4>Person 300</h4></flow-component-renderer>"));
         scrollToItem(beanBox, 0);
-        waitUntil(e -> getOverlayContents().contains("<h4>Person 0</h4>"));
+        waitUntil(e -> getOverlayContents().contains("<flow-component-renderer appid=\"ROOT\"><h4>Person 0</h4></flow-component-renderer>"));
 
         assertComponentRendered("<h4>Person 0</h4>");
         assertComponentRendered("<h4>Person 4</h4>");
