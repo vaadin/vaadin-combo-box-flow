@@ -31,18 +31,13 @@ window.Vaadin.Flow.comboBoxConnector = {
     let lastFilter = '';
 
     const clearActiveRangeCache = () => {
-      const placeHolder = new Vaadin.ComboBoxPlaceholder();
-      Object.keys(pageCallbacks).forEach(page => {
-        const pageStartIndex = parseInt(page) * comboBox.pageSize;
-        const maxItemsCountForPage = comboBox.filteredItems.length - pageStartIndex;
-        const pageSize = Math.min(comboBox.pageSize, maxItemsCountForPage);
-        pageSize >= 0 && pageCallbacks[page](Array.from(new Array(pageSize)).map(i => placeHolder), comboBox.size);
-      });
-
-      comboBox.filteredItems.forEach((item, index) => {
-        comboBox.filteredItems[index] = placeHolder;
-      });
+      Object.keys(pageCallbacks).forEach(page => pageCallbacks[page]([], comboBox.size));
       pageCallbacks = {};
+
+      const placeHolder = new Vaadin.ComboBoxPlaceholder();
+      for (let i = 0; i < comboBox.filteredItems.length; i++) {
+        comboBox.filteredItems[i] = placeHolder;
+      }
     }
 
     comboBox.dataProvider = function (params, callback) {
