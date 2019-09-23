@@ -75,7 +75,6 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         stringBox.openPopup();
         scrollToItem(stringBox, 50);
         
-        waitUntil(e -> getOverlayContents().contains("Item 50"));
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 stringBox);
@@ -83,7 +82,6 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         scrollToItem(stringBox, 100);
 
-        waitUntil(e -> getOverlayContents().contains("Item 100"));
         assertLoadedItemsCount(
                 "There should be 150 items after loading three pages", 150,
                 stringBox);
@@ -96,7 +94,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         scrollToItem(stringBox, 1000);
         waitUntil(e -> getOverlayContents().contains("Item 999"));
         assertLoadedItemsCount(
-                "Expected the first and the last pages to be loaded (50 items).",
+                "Expected the last page to be loaded (50 items).",
                 50, stringBox);
         assertRendered("Item 999");
     }
