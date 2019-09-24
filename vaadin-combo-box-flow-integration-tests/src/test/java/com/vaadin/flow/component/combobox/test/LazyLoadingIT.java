@@ -74,7 +74,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void scrollOverlay_morePagesLoaded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 50);
-        
+
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 stringBox);
@@ -89,7 +89,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void openPopup_scrollToEnd_onlyFirstAndLastPagesLoaded() {
+    public void openPopup_scrollToEnd_onlyLastPageLoaded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 1000);
         waitUntil(e -> getOverlayContents().contains("Item 999"));
@@ -426,9 +426,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         scrollToItem(beanBox, 300);
         
-        waitUntil(e -> getOverlayContents().contains("<flow-component-renderer appid=\"ROOT\"><h4>Person 300</h4></flow-component-renderer>"));
+        waitUntil(e -> getOverlayContents().stream().anyMatch(s -> s.contains("<h4>Person 300</h4>")));
         scrollToItem(beanBox, 0);
-        waitUntil(e -> getOverlayContents().contains("<flow-component-renderer appid=\"ROOT\"><h4>Person 0</h4></flow-component-renderer>"));
+        waitUntil(e -> getOverlayContents().stream().anyMatch(s -> s.contains("<h4>Person 0</h4>")));
 
         assertComponentRendered("<h4>Person 0</h4>");
         assertComponentRendered("<h4>Person 4</h4>");

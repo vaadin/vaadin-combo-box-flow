@@ -29,6 +29,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     let pageCallbacks = {};
     let cache = {};
     let lastFilter = '';
+    const placeHolder = new Vaadin.ComboBoxPlaceholder();
 
     const clearPageCallbacks = () => {
       // Flush and empty the existing requests
@@ -38,7 +39,6 @@ window.Vaadin.Flow.comboBoxConnector = {
       // Empty the comboBox's internal cache without invoking observers by filling
       // the filteredItems array with placeholders (comboBox will request for data when it
       // encounters a placeholder)
-      const placeHolder = new Vaadin.ComboBoxPlaceholder();
       for (let i = 0; i < comboBox.filteredItems.length; i++) {
         comboBox.filteredItems[i] = placeHolder;
       }
