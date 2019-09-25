@@ -30,18 +30,25 @@ window.Vaadin.Flow.comboBoxConnector = {
     let cache = {};
     let lastFilter = '';
     const placeHolder = new Vaadin.ComboBoxPlaceholder();
+    const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 150); // Max item count in active range
 
-    const clearPageCallbacks = () => {
+    const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
-      Object.keys(pageCallbacks).forEach(page => pageCallbacks[page]([], comboBox.size));
-      pageCallbacks = {};
+      pages.forEach(page => {
+        pageCallbacks[page]([], comboBox.size);
+        delete pageCallbacks[page];
 
-      // Empty the comboBox's internal cache without invoking observers by filling
-      // the filteredItems array with placeholders (comboBox will request for data when it
-      // encounters a placeholder)
-      for (let i = 0; i < comboBox.filteredItems.length; i++) {
-        comboBox.filteredItems[i] = placeHolder;
-      }
+        // Empty the comboBox's internal cache without invoking observers by filling
+        // the filteredItems array with placeholders (comboBox will request for data when it
+        // encounters a placeholder)
+        const pageStart = parseInt(page) * comboBox.pageSize;
+        const pageEnd = pageStart + comboBox.pageSize;
+        for (let i = 0; i < comboBox.filteredItems.length; i++) {
+          if (i >= pageStart && i < pageEnd) {
+            comboBox.filteredItems[i] = placeHolder;
+          }
+        }
+      });
     }
 
     comboBox.dataProvider = function (params, callback) {
@@ -98,7 +105,14 @@ window.Vaadin.Flow.comboBoxConnector = {
         const rangeMin = Math.min(...activePages);
         const rangeMax = Math.max(...activePages);
 
-        if (rangeMax - rangeMin + 1 !== activePages.length) {
+        if (activePages.length * params.pageSize > MAX_RANGE_COUNT) {
+          if (params.page === rangeMin) {
+            clearPageCallbacks([String(rangeMax)]);
+          } else {
+            clearPageCallbacks([String(rangeMin)]);
+          }
+          comboBox.dataProvider(params, callback);
+        } else if (rangeMax - rangeMin + 1 !== activePages.length) {
           // Wasn't a sequential page index, clear the cache so combo-box will request for new pages
           clearPageCallbacks();
         } else {
@@ -106,7 +120,11 @@ window.Vaadin.Flow.comboBoxConnector = {
           const startIndex = params.pageSize * rangeMin;
           const endIndex = params.pageSize * (rangeMax + 1);
           const count = endIndex - startIndex;
-          comboBox.$server.setRequestedRange(startIndex, count, params.filter);
+
+          this._debouncer = Debouncer.debounce(
+            this._debouncer,
+            timeOut.after(50),
+            () => comboBox.$server.setRequestedRange(startIndex, count, params.filter));
         }
       }
     }

@@ -71,7 +71,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void scrollOverlay_morePagesLoaded() {
+    public void scrollOverlay_morePagesLoaded_overflowingPagesDiscarded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 50);
 
@@ -86,6 +86,22 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "There should be 150 items after loading three pages", 150,
                 stringBox);
         assertRendered("Item 102");
+
+        // The first page should get discarded (active range has default limit of 150)
+        scrollToItem(stringBox, 150);
+
+        assertLoadedItemsCount(
+                "There should be 150 items after loading four pages", 150,
+                stringBox);
+        assertRendered("Item 152");
+        
+        // The last page should get discarded (active range has default limit of 150)
+        scrollToItem(stringBox, 0);
+
+        assertLoadedItemsCount(
+                "There should be 150 items after loading four pages", 150,
+                stringBox);
+        assertRendered("Item 2");
     }
 
     @Test
