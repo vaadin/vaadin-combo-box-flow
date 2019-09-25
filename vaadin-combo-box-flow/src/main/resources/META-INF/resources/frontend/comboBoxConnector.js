@@ -54,7 +54,7 @@ window.Vaadin.Flow.comboBoxConnector = {
       }
     };
     let setRequestedRange;
-    const rangeRequestToggle = throttle(() => setRequestedRange && setRequestedRange(), 50);
+    const rangeRequestThrottle = throttle(() => setRequestedRange && setRequestedRange(), 50);
 
     const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
@@ -145,7 +145,7 @@ window.Vaadin.Flow.comboBoxConnector = {
           const endIndex = params.pageSize * (rangeMax + 1);
           const count = endIndex - startIndex;
           setRequestedRange = () => comboBox.$server.setRequestedRange(startIndex, count, params.filter);
-          rangeRequestToggle();
+          rangeRequestThrottle();
         }
       }
     }
