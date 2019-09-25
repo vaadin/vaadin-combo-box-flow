@@ -32,6 +32,19 @@ window.Vaadin.Flow.comboBoxConnector = {
     const placeHolder = new Vaadin.ComboBoxPlaceholder();
     const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 150); // Max item count in active range
 
+    let flushCallback, flushTimeout;
+    const scheduleFlush = () => {
+      flushTimeout = setTimeout(() => {
+        if (flushCallback) {
+          flushCallback();
+          flushCallback = null;
+          scheduleFlush();
+        } else {
+          flushTimeout = null;
+        }
+      }, 50);
+    };
+
     const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
       pages.forEach(page => {
@@ -120,11 +133,13 @@ window.Vaadin.Flow.comboBoxConnector = {
           const startIndex = params.pageSize * rangeMin;
           const endIndex = params.pageSize * (rangeMax + 1);
           const count = endIndex - startIndex;
+          flushCallback = () => comboBox.$server.setRequestedRange(startIndex, count, params.filter);
 
-          this._debouncer = Debouncer.debounce(
-            this._debouncer,
-            timeOut.after(50),
-            () => comboBox.$server.setRequestedRange(startIndex, count, params.filter));
+          if (!flushTimeout) {
+            flushCallback();
+            flushCallback = null;
+            scheduleFlush();
+          }
         }
       }
     }
@@ -193,6 +208,7 @@ window.Vaadin.Flow.comboBoxConnector = {
       clearPageCallbacks();
       cache = {};
       comboBox.clearCache();
+      flushTimeout = null;
     }
 
     comboBox.$connector.confirm = function (id, filter) {
@@ -201,11 +217,11 @@ window.Vaadin.Flow.comboBoxConnector = {
         return;
       }
 
-      // We're done applying changes from this batch, resolve outstanding
+      // We're done applying changes from this batch, resolve pending
       // callbacks
-      let outstandingRequests = Object.getOwnPropertyNames(pageCallbacks);
-      for (let i = 0; i < outstandingRequests.length; i++) {
-        let page = outstandingRequests[i];
+      let activePages = Object.getOwnPropertyNames(pageCallbacks);
+      for (let i = 0; i < activePages.length; i++) {
+        let page = activePages[i];
 
         if (cache[page]) {
           commitPage(page, pageCallbacks[page]);
