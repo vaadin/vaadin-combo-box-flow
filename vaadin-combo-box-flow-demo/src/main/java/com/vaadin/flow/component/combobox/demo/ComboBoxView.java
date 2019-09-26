@@ -243,7 +243,6 @@ public class ComboBoxView extends DemoView {
         comboBox.addCustomValueSetListener(event -> {
             Project project = projectData.addProject(event.getDetail());
             comboBox.setValue(project);
-            System.out.println("added");
         });
         // end-source-example
 

@@ -11,7 +11,6 @@ public class ElementData {
     private static List<Element> createElementList() {
         List<Element> elementList = new ArrayList<>();
 
-        elementList = new ArrayList<>();
         elementList.add(new Element("Hydrogen"));
         elementList.add(new Element("Helium"));
         elementList.add(new Element("Lithium"));
