@@ -32,29 +32,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     const placeHolder = new Vaadin.ComboBoxPlaceholder();
     const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 150); // Max item count in active range
 
-    // From https://codeburst.io/throttling-and-debouncing-in-javascript-b01cad5c8edf
-    const throttle = (func, limit) => {
-      let lastFunc
-      let lastRan
-      return function() {
-        const context = this
-        const args = arguments
-        if (!lastRan) {
-          func.apply(context, args)
-          lastRan = Date.now()
-        } else {
-          clearTimeout(lastFunc)
-          lastFunc = setTimeout(function() {
-            if ((Date.now() - lastRan) >= limit) {
-              func.apply(context, args)
-              lastRan = Date.now()
-            }
-          }, limit - (Date.now() - lastRan))
-        }
-      }
-    };
     let setRequestedRange;
-    const rangeRequestThrottle = throttle(() => setRequestedRange && setRequestedRange(), 50);
 
     const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
@@ -145,7 +123,14 @@ window.Vaadin.Flow.comboBoxConnector = {
           const endIndex = params.pageSize * (rangeMax + 1);
           const count = endIndex - startIndex;
           setRequestedRange = () => comboBox.$server.setRequestedRange(startIndex, count, params.filter);
-          rangeRequestThrottle();
+          if (!this._debouncer || !this._debouncer.isActive()) {
+            setRequestedRange();
+            setRequestedRange = null;
+          }
+          this._debouncer = Debouncer.debounce(
+            this._debouncer,
+            timeOut.after(50),
+            () => setRequestedRange && setRequestedRange());
         }
       }
     }
