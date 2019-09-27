@@ -70,7 +70,7 @@ public class ComboBoxView extends DemoView {
         customFiltering(); // Filtering
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
-        themeVariants(); // Theme variants
+        themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
         styling(); // Styling
     }
@@ -383,7 +383,7 @@ public class ComboBoxView extends DemoView {
                 "Customizing drop down items with TemplateRenderer", comboBox);
     }
 
-    private void themeVariants() {
+    private void themeVariantsTextAlign() {
         Div div = new Div();
         // begin-source-example
         // source-example-heading: Text align
