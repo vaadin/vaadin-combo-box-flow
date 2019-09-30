@@ -30,7 +30,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     let cache = {};
     let lastFilter = '';
     const placeHolder = new Vaadin.ComboBoxPlaceholder();
-    const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 150); // Max item count in active range
+    const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
     let setRequestedRange;
 
@@ -45,11 +45,11 @@ window.Vaadin.Flow.comboBoxConnector = {
         // encounters a placeholder)
         const pageStart = parseInt(page) * comboBox.pageSize;
         const pageEnd = pageStart + comboBox.pageSize;
-        for (let i = 0; i < comboBox.filteredItems.length; i++) {
-          if (i >= pageStart && i < pageEnd) {
-            comboBox.filteredItems[i] = placeHolder;
-          }
-        }
+        for (let i = pageStart; i < pageEnd; i++) {
+    	  if (i < comboBox.filteredItems.length) {
+		    comboBox.filteredItems[i] = placeHolder;
+    	  }
+    	}
       });
     }
 
@@ -129,7 +129,7 @@ window.Vaadin.Flow.comboBoxConnector = {
           }
           this._debouncer = Debouncer.debounce(
             this._debouncer,
-            timeOut.after(50),
+            timeOut.after(200),
             () => setRequestedRange && setRequestedRange());
         }
       }
