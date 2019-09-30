@@ -88,6 +88,8 @@ public class DataProviderIT extends AbstractComponentIT {
 
         findElement(By.id("refresh-all-with-smaller-data-set")).click();
         comboBox.openPopup();
+        
+        waitUntil(e -> "bar".equals(comboBox.getOptions().get(0)));
 
         List<String> items = comboBox.getOptions();
         Assert.assertEquals(

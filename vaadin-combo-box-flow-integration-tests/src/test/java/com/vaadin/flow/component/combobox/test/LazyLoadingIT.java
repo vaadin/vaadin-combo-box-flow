@@ -87,19 +87,25 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 stringBox);
         assertRendered("Item 102");
 
-        // The first page should get discarded (active range has default limit of 150)
-        scrollToItem(stringBox, 150);
-
-        assertLoadedItemsCount(
-                "There should be 150 items after loading four pages", 150,
-                stringBox);
-        assertRendered("Item 152");
+        // The first pages should get discarded (active range has default limit of 500)
+        for (int i = 150; i <= 600; i += 50) {
+        	scrollToItem(stringBox, i);
+        	waitUntilTextInContent("Item " + i);
+        }
         
-        // The last page should get discarded (active range has default limit of 150)
-        scrollToItem(stringBox, 0);
+        assertLoadedItemsCount(
+                "There should be 500 items after loading multiple pages", 500,
+                stringBox);
+        assertRendered("Item 602");
+        
+        // The last pages should get discarded (active range has default limit of 500)
+        for (int i = 600; i >= 0; i -= 50) {
+        	scrollToItem(stringBox, i);
+        	waitUntilTextInContent("Item " + i);
+        }
 
         assertLoadedItemsCount(
-                "There should be 150 items after loading four pages", 150,
+                "There should be 500 items after scrolling back to start", 500,
                 stringBox);
         assertRendered("Item 2");
     }
@@ -119,7 +125,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void scrollToEnd_scrollUpwards_pagesLoaded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 1000);
+        waitUntilTextInContent("Item 999");
         scrollToItem(stringBox, 920);
+        waitUntilTextInContent("Item 919");
 
         assertLoadedItemsCount(
                 "Expected the two last pages to be loaded (100 items).",
@@ -127,6 +135,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 920");
         
         scrollToItem(stringBox, 870);
+        waitUntilTextInContent("Item 869");
         
         assertLoadedItemsCount(
                 "Expected the three last pages to be loaded (150 items).",
@@ -229,6 +238,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         clickButton("change-pagesize");
         pagesizeBox.openPopup();
+        waitUntilTextInContent("Item");
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 'pageSize' amount "
                         + "of items should be loaded (with updated pageSize: 100).",

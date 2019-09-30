@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
@@ -143,6 +144,14 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
         executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
                 comboBox, index);
+    }
+    
+    protected void waitUntilTextInContent(String text) {
+    	waitUntil(e -> {
+        	List<String> overlayContents = getOverlayContents();
+            return overlayContents.stream()
+                    .anyMatch(s -> s.contains(text));
+        });
     }
 
     protected TestBenchElement getOverlay() {
