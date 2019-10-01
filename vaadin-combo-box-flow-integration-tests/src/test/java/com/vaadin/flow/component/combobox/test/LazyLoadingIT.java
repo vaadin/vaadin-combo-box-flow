@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -89,21 +90,23 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 stringBox);
         assertRendered("Item 102");
 
-        // The first pages should get discarded (active range has default limit of 500)
+        // The first pages should get discarded (active range has default limit
+        // of 500)
         for (int i = 150; i <= 600; i += 50) {
-        	scrollToItem(stringBox, i);
-        	waitUntilTextInContent("Item " + i);
+            scrollToItem(stringBox, i);
+            waitUntilTextInContent("Item " + i);
         }
-        
+
         assertLoadedItemsCount(
                 "There should be 500 items after loading multiple pages", 500,
                 stringBox);
         assertRendered("Item 602");
-        
-        // The last pages should get discarded (active range has default limit of 500)
+
+        // The last pages should get discarded (active range has default limit
+        // of 500)
         for (int i = 600; i >= 0; i -= 50) {
-        	scrollToItem(stringBox, i);
-        	waitUntilTextInContent("Item " + i);
+            scrollToItem(stringBox, i);
+            waitUntilTextInContent("Item " + i);
         }
 
         assertLoadedItemsCount(
@@ -118,8 +121,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         scrollToItem(stringBox, 1000);
         waitUntil(e -> getOverlayContents().contains("Item 999"));
         assertLoadedItemsCount(
-                "Expected the last page to be loaded (50 items).",
-                50, stringBox);
+                "Expected the last page to be loaded (50 items).", 50,
+                stringBox);
         assertRendered("Item 999");
     }
 
@@ -132,20 +135,19 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntilTextInContent("Item 919");
 
         assertLoadedItemsCount(
-                "Expected the two last pages to be loaded (100 items).",
-                100, stringBox);
+                "Expected the two last pages to be loaded (100 items).", 100,
+                stringBox);
         assertRendered("Item 920");
-        
+
         scrollToItem(stringBox, 870);
         waitUntilTextInContent("Item 869");
-        
+
         assertLoadedItemsCount(
-                "Expected the three last pages to be loaded (150 items).",
-                150, stringBox);
+                "Expected the three last pages to be loaded (150 items).", 150,
+                stringBox);
         assertRendered("Item 870");
         assertNotRendered("Item 990");
 
-        
     }
 
     @Test
@@ -453,15 +455,34 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void setComponentRenderer_scrollDown_scrollUp_itemsRendered() {
         clickButton("component-renderer");
         beanBox.openPopup();
+
         scrollToItem(beanBox, 300);
-        
-        waitUntil(e -> getOverlayContents().stream().anyMatch(s -> s.contains("<h4>Person 300</h4>")));
+        waitUntilTextInContent("<h4>Person 300</h4>");
+
         scrollToItem(beanBox, 0);
-        waitUntil(e -> getOverlayContents().stream().anyMatch(s -> s.contains("<h4>Person 0</h4>")));
+        waitUntilTextInContent("<h4>Person 0</h4>");
 
         assertComponentRendered("<h4>Person 0</h4>");
         assertComponentRendered("<h4>Person 4</h4>");
         assertComponentRendered("<h4>Person 9</h4>");
+    }
+
+    @Test
+    public void scrollDown_scrollUp_selectionRetained() {
+        beanBox.sendKeys("Person 0");
+        waitUntilTextInContent("Person 0");
+        beanBox.sendKeys(Keys.ENTER);
+
+        beanBox.openPopup();
+        waitUntilTextInContent("Person 0");
+
+        scrollToItem(beanBox, 600);
+        waitUntilTextInContent("Person 600");
+
+        scrollToItem(beanBox, 0);
+        waitUntilTextInContent("Person 0");
+
+        assertItemSelected("Person 0");
     }
 
     private void assertMessage(String expectedMessage) {

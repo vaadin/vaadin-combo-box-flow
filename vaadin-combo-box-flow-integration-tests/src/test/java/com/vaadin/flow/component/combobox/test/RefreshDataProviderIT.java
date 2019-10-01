@@ -42,7 +42,7 @@ public class RefreshDataProviderIT extends AbstractComponentIT {
                 comboBox);
 
         findElement(By.id("update")).click();
-        
+
         waitUntil(e -> comboBox.getOptions().size() == 2);
 
         testItems(

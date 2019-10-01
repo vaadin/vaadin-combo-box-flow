@@ -1051,6 +1051,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void setRequestedRange(int start, int length, String filter) {
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
+        refreshValue();
     }
 
     @ClientCallable
