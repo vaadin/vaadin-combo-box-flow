@@ -476,8 +476,13 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         waitUntilTextInContent("Person 0");
 
-        scrollToItem(beanBox, 600);
-        waitUntilTextInContent("Person 600");
+        int scrollIndex = 600;
+        scrollToItem(beanBox, scrollIndex);
+        waitUntilTextInContent("Person " + scrollIndex);
+
+        Assert.assertTrue(
+                "First item should not be loaded after scrolling down enough",
+                getLoadedItems(beanBox).size() < scrollIndex);
 
         scrollToItem(beanBox, 0);
         waitUntilTextInContent("Person 0");
