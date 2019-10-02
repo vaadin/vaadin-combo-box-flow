@@ -485,6 +485,21 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertItemSelected("Person 0");
     }
 
+    @Test
+    public void filtering_filterRetained() {
+        beanBox.sendKeys("Person 1");
+        waitUntilTextInContent("Person 1");
+        beanBox.sendKeys(Keys.ENTER);
+
+        beanBox.sendKeys("11");
+        waitUntilTextInContent("Person 111");
+
+        String filterText = (String) executeScript(
+                "return arguments[0].focusElement.value", beanBox);
+        Assert.assertEquals("The ComboBox filter text got modified",
+                "Person 111", filterText);
+    }
+
     private void assertMessage(String expectedMessage) {
         Assert.assertEquals(expectedMessage, $("div").id("message").getText());
     }

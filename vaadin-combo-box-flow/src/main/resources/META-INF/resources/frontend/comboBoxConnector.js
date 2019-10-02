@@ -220,6 +220,10 @@ window.Vaadin.Flow.comboBoxConnector = {
 
       // Let server know we're done
       comboBox.$server.confirmUpdate(id);
+
+      if (comboBox.selectedItem && comboBox._selectedKey) {
+        comboBox.value = comboBox.selectedItem.key = comboBox._selectedKey;
+      }
     }
 
     comboBox.$connector.enableClientValidation = function( enable ){
