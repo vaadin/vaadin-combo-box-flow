@@ -414,7 +414,7 @@ public class ComboBoxView extends DemoView {
         // source-example-heading: Small size
         ComboBox<String> comboBox = new ComboBox<>("Label");
         comboBox.setItems("Option one", "Option two");
-        comboBox.setPlaceholder("Option one");
+        comboBox.setPlaceholder("Placeholder");
         comboBox.getElement().setAttribute("theme", "small");
         // end-source-example
         addCard("Theme Variants", "Small size", comboBox);
