@@ -39,7 +39,7 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
 
         waitForItems(comboBox, items -> items.size() == 0);
 
-        WebElement button = findElement(By.tagName("button"));
+        WebElement button = findElement(By.id("set-items-button"));
         button.click();
 
         comboBox.openPopup();
@@ -63,8 +63,12 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
     public void openEmptyComboBox_setItems_open_containsItems() {
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
         comboBox.openPopup();
-        findElement(By.tagName("button")).click();
+        WebElement button = findElement(By.id("set-items-button"));
+        button.click();
         comboBox.openPopup();
+
+        waitUntil(e -> comboBox.getOptions().size() == 2);
+
         assertLoadedItemsCount("ComboBox should have loaded 2 items", 2,
                 comboBox);
         assertRendered("foo");
