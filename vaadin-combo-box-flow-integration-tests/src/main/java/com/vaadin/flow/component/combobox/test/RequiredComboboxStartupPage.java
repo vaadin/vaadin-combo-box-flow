@@ -45,6 +45,8 @@ public class RequiredComboboxStartupPage extends Div {
 
     private class TestBean {
 
+        private Boolean dob = true;
+
         public Boolean getDob() {
             return dob;
         }
@@ -52,8 +54,6 @@ public class RequiredComboboxStartupPage extends Div {
         public void setDob(Boolean dob) {
             this.dob = dob;
         }
-
-        private Boolean dob = true;
 
     }
 }
