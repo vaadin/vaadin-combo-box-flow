@@ -33,6 +33,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
     let setRequestedRange;
+    let needsDataCommunicatorReset;
 
     const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
@@ -81,18 +82,20 @@ window.Vaadin.Flow.comboBoxConnector = {
       if (filterChanged) {
         cache = {};
         lastFilter = params.filter;
+        needsDataCommunicatorReset = needsDataCommunicatorReset || params.filter === '';
         this._debouncer = Debouncer.debounce(
           this._debouncer,
           timeOut.after(500),
           () => {
             clearPageCallbacks();
             comboBox.clearCache();
-            if (params.filter === '') {
+            if (needsDataCommunicatorReset) {
               // Fixes the case when the filter changes
               // from '' to something else and back to ''
               // within debounce timeout, and the
               // DataCommunicator thinks it doesn't need to send data
               comboBox.$server.resetDataCommunicator();
+              needsDataCommunicatorReset = false;
             }
           });
         return;
