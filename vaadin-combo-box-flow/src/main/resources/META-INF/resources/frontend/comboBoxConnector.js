@@ -22,7 +22,6 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
     const timeOut = window.Vaadin.Flow.Legacy.timeOut;
-
     comboBox.$connector = {};
 
     // holds pageIndex -> callback pairs of subsequent indexes (current active range)
@@ -33,7 +32,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
     let setRequestedRange;
-    let needsDataCommunicatorReset;
+    let lastFilterSentToServer = '';
 
     const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
@@ -82,20 +81,18 @@ window.Vaadin.Flow.comboBoxConnector = {
       if (filterChanged) {
         cache = {};
         lastFilter = params.filter;
-        needsDataCommunicatorReset = needsDataCommunicatorReset || params.filter === '';
         this._debouncer = Debouncer.debounce(
           this._debouncer,
           timeOut.after(500),
           () => {
             clearPageCallbacks();
             comboBox.clearCache();
-            if (needsDataCommunicatorReset) {
+            if (lastFilterSentToServer === params.filter) {
               // Fixes the case when the filter changes
               // from '' to something else and back to ''
               // within debounce timeout, and the
               // DataCommunicator thinks it doesn't need to send data
               comboBox.$server.resetDataCommunicator();
-              needsDataCommunicatorReset = false;
             }
           });
         return;
@@ -125,7 +122,10 @@ window.Vaadin.Flow.comboBoxConnector = {
           const startIndex = params.pageSize * rangeMin;
           const endIndex = params.pageSize * (rangeMax + 1);
           const count = endIndex - startIndex;
-          setRequestedRange = () => comboBox.$server.setRequestedRange(startIndex, count, params.filter);
+          setRequestedRange = () => {
+            comboBox.$server.setRequestedRange(startIndex, count, params.filter);
+            lastFilterSentToServer = params.filter;
+          };
           if (!this._debouncer || !this._debouncer.isActive()) {
             setRequestedRange();
             setRequestedRange = null;
