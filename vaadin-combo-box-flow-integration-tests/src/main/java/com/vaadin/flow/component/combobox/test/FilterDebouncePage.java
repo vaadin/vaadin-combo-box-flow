@@ -42,7 +42,8 @@ public class FilterDebouncePage extends VerticalLayout {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            // Wait more
+            waitABit();
         }
     }
 }
