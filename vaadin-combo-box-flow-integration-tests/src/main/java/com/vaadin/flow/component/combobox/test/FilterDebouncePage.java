@@ -11,8 +11,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
 
 /**
- * vaadin/vaadin-combo-box-flow#296 - Filtering problem using slow
- * DataProvider
+ * vaadin/vaadin-combo-box-flow#296 - Filtering problem using slow DataProvider
  */
 @Route("filter-debounce")
 public class FilterDebouncePage extends VerticalLayout {
