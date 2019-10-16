@@ -21,13 +21,10 @@ public class FilterDebouncePage extends VerticalLayout {
         ListDataProvider<String> dp = new ListDataProvider<>(
                 Arrays.asList("aaa", "bbb", "ccc"));
         combo.setDataProvider((filter, offset, limit) -> {
-            System.out.println("filter " + filter + " " + offset + " " + limit);
             waitABit();
             return dp.fetch(
-                    new Query<>(offset, limit, null, null, filter(filter)))
-                    .peek(System.out::println);
+                    new Query<>(offset, limit, null, null, filter(filter)));
         }, s -> {
-            System.out.println("size " + s);
             waitABit();
             return dp.size(
                     new Query<>(0, Integer.MAX_VALUE, null, null, filter(s)));
@@ -45,7 +42,7 @@ public class FilterDebouncePage extends VerticalLayout {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
     }
 }
