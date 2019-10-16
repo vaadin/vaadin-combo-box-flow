@@ -89,7 +89,7 @@ window.Vaadin.Flow.comboBoxConnector = {
             comboBox.clearCache();
             if (lastFilterSentToServer === params.filter) {
               // Fixes the case when the filter changes
-              // from '' to something else and back to ''
+              // to something else and back to the original value
               // within debounce timeout, and the
               // DataCommunicator thinks it doesn't need to send data
               comboBox.$server.resetDataCommunicator();
