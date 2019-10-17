@@ -45,10 +45,9 @@ window.Vaadin.Flow.comboBoxConnector = {
         // encounters a placeholder)
         const pageStart = parseInt(page) * comboBox.pageSize;
         const pageEnd = pageStart + comboBox.pageSize;
-        for (let i = pageStart; i < pageEnd; i++) {
-          if (i < comboBox.filteredItems.length) {
-            comboBox.filteredItems[i] = placeHolder;
-          }
+        const end = Math.min(pageEnd, comboBox.filteredItems.length);
+        for (let i = pageStart; i < end; i++) {
+          comboBox.filteredItems[i] = placeHolder;
         }
       });
     }
