@@ -25,14 +25,35 @@ window.Vaadin.Flow.comboBoxConnector = {
     comboBox.$connector = {};
 
     // holds pageIndex -> callback pairs of subsequent indexes (current active range)
-    let pageCallbacks = {};
+    const pageCallbacks = {};
     let cache = {};
     let lastFilter = '';
     const placeHolder = new Vaadin.ComboBoxPlaceholder();
     const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
-    let setRequestedRange;
-    let lastFilterSentToServer = '';
+    const serverFacade = (() => {
+        // Private variables
+        let lastFilterSentToServer = '';
+        let dataCommunicatorResetNeeded = false;
+
+        // Public methods
+        const needsDataCommunicatorReset = () => dataCommunicatorResetNeeded = true;
+        const getLastFilterSentToServer = () => lastFilterSentToServer;
+        const requestData = (startIndex, endIndex, params) => {
+          const count = endIndex - startIndex;
+          const filter = params.filter;
+
+          comboBox.$server.setRequestedRange(startIndex, count, filter);
+          lastFilterSentToServer = filter;
+          if(dataCommunicatorResetNeeded) {
+            comboBox.$server.resetDataCommunicator();
+            dataCommunicatorResetNeeded = true;
+          }
+        };
+
+        return {needsDataCommunicatorReset, getLastFilterSentToServer, requestData};
+
+    })();
 
     const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
       // Flush and empty the existing requests
@@ -84,15 +105,20 @@ window.Vaadin.Flow.comboBoxConnector = {
           this._debouncer,
           timeOut.after(500),
           () => {
-            clearPageCallbacks();
-            comboBox.clearCache();
-            if (lastFilterSentToServer === params.filter) {
+            if (serverFacade.getLastFilterSentToServer() === params.filter) {
               // Fixes the case when the filter changes
               // to something else and back to the original value
               // within debounce timeout, and the
               // DataCommunicator thinks it doesn't need to send data
-              comboBox.$server.resetDataCommunicator();
+              serverFacade.needsDataCommunicatorReset();
             }
+            if(params.filter !== lastFilter) {
+              throw new Error("Expected params.filter to be '"
+                    + lastFilter + "' but was '" + params.filter + "'");
+            }
+            // Call the method again after debounce.
+            clearPageCallbacks();
+            comboBox.dataProvider(params, callback)
           });
         return;
       }
@@ -120,19 +146,15 @@ window.Vaadin.Flow.comboBoxConnector = {
           // The requested page was sequential, extend the requested range
           const startIndex = params.pageSize * rangeMin;
           const endIndex = params.pageSize * (rangeMax + 1);
-          const count = endIndex - startIndex;
-          setRequestedRange = () => {
-            comboBox.$server.setRequestedRange(startIndex, count, params.filter);
-            lastFilterSentToServer = params.filter;
-          };
+
           if (!this._debouncer || !this._debouncer.isActive()) {
-            setRequestedRange();
-            setRequestedRange = null;
+            serverFacade.requestData(startIndex, endIndex, params);
+          } else {
+            this._debouncer = Debouncer.debounce(
+              this._debouncer,
+              timeOut.after(200),
+              () => serverFacade.requestData(startIndex, endIndex, params));
           }
-          this._debouncer = Debouncer.debounce(
-            this._debouncer,
-            timeOut.after(200),
-            () => setRequestedRange && setRequestedRange());
         }
       }
     }
@@ -143,7 +165,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
 
     comboBox.$connector.set = function (index, items, filter) {
-      if (filter != lastFilter) {
+      if (filter != serverFacade.getLastFilterSentToServer()) {
         return;
       }
 
@@ -205,7 +227,7 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     comboBox.$connector.confirm = function (id, filter) {
 
-      if (filter != lastFilter) {
+      if (filter != serverFacade.getLastFilterSentToServer()) {
         return;
       }
 
