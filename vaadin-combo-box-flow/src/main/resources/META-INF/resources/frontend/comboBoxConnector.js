@@ -47,7 +47,7 @@ window.Vaadin.Flow.comboBoxConnector = {
           lastFilterSentToServer = filter;
           if(dataCommunicatorResetNeeded) {
             comboBox.$server.resetDataCommunicator();
-            dataCommunicatorResetNeeded = true;
+            dataCommunicatorResetNeeded = false;
           }
         };
 
