@@ -26,8 +26,8 @@ import org.openqa.selenium.TimeoutException;
 @TestPath("required-combobox-startup")
 public class RequiredComboboxStartupIT extends AbstractComponentIT {
 
-    @Test(expected = TimeoutException.class)
-    public void serverSideValidation_persistsOnBlur() {
+    @Test
+    public void serverSideValidation_persistsAtStartup() {
         open();
 
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
@@ -35,16 +35,26 @@ public class RequiredComboboxStartupIT extends AbstractComponentIT {
         Assert.assertEquals(Boolean.TRUE.toString(),
                 comboBox.getAttribute("invalid"));
 
-        TestBenchElement error = comboBox.$("vaadin-text-field").first()
+        TestBenchElement textField = comboBox.$("vaadin-text-field").first();
+
+        TestBenchElement error = textField
                 .$(TestBenchElement.class).id("vaadin-text-field-error-0");
 
         Assert.assertTrue(error.getSize().getHeight() > 0);
         Assert.assertEquals("Must be false", error.getText());
 
-        // This should timeout and the validation error preserved on screen.
-        waitUntil(input -> error.getSize().getHeight() == 0);
+        try {
+            // This should timeout and the validation error preserved on screen.
+            waitUntil(input -> error.getSize().getHeight() == 0, 3);
 
-        Assert.fail();
+            Assert.fail(
+                    "Validation error message was dismissed while it should have remained visible");
+
+        } catch (TimeoutException e) {
+            // Validation error message is still visible after the timeout and
+            // wasn't hidden. This is expected since the input field is not valid.
+        }
+
     }
 
 }
