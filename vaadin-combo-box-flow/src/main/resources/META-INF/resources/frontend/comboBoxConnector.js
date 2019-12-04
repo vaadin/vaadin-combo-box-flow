@@ -39,43 +39,43 @@
             const serverFacade = (() => {
                 // Private variables
                 let lastFilterSentToServer = '';
-            let dataCommunicatorResetNeeded = false;
+                let dataCommunicatorResetNeeded = false;
 
-            // Public methods
-            const needsDataCommunicatorReset = () => dataCommunicatorResetNeeded = true;
-            const getLastFilterSentToServer = () => lastFilterSentToServer;
-            const requestData = (startIndex, endIndex, params) => {
-                const count = endIndex - startIndex;
-                const filter = params.filter;
+                // Public methods
+                const needsDataCommunicatorReset = () => dataCommunicatorResetNeeded = true;
+                const getLastFilterSentToServer = () => lastFilterSentToServer;
+                const requestData = (startIndex, endIndex, params) => {
+                    const count = endIndex - startIndex;
+                    const filter = params.filter;
 
-                comboBox.$server.setRequestedRange(startIndex, count, filter);
-                lastFilterSentToServer = filter;
-                if(dataCommunicatorResetNeeded) {
-                    comboBox.$server.resetDataCommunicator();
-                    dataCommunicatorResetNeeded = false;
-                }
-            };
+                    comboBox.$server.setRequestedRange(startIndex, count, filter);
+                    lastFilterSentToServer = filter;
+                    if(dataCommunicatorResetNeeded) {
+                        comboBox.$server.resetDataCommunicator();
+                        dataCommunicatorResetNeeded = false;
+                    }
+                };
 
-            return {needsDataCommunicatorReset, getLastFilterSentToServer, requestData};
+                return {needsDataCommunicatorReset, getLastFilterSentToServer, requestData};
 
-        })();
+            })();
 
             const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
                 // Flush and empty the existing requests
                 pages.forEach(page => {
                     pageCallbacks[page]([], comboBox.size);
-                delete pageCallbacks[page];
+                    delete pageCallbacks[page];
 
-                // Empty the comboBox's internal cache without invoking observers by filling
-                // the filteredItems array with placeholders (comboBox will request for data when it
-                // encounters a placeholder)
-                const pageStart = parseInt(page) * comboBox.pageSize;
-                const pageEnd = pageStart + comboBox.pageSize;
-                const end = Math.min(pageEnd, comboBox.filteredItems.length);
-                for (let i = pageStart; i < end; i++) {
-                    comboBox.filteredItems[i] = placeHolder;
-                }
-            });
+                    // Empty the comboBox's internal cache without invoking observers by filling
+                    // the filteredItems array with placeholders (comboBox will request for data when it
+                    // encounters a placeholder)
+                    const pageStart = parseInt(page) * comboBox.pageSize;
+                    const pageEnd = pageStart + comboBox.pageSize;
+                    const end = Math.min(pageEnd, comboBox.filteredItems.length);
+                    for (let i = pageStart; i < end; i++) {
+                        comboBox.filteredItems[i] = placeHolder;
+                    }
+                });
             }
 
             comboBox.dataProvider = function (params, callback) {
@@ -110,21 +110,21 @@
                         this._debouncer,
                         timeOut.after(500),
                         () => {
-                        if (serverFacade.getLastFilterSentToServer() === params.filter) {
-                        // Fixes the case when the filter changes
-                        // to something else and back to the original value
-                        // within debounce timeout, and the
-                        // DataCommunicator thinks it doesn't need to send data
-                        serverFacade.needsDataCommunicatorReset();
-                    }
-                    if(params.filter !== lastFilter) {
-                        throw new Error("Expected params.filter to be '"
-                            + lastFilter + "' but was '" + params.filter + "'");
-                    }
-                    // Call the method again after debounce.
-                    clearPageCallbacks();
-                    comboBox.dataProvider(params, callback)
-                });
+                            if (serverFacade.getLastFilterSentToServer() === params.filter) {
+                                // Fixes the case when the filter changes
+                                // to something else and back to the original value
+                                // within debounce timeout, and the
+                                // DataCommunicator thinks it doesn't need to send data
+                                serverFacade.needsDataCommunicatorReset();
+                            }
+                            if(params.filter !== lastFilter) {
+                                throw new Error("Expected params.filter to be '"
+                                    + lastFilter + "' but was '" + params.filter + "'");
+                            }
+                            // Call the method again after debounce.
+                            clearPageCallbacks();
+                            comboBox.dataProvider(params, callback)
+                        });
                     return;
                 }
 
@@ -208,7 +208,7 @@
                         }
                     }
                 }
-            })
+            });
 
             comboBox.$connector.updateSize = tryCatchWrapper(function (newSize) {
                 if (!comboBox._clientSideFilter) {
@@ -222,13 +222,13 @@
                     // filtered items count are less.
                     comboBox.size = newSize;
                 }
-            })
+            });
 
             comboBox.$connector.reset = tryCatchWrapper(function () {
                 clearPageCallbacks();
                 cache = {};
                 comboBox.clearCache();
-            })
+            });
 
             comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
 
@@ -249,25 +249,25 @@
 
                 // Let server know we're done
                 comboBox.$server.confirmUpdate(id);
-            })
+            });
 
-            customElements.whenDefined('vaadin-combo-box').then(() => {
+            customElements.whenDefined('vaadin-combo-box').then(tryCatchWrapper(() => {
                 const _isItemSelected = comboBox.$.overlay._isItemSelected;
-            // Override comboBox's _isItemSelected logic to handle remapped items
-            comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
-                let selected = _isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
+                // Override comboBox's _isItemSelected logic to handle remapped items
+                comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
+                    let selected = _isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
 
-                if (comboBox._selectedKey) {
-                    if (comboBox.filteredItems.indexOf(selectedItem) > -1) {
-                        delete comboBox._selectedKey;
-                    } else {
-                        selected = selected || item.key === comboBox._selectedKey;
+                    if (comboBox._selectedKey) {
+                        if (comboBox.filteredItems.indexOf(selectedItem) > -1) {
+                            delete comboBox._selectedKey;
+                        } else {
+                            selected = selected || item.key === comboBox._selectedKey;
+                        }
                     }
-                }
 
-                return selected;
-            }
-        });
+                    return selected;
+                }
+            }));
 
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
@@ -292,7 +292,7 @@
                         comboBox.$connector.enableClientValidation(enable);
                     }, 10);
                 }
-            })
+            });
 
             const disableClientValidation =  tryCatchWrapper(function (combo){
                 if ( typeof combo.$checkValidity == 'undefined'){
@@ -305,21 +305,21 @@
                         return !(comboBox.focusElement.invalid = comboBox.invalid);
                     };
                 }
-            })
+            });
 
             const disableTextFieldClientValidation =  tryCatchWrapper(function (field, comboBox){
                 if ( typeof field.$checkValidity == 'undefined'){
                     field.$checkValidity = field.checkValidity;
                     field.checkValidity = function() { return !comboBox.invalid; };
                 }
-            })
+            });
 
             const enableTextFieldClientValidation = tryCatchWrapper(function (field){
                 if ( field.$checkValidity ){
                     field.checkValidity = field.$checkValidity;
                     delete field.$checkValidity;
                 }
-            })
+            });
 
             const enableClientValidation = tryCatchWrapper(function (combo){
                 if ( combo.$checkValidity ){
@@ -330,7 +330,7 @@
                     combo.validate = combo.$validate;
                     delete combo.$validate;
                 }
-            })
+            });
 
             const commitPage = tryCatchWrapper(function (page, callback) {
                 let data = cache[page];
@@ -347,7 +347,7 @@
                     // comboBox.size and remove updateSize function.
                     callback(data, comboBox.size);
                 }
-            })
+            });
 
             // Perform filter on client side (here) using the items from specified page
             // and submitting the filtered items to specified callback.
@@ -363,14 +363,14 @@
                 }
 
                 callback(filteredItems, filteredItems.length);
-            })
+            });
 
             // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
-            comboBox.addEventListener('opened-changed', e =>
-            e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {}));
+            comboBox.addEventListener('opened-changed', tryCatchWrapper(e =>
+                {e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {})}));
 
             // Prevent setting the custom value as the 'value'-prop automatically
-            comboBox.addEventListener('custom-value-set', e => e.preventDefault());
+            comboBox.addEventListener('custom-value-set', tryCatchWrapper(e => e.preventDefault()));
         })
     }
 })();
