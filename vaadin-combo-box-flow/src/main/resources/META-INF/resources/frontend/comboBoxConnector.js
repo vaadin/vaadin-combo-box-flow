@@ -1,11 +1,11 @@
+// Not using ES6 imports in this file yet because the connector in V14 must
+// still work in Legacy bower projects. See: `comboBoxConnector-es6.js` for
+// the Polymer3 approach.
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow');
     };
 
-    // Not using ES6 imports in this file yet because the connector in V14 must
-    // still work in Legacy bower projects. See: `ironListConnector-es6.js` for
-    // the Polymer3 approach.
     window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
     window.Vaadin.Flow.comboBoxConnector = {
