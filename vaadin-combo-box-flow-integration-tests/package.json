@@ -1,0 +1,53 @@
+{
+  "name": "no-name",
+  "license": "UNLICENSED",
+  "vaadin": {
+    "dependencies": {
+      "@vaadin/router": "^1.6.0",
+      "@polymer/polymer": "3.2.0",
+      "@vaadin/vaadin-ordered-layout": "1.1.0",
+      "@vaadin/vaadin-combo-box": "5.0.11",
+      "@vaadin/vaadin-lumo-styles": "1.5.0",
+      "@vaadin/vaadin-material-styles": "1.2.3"
+    },
+    "devDependencies": {
+      "copy-webpack-plugin": "5.1.1",
+      "compression-webpack-plugin": "3.1.0",
+      "raw-loader": "4.0.0",
+      "webpack-cli": "3.3.11",
+      "webpack": "4.42.0",
+      "progress-webpack-plugin": "0.0.24",
+      "html-webpack-plugin": "3.2.0",
+      "script-ext-html-webpack-plugin": "2.1.4",
+      "awesome-typescript-loader": "5.2.1",
+      "typescript": "3.8.3",
+      "webpack-merge": "4.2.2",
+      "webpack-dev-server": "3.10.3"
+    },
+    "hash": "68d83a0b92e325f539e129fac3819ce5e3ea0fdf0fb61ba0e18b55ff2f3fd11e"
+  },
+  "dependencies": {
+    "@vaadin/router": "^1.6.0",
+    "@polymer/polymer": "3.2.0",
+    "@vaadin/flow-frontend": "./target/flow-frontend",
+    "@vaadin/vaadin-ordered-layout": "1.1.0",
+    "@vaadin/vaadin-combo-box": "5.0.11",
+    "@vaadin/vaadin-lumo-styles": "1.5.0",
+    "@vaadin/vaadin-material-styles": "1.2.3"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "5.2.1",
+    "compression-webpack-plugin": "3.1.0",
+    "copy-webpack-plugin": "5.1.1",
+    "html-webpack-plugin": "3.2.0",
+    "progress-webpack-plugin": "0.0.24",
+    "raw-loader": "4.0.0",
+    "script-ext-html-webpack-plugin": "2.1.4",
+    "terser": "4.6.7",
+    "typescript": "3.8.3",
+    "webpack": "4.42.0",
+    "webpack-cli": "3.3.11",
+    "webpack-dev-server": "3.10.3",
+    "webpack-merge": "4.2.2"
+  }
+}

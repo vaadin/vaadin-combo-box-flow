@@ -17,7 +17,7 @@ reference-screenshots
 **/bower_components/**
 
 # The following files are generated/updated by flow-maven-plugin
-package.json
-package-lock.json
-webpack.config.js
+# package*.json
+webpack.*.js
 node_modules/
+tsconfig.json
