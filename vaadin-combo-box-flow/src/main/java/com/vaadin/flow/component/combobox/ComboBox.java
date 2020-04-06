@@ -90,6 +90,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
+
     /**
      * A callback method for fetching items. The callback is provided with a
      * non-null string filter, offset index and limit.
@@ -474,7 +475,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@code null}.
      */
     @Override
-    public void setDataProvider(DataProvider<T, String> dataProvider) {
+    public void setDataProvider(DataProvider<? extends T, String> dataProvider) {
         setDataProvider(dataProvider, SerializableFunction.identity());
     }
 
@@ -496,7 +497,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@code null}.
      */
     @Override
-    public <C> void setDataProvider(DataProvider<T, C> dataProvider,
+    public <C> void setDataProvider(DataProvider<? extends T, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
         Objects.requireNonNull(dataProvider,
                 "The data provider can not be null");
@@ -526,7 +527,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         };
 
         SerializableConsumer<C> providerFilterSlot = dataCommunicator
-                .setDataProvider(dataProvider,
+                .setDataProvider((DataProvider) dataProvider,
                         convertOrNull.apply(getFilterString()));
 
         filterSlot = filter -> {
@@ -595,7 +596,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * size callback.
      * <p>
      * This method is a shorthand for making a {@link CallbackDataProvider} that
-     * handles a partial {@link com.vaadin.data.provider.Query Query} object.
+     * handles a partial {@link com.vaadin.flow.data.provider.Query Query} object.
      * <p>
      * Changing the combo box's data provider resets its current value to
      * {@code null}.
