@@ -65,8 +65,8 @@ public class ComboBoxView extends DemoView {
         displayClearButton();
         valueChangeEvent();
         customValues();
-        autoOpenDisabled();
         storingCustomValues();
+        autoOpenDisabled();
         lazyLoading();
         configurationForReqired(); // Validation
         customFiltering(); // Filtering
