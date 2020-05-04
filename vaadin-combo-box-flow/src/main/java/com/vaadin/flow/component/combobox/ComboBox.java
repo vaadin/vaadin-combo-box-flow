@@ -30,7 +30,9 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.data.binder.HasDynamicDataProvider;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
+import com.vaadin.flow.data.binder.HasFilterableDynamicDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -39,8 +41,11 @@ import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DynamicDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.ArrayUpdater.Update;
+import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
@@ -84,7 +89,7 @@ import elemental.json.JsonValue;
 @JsModule("./comboBoxConnector.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
-        HasFilterableDataProvider<T, String> {
+        HasFilterableDynamicDataProvider<T, String> {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -478,7 +483,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@code null}.
      */
     @Override
-    public void setDataProvider(DataProvider<T, String> dataProvider) {
+    public void setDataProvider(DynamicDataProvider<T, String> dataProvider) {
         setDataProvider(dataProvider, SerializableFunction.identity());
     }
 
@@ -500,7 +505,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@code null}.
      */
     @Override
-    public <C> void setDataProvider(DataProvider<T, C> dataProvider,
+    public <C> void setDataProvider(DynamicDataProvider<T, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
         Objects.requireNonNull(dataProvider,
                 "The data provider can not be null");
@@ -653,7 +658,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the data provider used by this ComboBox
      */
-    public DataProvider<T, ?> getDataProvider() { // NOSONAR
+    public DynamicDataProvider<T, ?> getDataProvider() { // NOSONAR
         return dataCommunicator.getDataProvider();
     }
 

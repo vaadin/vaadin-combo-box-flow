@@ -26,14 +26,12 @@ import com.vaadin.flow.component.combobox.demo.entity.Person;
 import com.vaadin.flow.component.combobox.demo.entity.Project;
 import com.vaadin.flow.component.combobox.demo.entity.Song;
 import com.vaadin.flow.component.combobox.demo.service.PersonService;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DynamicDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -43,6 +41,8 @@ import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -58,21 +58,22 @@ public class ComboBoxView extends DemoView {
 
     @Override
     public void initView() {
-        basicDemo(); // Basic usage
-        disabledAndReadonly();
-        entityList();
-        displayClearButton();
-        valueChangeEvent();
-        customValues();
-        storingCustomValues();
+//        basicDemo(); // Basic usage
+//        disabledAndReadonly();
+//        entityList();
+//        displayClearButton();
+//        valueChangeEvent();
+//        customValues();
+//        storingCustomValues();
         lazyLoading();
-        configurationForReqired(); // Validation
-        customFiltering(); // Filtering
-        customOptionsDemo(); // Presentation
-        usingTemplateRenderer();
-        themeVariantsTextAlign(); // Theme variants
-        themeVariantsSmallSize();
-        styling(); // Styling
+        dynamicLazyLoading();
+//        configurationForReqired(); // Validation
+//        customFiltering(); // Filtering
+//        customOptionsDemo(); // Presentation
+//        usingTemplateRenderer();
+//        themeVariantsTextAlign(); // Theme variants
+//        themeVariantsSmallSize();
+//        styling(); // Styling
     }
 
     private void basicDemo() {
@@ -270,6 +271,35 @@ public class ComboBoxView extends DemoView {
         //@formatter:on
         comboBox.setId("callback-box");
         addCard("Lazy loading with callbacks", comboBox);
+    }
+
+    private void dynamicLazyLoading() {
+        ComboBox<Person> comboBox = new ComboBox<>();
+
+        comboBox.setDataProvider(DynamicDataProvider.fromFilteringCallback(query -> {
+            int total = new Random().nextInt(300);
+            System.out.println("Total count = " + total);
+
+            int lastIndex = toIndex(query, total);
+            return generatePersonStream(query, lastIndex);
+        }));
+
+        comboBox.setId("callback-box-dynamic");
+        addCard("Dynamic Lazy loading with callbacks", comboBox);
+    }
+
+    private int toIndex(Query<Person, String> query, int total) {
+        if (query.getOffset() + query.getLimit() <= total) {
+            total = query.getOffset() + query.getLimit();
+        }
+        return total;
+    }
+
+    private Stream<Person> generatePersonStream(Query<Person, String> query, int lastIndex) {
+        return IntStream
+                .range(query.getOffset(), lastIndex)
+                .mapToObj(index -> new Person(1, "John", "Doe",
+                        index + 1, new Person.Address("111", "Turku"), "0461234567"));
     }
 
     private void configurationForReqired() {
