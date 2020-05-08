@@ -42,6 +42,10 @@
         <module>vaadin-combo-box-flow-demo</module>
     </modules>
 
+    <properties>
+        <flow.version>3.2-SNAPSHOT</flow.version>
+    </properties>
+
     <profiles>
         <profile>
             <id>default</id>
