@@ -45,7 +45,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void init() {
         open();
         waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
-                .size() > 0);
+                .size() > 0, 300);
         stringBox = $(ComboBoxElement.class).id("lazy-strings");
         pagesizeBox = $(ComboBoxElement.class).id("pagesize");
         beanBox = $(ComboBoxElement.class).id("lazy-beans");
