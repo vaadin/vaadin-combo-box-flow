@@ -313,8 +313,7 @@ public class ComboBoxView extends DemoView {
 
     private void customOptionsDemo() {
         // begin-source-example
-        // source-example-heading: Customizing drop down items with
-        // ComponentRenderer
+        // source-example-heading: Drop down items with ComponentRenderer
         ComboBox<Information> comboBox = new ComboBox<>();
         comboBox.setLabel("User");
         comboBox.setItems(
@@ -346,13 +345,13 @@ public class ComboBoxView extends DemoView {
         // end-source-example
 
         addCard("Presentation",
-                "Customizing drop down items with ComponentRenderer", comboBox);
+                "Drop down items with ComponentRenderer", comboBox);
     }
 
     private void usingTemplateRenderer() {
         //@formatter:off
         // begin-source-example
-        // source-example-heading: Customizing drop down items with TemplateRenderer
+        // source-example-heading: Drop down items with TemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
         comboBox.setLabel("Song");
         List<Song> listOfSongs = createListOfSongs();
@@ -380,7 +379,7 @@ public class ComboBoxView extends DemoView {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
         addCard("Presentation",
-                "Customizing drop down items with TemplateRenderer", comboBox);
+                "Drop down items with TemplateRenderer", comboBox);
     }
 
     private void themeVariantsTextAlign() {
