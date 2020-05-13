@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.combobox.demo;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
@@ -41,10 +45,6 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * View for {@link ComboBox} demo.
@@ -168,6 +168,7 @@ public class ComboBoxView extends DemoView {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("Option one", "Option two");
         comboBox.setAutoOpen(false);
+        add(comboBox);
         // end-source-example
 
         addCard("Auto open disabled", note, comboBox);
@@ -198,10 +199,10 @@ public class ComboBoxView extends DemoView {
     }
 
     private void customValues() {
-        Div message = createMessageDiv("custom-value-message");
-
         // begin-source-example
         // source-example-heading: Allow custom values
+        Div message = new Div();
+
         ComboBox<String> comboBox = new ComboBox<>("Fruit");
         comboBox.setItems("Apple", "Orange", "Banana");
 
@@ -219,8 +220,9 @@ public class ComboBoxView extends DemoView {
                 message.setText("Selected value: " + event.getValue());
             }
         });
+        add(comboBox, message);
         // end-source-example
-
+        decorateMessageDiv(message, "custom-value-message");
         comboBox.setId("custom-value-box");
         addCard("Allow custom values", comboBox, message);
     }
@@ -240,9 +242,10 @@ public class ComboBoxView extends DemoView {
     }
 
     private void storingCustomValues() {
-        Div message = createMessageDiv("custom-value-message");
         // begin-source-example
         // source-example-heading: Storing custom values
+        Div message = new Div();
+
         ComboBox<Project> comboBox = new ComboBox<>("Project");
         DataProvider<Project, String> dataProvider = DataProvider
                 .fromFilteringCallbacks(this::fetchProjects,
@@ -265,7 +268,7 @@ public class ComboBoxView extends DemoView {
         });
         add(comboBox, message);
         // end-source-example
-
+        decorateMessageDiv(message, "custom-value-message");
         addCard("Storing custom values", comboBox, message);
 
     }
@@ -366,6 +369,7 @@ public class ComboBoxView extends DemoView {
         }));
 
         comboBox.setItemLabelGenerator(Information::getText);
+        add(comboBox);
         // end-source-example
 
         addCard("Presentation",
@@ -475,11 +479,9 @@ public class ComboBoxView extends DemoView {
         return listOfSongs;
     }
 
-    private Div createMessageDiv(String id) {
-        Div message = new Div();
+    private void decorateMessageDiv(Div message, String id) {
         message.setId(id);
         message.getStyle().set("whiteSpace", "pre");
-        return message;
     }
 
     private static class Information {
