@@ -68,6 +68,7 @@ public class ComboBoxView extends DemoView {
         storingCustomValues();
         autoOpenDisabled();
         lazyLoading();
+        helperText();
         configurationForReqired(); // Validation
         customFiltering(); // Filtering
         customOptionsDemo(); // Presentation
@@ -294,6 +295,41 @@ public class ComboBoxView extends DemoView {
         //@formatter:on
         comboBox.setId("callback-box");
         addCard("Lazy loading with callbacks", comboBox);
+    }
+
+    private void helperText() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Helper text and helper component
+        ComboBox<String> helperTextCombobox = new ComboBox<>();
+        helperTextCombobox
+              .setItems("Java", "Python", "C++", "Scala", "JavaScript");
+        helperTextCombobox
+              .setHelperText("Choose the language you are most familiar with");
+
+        ComboBox<String> helperComponentCombobox = new ComboBox<>();
+        helperComponentCombobox
+              .setItems("North America", "South America", "Africa", "Europe",
+                    "Asia", "Australia", "Antarctica");
+        helperComponentCombobox
+              .setHelperComponent(new Span("Select the biggest continent"));
+
+        ComboBox<String> helperTextAbove = new ComboBox<>();
+        helperTextAbove.setItems("Option 1", "Option 2");
+        helperTextAbove.setHelperText(
+              "Helper text positioned above the field using `helper-above-field` theme");
+        helperTextAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+
+        add(helperTextCombobox, helperComponentCombobox, helperTextAbove);
+
+        // end-source-example
+        helperTextCombobox.getStyle().set("margin-right", "15px");
+        helperComponentCombobox.getStyle().set("margin-right", "15px");
+
+        div.add(helperTextCombobox, helperComponentCombobox, helperTextAbove);
+
+        addCard("Helper text and helper component", div);
     }
 
     private void configurationForReqired() {
