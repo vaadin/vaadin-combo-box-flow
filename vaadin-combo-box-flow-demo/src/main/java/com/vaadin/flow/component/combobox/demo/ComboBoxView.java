@@ -75,6 +75,7 @@ public class ComboBoxView extends DemoView {
         usingTemplateRenderer();
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
+        helperTextAbove();
         styling(); // Styling
     }
 
@@ -314,20 +315,11 @@ public class ComboBoxView extends DemoView {
         helperComponentCombobox
               .setHelperComponent(new Span("Select the biggest continent"));
 
-        ComboBox<String> helperTextAbove = new ComboBox<>();
-        helperTextAbove.setItems("Option 1", "Option 2");
-        helperTextAbove.setHelperText(
-              "Helper text positioned above the field using `helper-above-field` theme");
-        helperTextAbove.getElement().getThemeList()
-              .set("helper-above-field", true);
-
-        add(helperTextCombobox, helperComponentCombobox, helperTextAbove);
+        add(helperTextCombobox, helperComponentCombobox);
 
         // end-source-example
         helperTextCombobox.getStyle().set("margin-right", "15px");
-        helperComponentCombobox.getStyle().set("margin-right", "15px");
-
-        div.add(helperTextCombobox, helperComponentCombobox, helperTextAbove);
+        div.add(helperTextCombobox, helperComponentCombobox);
 
         addCard("Helper text and helper component", div);
     }
@@ -483,6 +475,24 @@ public class ComboBoxView extends DemoView {
         add(comboBox);
         // end-source-example
         addCard("Theme Variants", "Small size", comboBox);
+    }
+
+    private void helperTextAbove() {
+        // begin-source-example
+        // source-example-heading: Helper text above the component
+
+        ComboBox<String> helperTextAbove = new ComboBox<>();
+        helperTextAbove.setItems("Option 1", "Option 2");
+        helperTextAbove.setHelperText(
+              "Helper text positioned above the field using `helper-above-field` theme");
+        helperTextAbove.getElement().getThemeList()
+              .set("helper-above-field", true);
+
+        add(helperTextAbove);
+        // end-source-example
+
+        addCard("Theme Variants", "Helper text above the component",
+              helperTextAbove);
     }
 
     private void styling() {
