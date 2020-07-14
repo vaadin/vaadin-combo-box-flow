@@ -32,8 +32,7 @@ public class HelperTextPageIT extends AbstractComboBoxIT {
               comboHelperComponent.getHelperComponent().getAttribute("id"));
 
         clickButton("empty-helper-component");
-        Assert.assertEquals("",
-              comboHelperComponent.getHelperComponent().getAttribute("id"));
+        Assert.assertEquals(null, comboHelperComponent.getHelperComponent());
     }
 
 }
