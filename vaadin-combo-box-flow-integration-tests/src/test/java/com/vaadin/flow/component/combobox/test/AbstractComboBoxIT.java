@@ -160,6 +160,10 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         $("button").id(id).click();
     }
 
+    protected boolean isButtonEnabled(String id) {
+        return $("button").id(id).isEnabled();
+    }
+
     protected List<?> getItems(WebElement combo) {
         executeScript("arguments[0].opened=true", combo);
         List<?> items = (List<?>) getCommandExecutor()

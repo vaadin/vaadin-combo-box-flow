@@ -24,10 +24,7 @@ public class PersonService {
     }
 
     public Stream<Person> fetchPage(String filter, int page, int pageSize) {
-        return personData.getPersons().stream()
-                .filter(person -> filter == null || person.toString()
-                        .toLowerCase().startsWith(filter.toLowerCase()))
-                .skip(page * pageSize).limit(pageSize);
+        return fetch(filter, page * pageSize, pageSize);
     }
 
     public int count() {

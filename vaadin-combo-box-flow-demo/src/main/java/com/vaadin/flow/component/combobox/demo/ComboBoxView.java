@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox.demo;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
 import com.vaadin.flow.component.combobox.demo.data.ElementData;
 import com.vaadin.flow.component.combobox.demo.data.ProjectData;
@@ -226,10 +227,7 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Storing custom values
         ComboBox<Project> comboBox = new ComboBox<>("Project");
-        DataProvider<Project, String> dataProvider = DataProvider
-                .fromFilteringCallbacks(this::fetchProjects,
-                        this::countProjects);
-        comboBox.setDataProvider(dataProvider);
+        comboBox.setItems(this::fetchProjects, this::countProjects);
         comboBox.setItemLabelGenerator(Project::getName);
 
         comboBox.addValueChangeListener(valueChangeEvent -> {
@@ -261,12 +259,13 @@ public class ComboBoxView extends DemoView {
         ComboBox<Person> comboBox = new ComboBox<>();
         PersonService service = new PersonService();
         /*
-         * This data provider doesn't load all the items to the server memory
-         * right away. The component calls the first provided callback to fetch
-         * items from the given range with the given filter. The second callback
-         * should provide the number of items that match the query.
+         * By using these callbacks the ComboBox doesn't load all the items to
+         * the server memory right away. The ComboBox calls the first provided
+         * callback to fetch items from the given range with the given filter.
+         * The second callback should provide the number of items that match
+         * the query.
          */
-        comboBox.setDataProvider(service::fetch, service::count);
+        comboBox.setItems(service::fetch, service::count);
         // end-source-example
         //@formatter:on
         comboBox.setId("callback-box");
@@ -286,10 +285,11 @@ public class ComboBoxView extends DemoView {
          * For those backend repositories which use paged data fetching, it
          * is possible to get the page number and page size from Query API.
          */
-        comboBox.setDataProvider(DataProvider.fromFilteringCallbacks(
-                query -> service.fetchPage(query.getFilter().orElse(""),
-                        query.getPage(), query.getPageSize()),
-                query -> service.count(query.getFilter().orElse(""))));
+        // TODO: setItems clash
+//        comboBox.setItems(
+//                query -> service.fetchPage(query.getFilter().orElse(""),
+//                        query.getPage(), query.getPageSize()),
+//                filter -> service.count(filter));
         // end-source-example
         //@formatter:on
         comboBox.setId("paged-box");
