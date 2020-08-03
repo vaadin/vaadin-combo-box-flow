@@ -364,9 +364,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
      *
-     * Note that filtering of the ComboBox is not affected by the renderer that
-     * is set here. Filtering is done on the original values and can be affected
-     * by {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      */
     public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
@@ -511,8 +512,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
             if (dataCommunicator == null) {
                 dataCommunicator = new DataCommunicator<>(dataGenerator,
-                        arrayUpdater, data -> getElement()
-                        .callJsFunction("$connector.updateData", data),
+                        arrayUpdater,
+                        data -> getElement()
+                                .callJsFunction("$connector.updateData", data),
                         getElement().getNode());
                 dataCommunicator.setPageSize(getPageSize());
             }
@@ -543,7 +545,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
             dataProvider.addDataProviderListener(e -> {
                 if (e instanceof DataRefreshEvent) {
-                    dataCommunicator.refresh(((DataRefreshEvent<T>) e).getItem());
+                    dataCommunicator
+                            .refresh(((DataRefreshEvent<T>) e).getItem());
                 } else {
                     refreshAllData(shouldForceServerSideFiltering);
                 }
@@ -1103,25 +1106,27 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void initDataCommunicator() {
-        /*
-         * If the user hasn't provided any data, initialize with empty data set.
-         * DataCommunicator initializer is created each time when the items
-         * are set explicitly, or by setting the Data Provider.
-         */
-        if (dataCommunicatorInitializer == null) {
-            setItems();
-            assert dataCommunicatorInitializer != null :
-                    "Data Communicator initializer is expected after " +
-                            "setting the items to component, but got null";
-        } else if (dataCommunicator == null) {
-            /*
-             * Init the Data Communicator:
-             * 1. Lazily, when the generic Data Provider is used. User clicks on
-             * the dropdown to view the list of items.
-             * 2. Eagerly, when the items are set explicitly or in-memory Data
-             * Provider is used.
-             */
-            dataCommunicatorInitializer.init();
+        if (dataCommunicator == null) {
+            if (dataCommunicatorInitializer == null) {
+                /*
+                 * If the user hasn't provided any data, initialize with empty
+                 * data set. DataCommunicator initializer is created each time
+                 * when the items are set explicitly, or by setting the Data
+                 * Provider.
+                 */
+                setItems();
+                assert dataCommunicatorInitializer != null : "Data Communicator initializer is expected after "
+                        + "setting the items to component, but got null";
+            } else {
+                /*
+                 * Init the Data Communicator: 1. Lazily, when the data lazy
+                 * loading is used. Initialization occurs when the user clicks
+                 * on the dropdown to view the list of items. 2. Eagerly, when
+                 * the items are set explicitly or in-memory Data Provider is
+                 * used.
+                 */
+                dataCommunicatorInitializer.init();
+            }
         }
     }
 
