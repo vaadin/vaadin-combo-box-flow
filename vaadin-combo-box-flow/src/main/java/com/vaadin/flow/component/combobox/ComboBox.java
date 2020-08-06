@@ -89,6 +89,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+    private dataProviderListener = null;
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -543,7 +544,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
 
-        dataProvider.addDataProviderListener(e -> {
+        if (dataProviderListener != null) dataProviderListener.remove();
+        dataProviderListener = dataProvider.addDataProviderListener(e -> {
             if (e instanceof DataRefreshEvent) {
                 dataCommunicator.refresh(((DataRefreshEvent<T>) e).getItem());
             } else {
