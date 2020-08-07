@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -544,6 +546,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
 
+        setupDataProvider(dataProvider);
+        refreshAllData(shouldForceServerSideFiltering);
+
+        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+    }
+
+    private void setupDataProviderListener(dataProvider) {
+        boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         if (dataProviderListener != null) {
             dataProviderListener.remove();
         }
@@ -554,9 +564,21 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 refreshAllData(shouldForceServerSideFiltering);
             }
         });
-        refreshAllData(shouldForceServerSideFiltering);
+    }
 
-        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider != null && dataProviderListener != null) {
+            setupDataProviderListener(dataProvider);
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        dataProviderListener.remove();
+        super.onDetach(detachEvent);
     }
 
     private void refreshAllData(boolean forceServerSideFiltering) {
@@ -659,6 +681,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @return the data provider used by this ComboBox
      */
     public DataProvider<T, ?> getDataProvider() { // NOSONAR
+        if (getDataCommunicator() != null) {
+            return internalGetDataProvider();
+        }
         return dataCommunicator.getDataProvider();
     }
 
