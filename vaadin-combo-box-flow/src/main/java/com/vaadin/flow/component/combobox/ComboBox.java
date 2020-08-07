@@ -685,7 +685,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataCommunicator != null) {
             return dataCommunicator.getDataProvider();
         }
-        return dataCommunicator.getDataProvider();
+        return null;
     }
 
     /**
