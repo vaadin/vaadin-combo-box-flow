@@ -92,6 +92,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
     private Registration dataProviderListener = null;
+    private boolean shouldForceServerSideFiltering = false;
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -544,13 +545,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         };
 
+        shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         setupDataProviderListener(dataProvider);
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
 
     private <C> void setupDataProviderListener(DataProvider<T, C> dataProvider) {
-        boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         if (dataProviderListener != null) {
             dataProviderListener.remove();
         }
