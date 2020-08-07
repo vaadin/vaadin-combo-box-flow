@@ -549,7 +549,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
 
-    private void setupDataProviderListener(DataProvider<T, C> dataProvider) {
+    private <C> void setupDataProviderListener(DataProvider<T, C> dataProvider) {
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         if (dataProviderListener != null) {
             dataProviderListener.remove();
@@ -575,8 +575,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        dataProviderListener.remove();
-        dataProviderListener = null;
+        if (dataProviderListener != null) {
+            dataProviderListener.remove();
+            dataProviderListener = null;
+        }
         super.onDetach(detachEvent);
     }
 
@@ -680,7 +682,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @return the data provider used by this ComboBox
      */
     public DataProvider<T, ?> getDataProvider() { // NOSONAR
-        if (getDataCommunicator() != null) {
+        if (dataCommunicator != null) {
             return internalGetDataProvider();
         }
         return dataCommunicator.getDataProvider();
