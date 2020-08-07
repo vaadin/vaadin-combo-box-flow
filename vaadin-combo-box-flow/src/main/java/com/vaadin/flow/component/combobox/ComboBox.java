@@ -552,7 +552,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
 
-    private void setupDataProviderListener(DataProvider dataProvider) {
+    private void setupDataProviderListener(DataProvider<T, C> dataProvider) {
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         if (dataProviderListener != null) {
             dataProviderListener.remove();
