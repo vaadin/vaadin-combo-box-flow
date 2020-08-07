@@ -683,7 +683,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public DataProvider<T, ?> getDataProvider() { // NOSONAR
         if (dataCommunicator != null) {
-            return getDataProvider();
+            return dataCommunicator.getDataProvider();
         }
         return dataCommunicator.getDataProvider();
     }
