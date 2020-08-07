@@ -544,7 +544,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         };
 
-        setupDataProvider(dataProvider);
+        setupDataProviderListener(dataProvider);
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
@@ -683,7 +683,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public DataProvider<T, ?> getDataProvider() { // NOSONAR
         if (dataCommunicator != null) {
-            return internalGetDataProvider();
+            return getDataProvider();
         }
         return dataCommunicator.getDataProvider();
     }
