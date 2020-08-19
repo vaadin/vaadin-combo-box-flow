@@ -302,18 +302,18 @@ public class ComboBoxView extends DemoView {
         Div div = new Div();
         // begin-source-example
         // source-example-heading: Helper text and helper component
-        ComboBox<String> helperTextCombobox = new ComboBox<>();
+        ComboBox<String> helperTextCombobox = new ComboBox<>("Language");
         helperTextCombobox
               .setItems("Java", "Python", "C++", "Scala", "JavaScript");
         helperTextCombobox
-              .setHelperText("Choose the language you are most familiar with");
+              .setHelperText("Select the language you are most familiar with");
 
-        ComboBox<String> helperComponentCombobox = new ComboBox<>();
+        ComboBox<String> helperComponentCombobox = new ComboBox<>("Continent");
         helperComponentCombobox
               .setItems("North America", "South America", "Africa", "Europe",
                     "Asia", "Australia", "Antarctica");
         helperComponentCombobox
-              .setHelperComponent(new Span("Select the biggest continent"));
+              .setHelperComponent(new Span("Select the continent of your residence"));
 
         add(helperTextCombobox, helperComponentCombobox);
 
@@ -482,6 +482,7 @@ public class ComboBoxView extends DemoView {
         // source-example-heading: Helper text above the component
 
         ComboBox<String> helperTextAbove = new ComboBox<>();
+        helperTextAbove.setLabel("Label");
         helperTextAbove.setItems("Option 1", "Option 2");
         helperTextAbove.setHelperText(
               "Helper text positioned above the field using `helper-above-field` theme");
