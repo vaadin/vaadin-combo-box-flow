@@ -141,6 +141,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
+        comboBox.openPopup();
         executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
                 comboBox, index);
     }

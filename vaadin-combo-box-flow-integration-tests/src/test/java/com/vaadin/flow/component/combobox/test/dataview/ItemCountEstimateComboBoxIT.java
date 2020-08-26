@@ -51,15 +51,15 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
         scrollToItem(comboBoxElement, 400);
 
         verifyItemsSize(undefinedSizeBackendSize);
-        Assert.assertEquals("Incorrect last row visible",
-                undefinedSizeBackendSize - 1, getItems(comboBoxElement).size());
+        scrollToItem(comboBoxElement, undefinedSizeBackendSize - 1);
+        waitUntilTextInContent("Callback Item " + (undefinedSizeBackendSize - 1));
 
         // check that new estimate is not applied after size is known
         setEstimate(700);
 
         verifyItemsSize(undefinedSizeBackendSize);
-        Assert.assertEquals("Incorrect last row visible",
-                undefinedSizeBackendSize - 1, getItems(comboBoxElement).size());
+        scrollToItem(comboBoxElement, undefinedSizeBackendSize - 1);
+        waitUntilTextInContent("Callback Item " + (undefinedSizeBackendSize - 1));
     }
 
     @Test
@@ -72,6 +72,10 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsSize(initialEstimate);
 
         setCountCallback();
+        // ComboBox scroller jumps up when the estimated size has been reached,
+        // and thus, we have to open the combo box and scroll again.
+        // https://github.com/vaadin/vaadin-combo-box-flow/issues/386
+        scrollToItem(comboBoxElement, 50);
         verifyItemsSize(1000);
     }
 
@@ -82,12 +86,18 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsSize(initialEstimate);
 
         setEstimate(2000);
+
+        // ComboBox scroller jumps up when the estimated size has been reached,
+        // and thus, we have to open the combo box and scroll again.
+        // https://github.com/vaadin/vaadin-combo-box-flow/issues/386
+        scrollToItem(comboBoxElement, 50);
         verifyItemsSize(2000);
 
         scrollToItem(comboBoxElement, 1999);
         verifyItemsSize(2000 + 200);
 
         setEstimate(3000);
+        scrollToItem(comboBoxElement, 50);
         verifyItemsSize(3000);
     }
 

@@ -1013,6 +1013,31 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         initDataCommunicator();
     }
 
+    /**
+     * Sets a ListDataProvider for this combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items resets the combo box's value to {@code null}.
+     * <p>
+     * The returned data view object can be used for further access to combo box
+     * items, or later on fetched with {@link #getListDataView()}. For using
+     * lazy data load, use one of the {@code setItems} overloaded methods whose
+     * take a fetch callback as a parameter instead.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox.
+     * @param listDataProvider
+     *            ListDataProvider providing items to the component.
+     *
+     * @return the in-memory data view instance that provides access to the data
+     *         bound to the combo box
+     */
     public ComboBoxListDataView<T> setItems(ItemFilter<T> itemFilter,
             ListDataProvider<T> listDataProvider) {
         setDataProvider(itemFilter, listDataProvider);

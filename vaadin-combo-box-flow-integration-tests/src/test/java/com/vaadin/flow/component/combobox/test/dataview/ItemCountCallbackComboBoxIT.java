@@ -38,7 +38,6 @@ public class ItemCountCallbackComboBoxIT extends AbstractItemCountComboBoxIT {
 
         verifyItemsSize(500);
 
-        comboBoxElement.openPopup();
         scrollToItem(comboBoxElement, 500);
 
         verifyItemsSize(700);
@@ -51,13 +50,17 @@ public class ItemCountCallbackComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsSize(5800);
 
         scrollToItem(comboBoxElement, 5800);
+        waitUntilTextInContent("Callback Item " + 5799);
 
         verifyItemsSize(5800);
 
         setUnknownCountBackendSize(10000);
         setUnknownCount();
 
-        comboBoxElement.openPopup();
+        // ComboBox scroller jumps up when the estimated size has been reached,
+        // and thus, we have to scroll again to the end.
+        // https://github.com/vaadin/vaadin-combo-box-flow/issues/386
+        scrollToItem(comboBoxElement, 5800);
         verifyItemsSize(6000);
 
         scrollToItem(comboBoxElement, 6000);

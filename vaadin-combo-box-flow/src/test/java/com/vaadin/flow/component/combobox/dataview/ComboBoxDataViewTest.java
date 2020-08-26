@@ -44,6 +44,13 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
     }
 
     @Test
+    public void dataViewWithItems_getItem_returnsCorrectItem() {
+        Assert.assertEquals(items.get(0), dataView.getItem(0));
+        Assert.assertEquals(items.get(1), dataView.getItem(1));
+        Assert.assertEquals(items.get(2), dataView.getItem(2));
+    }
+
+    @Test
     public void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
         Item first = new Item(1L, "first");
         Item second = new Item(2L, "middle");
