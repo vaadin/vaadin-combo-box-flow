@@ -30,8 +30,7 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      */
     public ComboBoxDataView(DataCommunicator<T> dataCommunicator,
             ComboBox<T> comboBox) {
-        super(dataCommunicator::getDataProvider, dataCommunicator::buildQuery,
-                comboBox);
+        super(dataCommunicator::getDataProvider, comboBox);
         this.dataCommunicator = dataCommunicator;
     }
 
@@ -48,7 +47,7 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
     @Override
     public Stream<T> getItems() {
         return dataCommunicator.getDataProvider()
-                .fetch(buildQuery(0, Integer.MAX_VALUE));
+                .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
     }
 
     @Override
