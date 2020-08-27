@@ -319,9 +319,9 @@ public class ComboBoxView extends DemoView {
                 service::fetch);
 
         /*
-         * By default the grid will initially adjust the scrollbar to 200 items
-         * and as the user scrolls down it automatically increases the size by
-         * 200 until the backend runs out of items.
+         * By default, the combo box will initially adjust the scrollbar to 200
+         * items and as the user scrolls down it automatically increases the
+         * size by 200 until the backend runs out of items.
          *
          * Both the estimated item count and its increase can be customized to
          * allow the user to scroll down faster when the backend will have a lot

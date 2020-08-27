@@ -54,13 +54,12 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     }
 
     protected void doScroll(int itemToScroll, int expectedItems, int fetchIndex,
-            int start, int end) {
-        scrollToItem(comboBoxElement, itemToScroll);
-        // TODO: Is that happens for ComboBox too?
-        // FIXME when grid reduces size, it does currently some extra fetches
-        // -> not checking the requested items until this is fixed
-        // verifyFetchForUndefinedSizeCallback(fetchIndex,
-        // Range.between(start, end));
+            int start, int end, String expectedItemText) {
+        scrollToItemAndVerifyLabel(comboBoxElement, itemToScroll, expectedItemText);
+        // TODO: give an array of ranges as a parameter for this method,
+        //  because combo box might scroll to the target item several times
+        // verifyFetchForUndefinedSizeCallback(fetchIndex, Range.between(start,
+        //        end));
         verifyItemsSize(expectedItems);
     }
 

@@ -35,25 +35,26 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsSize(getDefaultInitialItemCount());
         verifyFetchForUndefinedSizeCallback(0, Range.withLength(0, pageSize));
 
-        doScroll(45, getDefaultInitialItemCount(), 1, 50, 150);
+        doScroll(45, getDefaultInitialItemCount(), 1, 50, 100,
+                "Callback Item 45");
 
         // trigger next page fetch and size buffer increase
-        doScroll(110, 400, 2, 150, 200);
+        doScroll(120, 400, 2, 100, 200, "Callback Item 120");
 
         // jump over a page, trigger fetch
-        doScroll(270, 400, 3, 250, 350);
+        doScroll(270, 400, 3, 250, 250, "Callback Item 270");
 
         // trigger another buffer increase but not capping size
-        doScroll(395, 600, 4, 350, 450);
+        doScroll(395, 600, 4, 250, 350, "Callback Item 395");
 
         // scroll to actual end, no more items returned and size is adjusted
-        doScroll(500, 500, 5, 450, 500);
-        Assert.assertEquals(499, getItems(comboBoxElement).size());
-        // TODO Is it relevant to ComboBox?
-        // TODO #1038 test further after grid is note fetching extra stuff when
-        // size has been adjusted to less than what it is
-        // doScroll(0, 500, 6, 0, 100);
-        // doScroll(450, 500, 7, 400, 500);
+        doScroll(499, 500, 5, 450, 500, "Callback Item 499");
+
+        // scroll to 0 position and check the size is correct
+        doScroll(0, 500, 6, 0, 100, "Callback Item 0");
+
+        // scroll again to the end of list and check the size
+        doScroll(450, 500, 7, 400, 500, "Callback Item 450");
     }
 
     @Test
@@ -64,43 +65,37 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsSize(getDefaultInitialItemCount());
         verifyFetchForUndefinedSizeCallback(0, Range.withLength(0, pageSize));
 
-        doScroll(120, 400, 1, 50, 200);
+        doScroll(120, 400, 1, 50, 200, "Callback Item 120");
 
-        doScroll(299, actualSize, 2, 150, actualSize);
+        doScroll(299, actualSize, 2, 150, actualSize, "Callback Item 299");
 
         Assert.assertEquals(300, getItems(comboBoxElement).size());
 
         // change callback backend size limit
         setUnknownCountBackendSize(DEFAULT_DATA_PROVIDER_SIZE);
-        // TODO is that relevant to ComboBox?
-        // grid has scrolled to end -> switch to defined size callback
+        // combo box has scrolled to end -> switch to defined size callback
         // -> new size updated and more items fetched
         setCountCallback();
 
-        verifyItemsSize(DEFAULT_DATA_PROVIDER_SIZE);
-        // new rows are added to end due to size increase
-        Assert.assertEquals(301, getItems(comboBoxElement).size());
+        // Open dropdown and scroll to the end again, check the DP size
+        doScroll(299, DEFAULT_DATA_PROVIDER_SIZE, 2, 150, actualSize,
+                "Callback Item 299");
 
-        scrollToItem(comboBoxElement, 500);
-
-        int expectedLastItem = 517;
-        Assert.assertEquals(
-                "ComboBox should be able to scroll after changing to defined " +
-                        "size",
-                expectedLastItem, getItems(comboBoxElement).size());
+        // Check that combo box is scrolled over 'actualSize' after switching
+        // to defined size
+        doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, 2, 150, actualSize,
+                "Callback Item 500");
 
         // switching back to undefined size, nothing changes
         setUnknownCount();
 
-        verifyItemsSize(DEFAULT_DATA_PROVIDER_SIZE);
-        Assert.assertEquals(expectedLastItem, getItems(comboBoxElement).size());
+        doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, 2, 150, actualSize,
+                "Callback Item 500");
 
         // increase backend size and scroll to current end
         setUnknownCountBackendSize(2000);
         // size has been increased again by default size
-        doScroll(1000, 1200, 6, 950, 1100);
-
-        Assert.assertEquals(1001, getItems(comboBoxElement).size());
+        doScroll(1000, 1200, 6, 950, 1100, "Callback Item 1000");
     }
 
     // @Test TODO

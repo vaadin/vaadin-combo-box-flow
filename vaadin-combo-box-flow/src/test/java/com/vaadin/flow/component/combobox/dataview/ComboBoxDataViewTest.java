@@ -93,7 +93,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
             }
         };
 
-        // Generic grid data view
+        // Generic combo box data view
         DataView<Item> dataView = comboBox.setItems(dataProvider);
         DataKeyMapper<Item> keyMapper = comboBox.getDataCommunicator()
                 .getKeyMapper();
@@ -105,7 +105,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         dataView.setIdentifierProvider(IdentifierProvider.identity());
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
 
-        // In-memory grid data view
+        // In-memory combo box data view
         dataView = comboBox.setItems(DataProvider.ofCollection(items));
         // We need to repopulate the keyMapper after setting a new data provider
         items.forEach(keyMapper::key);

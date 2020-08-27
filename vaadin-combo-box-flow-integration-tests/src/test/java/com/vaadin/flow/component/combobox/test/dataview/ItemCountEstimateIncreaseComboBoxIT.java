@@ -84,15 +84,18 @@ public class ItemCountEstimateIncreaseComboBoxIT extends AbstractItemCountComboB
         scrollToItem(comboBoxElement, 500);
 
         verifyItemsSize(unknownCountBackendSize);
-        Assert.assertEquals("Last visible row wrong",
-                unknownCountBackendSize - 1, getItems(comboBoxElement).size());
+
+        // Open the combo box drop down and scroll again to last item
+        scrollToItem(comboBoxElement, unknownCountBackendSize - 1);
+        waitUntilTextInContent("Callback Item " + (unknownCountBackendSize - 1));
 
         // since the end was reached, only a reset() to data provider will reset
         // estimated size
         setEstimateIncrease(600);
         verifyItemsSize(unknownCountBackendSize);
-        Assert.assertEquals("Last visible row wrong",
-                unknownCountBackendSize - 1, getItems(comboBoxElement).size());
+        // Open the combo box drop down and scroll again to last item
+        scrollToItem(comboBoxElement, unknownCountBackendSize - 1);
+        waitUntilTextInContent("Callback Item " + (unknownCountBackendSize - 1));
     }
 
 }
