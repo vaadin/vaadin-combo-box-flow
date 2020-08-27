@@ -68,7 +68,7 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
 
         doScroll(299, actualSize, 2, 150, actualSize);
 
-        Assert.assertEquals(299, getItems(comboBoxElement).size());
+        Assert.assertEquals(300, getItems(comboBoxElement).size());
 
         // change callback backend size limit
         setUnknownCountBackendSize(DEFAULT_DATA_PROVIDER_SIZE);

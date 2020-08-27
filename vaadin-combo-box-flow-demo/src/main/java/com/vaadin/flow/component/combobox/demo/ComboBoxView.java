@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
 import com.vaadin.flow.component.combobox.demo.data.ElementData;
 import com.vaadin.flow.component.combobox.demo.data.ProjectData;
@@ -39,7 +41,9 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
@@ -72,6 +76,7 @@ public class ComboBoxView extends DemoView {
         pagedRepository();
         configurationForRequired(); // Validation
         customFiltering(); // Filtering
+        filteringAndSortingWithDataView();
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
         themeVariantsTextAlign(); // Theme variants
@@ -259,7 +264,7 @@ public class ComboBoxView extends DemoView {
         // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
 
         ComboBox<Person> comboBox = new ComboBox<>();
-        PersonService service = new PersonService();
+        PersonService service = new PersonService(500);
         /*
          * When provided a callback, the combo box doesn't load all items from
          * backend to server memory right away. It will request only the data
@@ -406,6 +411,38 @@ public class ComboBoxView extends DemoView {
         // end-source-example
         addCard("Filtering", "Custom filtering", div, filteringComboBox);
 
+    }
+
+    private void filteringAndSortingWithDataView() {
+        // begin-source-example
+        // source-example-heading: Filtering and Sorting with Data View
+        ComboBox<Person> comboBox = new ComboBox<>("Persons");
+        PersonService personService = new PersonService();
+
+        ComboBoxListDataView<Person> dataView = comboBox
+                .setItems(personService.fetchAll());
+
+        /*
+         * Providing a predicate item filter allows filtering by any field of
+         * the business entity and apply a combo box's text filter independently
+         */
+        IntegerField personAgeFilter = new IntegerField(
+                event -> dataView.setFilter(person -> event.getValue() == null
+                        || person.getAge() > event.getValue()));
+
+        /*
+         * Providing a value provider or comparator allows sorting combo
+         * box's items by custom field, or combination of fields
+         */
+        Button sortPersons = new Button("Sort Persons by Name",
+                event -> dataView.setSortOrder(Person::toString,
+                        SortDirection.ASCENDING));
+
+        // end-source-example
+        personAgeFilter.setLabel("Filter Persons with age more than:");
+        personAgeFilter.setWidth("250px");
+        addCard("Filtering", "Filtering and Sorting with Data View", comboBox,
+                personAgeFilter, sortPersons);
     }
 
     private void customOptionsDemo() {

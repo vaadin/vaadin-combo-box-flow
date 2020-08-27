@@ -4,6 +4,7 @@ import com.vaadin.flow.component.combobox.demo.data.PersonData;
 import com.vaadin.flow.component.combobox.demo.entity.Person;
 import com.vaadin.flow.data.provider.Query;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -46,6 +47,8 @@ public class PersonService {
     }
 
     public List<Person> fetchAll() {
-        return personData.getPersons();
+        List<Person> persons = personData.getPersons();
+        Collections.shuffle(persons);
+        return persons;
     }
 }
