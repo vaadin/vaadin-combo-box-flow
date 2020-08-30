@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 
@@ -24,7 +23,7 @@ public class ComboBoxListDataViewPage extends Div {
     public static final String SHOW_ITEM_DATA = "showItemData";
     public static final String SHOW_NEXT_DATA = "showNextData";
     public static final String SHOW_PREVIOUS_DATA = "showPreviousData";
-    public static final String FIRST_NAME_FILTER = "firstNameFilter";
+    public static final String AGE_FILTER = "ageFilter";
     public static final String REMOVE_ITEM = "removeItem";
     public static final String REVERSE_SORTING = "reverseSorting";
 
@@ -84,12 +83,11 @@ public class ComboBoxListDataViewPage extends Div {
         removePerson.setId(REMOVE_ITEM);
         showPreviousData.setId(SHOW_PREVIOUS_DATA);
 
-        // Filter by name
-        TextField filterByFirstName = new TextField("Firstname filter",
-                event -> dataView
-                        .setFilter(item -> item.getFirstName().toLowerCase()
-                                .contains(event.getValue().toLowerCase())));
-        filterByFirstName.setId(FIRST_NAME_FILTER);
+        // Filter by Age
+        IntegerField filterByAge = new IntegerField("Age filter",
+                event -> dataView.setFilter(person -> event.getValue() == null
+                        || event.getValue().equals(person.getAge())));
+        filterByAge.setId(AGE_FILTER);
 
         // Sorting
         NativeButton reverseSorting = new NativeButton("Reverse sorting",
@@ -120,15 +118,15 @@ public class ComboBoxListDataViewPage extends Div {
                     .setEnabled(event.getValue() < dataView.getItemCount() - 1);
         });
 
-        add(comboBox, itemSelect, filterByFirstName, reverseSorting,
+        add(comboBox, itemSelect, filterByAge, reverseSorting,
                 selectItemOnIndex, showItemData, showNextData, showPreviousData,
                 removePerson, count, itemData);
     }
 
     private List<Person> generatePersonItems() {
         return IntStream.range(1, 251)
-                .mapToObj(i -> new Person(i, "Person " + i, "lastName",
-                        (i % 90) + 15, new Person.Address(), "1234567890"))
+                .mapToObj(index -> new Person(index, "Person " + index, "lastName",
+                        index % 100, new Person.Address(), "1234567890"))
                 .collect(Collectors.toList());
     }
 }

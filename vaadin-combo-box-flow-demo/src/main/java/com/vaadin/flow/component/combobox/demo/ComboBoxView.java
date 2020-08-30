@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.demo;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -419,8 +420,11 @@ public class ComboBoxView extends DemoView {
         ComboBox<Person> comboBox = new ComboBox<>("Persons");
         PersonService personService = new PersonService();
 
-        ComboBoxListDataView<Person> dataView = comboBox
-                .setItems(personService.fetchAll());
+        // We fetch the items to the memory and bind the obtained collection
+        // to the combo box
+        Collection<Person> persons = personService.fetchAll();
+
+        ComboBoxListDataView<Person> dataView = comboBox.setItems(persons);
 
         /*
          * Providing a predicate item filter allows filtering by any field of

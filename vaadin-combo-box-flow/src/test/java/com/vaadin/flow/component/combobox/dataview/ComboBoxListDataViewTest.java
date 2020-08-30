@@ -13,10 +13,10 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
+import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.shared.Registration;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -39,18 +39,33 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     }
 
     @Test
-    public void getItems_withFilter_filteredItemsObtained() {
-        ComboBox<String> comboBox = new ComboBox<String>() {
-            @Override
-            protected Locale getLocale() {
-                return Locale.getDefault();
-            }
-        };
-        comboBox.getElement().setProperty("filter", "middle");
+    public void getItems_withTextFilter_filteredItemsObtained() {
+        ComboBox<String> comboBox = getDefaultLocaleComboBox();
+        setComboBoxTextFilter(comboBox, "middle");
         ComboBoxListDataView<String> dataView = comboBox.setItems(items);
         Stream<String> allItems = dataView.getItems();
         Assert.assertArrayEquals("Unexpected data set",
                 new String[] { "middle" }, allItems.toArray());
+    }
+
+    @Test
+    public void getItems_withInMemoryFilter_filteredItemsObtained() {
+        dataView.setFilter("middle"::equals);
+        Stream<String> allItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set",
+                new String[] { "middle" }, allItems.toArray());
+    }
+
+    @Test
+    public void getItems_withInMemoryAndTextFilter_filteredItemsObtained() {
+        ComboBox<String> comboBox = getDefaultLocaleComboBox();
+        setComboBoxTextFilter(comboBox, "ba");
+        items = Arrays.asList("foo", "bar", "banana");
+        ComboBoxListDataView<String> dataView = comboBox.setItems(items);
+        dataView.setFilter(item -> item.length() == 3);
+        Stream<String> allItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set",
+                new String[] { "bar" }, allItems.toArray());
     }
 
     @Test
@@ -76,12 +91,15 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
         List<Item> items = new ArrayList<>(Arrays.asList(first, second));
 
-        ListDataProvider<Item> dataProvider = DataProvider.ofCollection(items);
         ComboBox<Item> component = new ComboBox<>();
 
-        ComboBoxListDataView<Item> dataView = component.setItems(dataProvider);
-        DataKeyMapper<Item> keyMapper = component.getDataCommunicator()
-                .getKeyMapper();
+        DataCommunicator<Item> dataCommunicator = new DataCommunicator<>(
+                (item, jsonObject) -> {
+                }, null, null, component.getElement().getNode());
+
+        ComboBoxListDataView<Item> dataView = new ComboBoxListDataView<>(
+                dataCommunicator, component);
+        DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
         items.forEach(keyMapper::key);
 
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
@@ -89,9 +107,58 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
     }
 
+    @Test
+    public void addItemCountChangeListener_serverSideFilterEnabled() {
+        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
+
+        dataView.addItemCountChangeListener(event -> {});
+
+        // Trigger refresh all event
+        dataView.setFilter(item -> true);
+
+        Assert.assertFalse(Boolean.parseBoolean(getClientSideFilter()));
+    }
+
+    @Test
+    public void addItemCountChangeListener_removeListeners_serverSideFilterDisabled() {
+        Registration registration1 =
+                dataView.addItemCountChangeListener(event -> {});
+
+        Registration registration2 =
+                dataView.addItemCountChangeListener(event -> {});
+
+        // Trigger refresh all event
+        dataView.setFilter(item -> true);
+
+        registration1.remove();
+        Assert.assertFalse(Boolean.parseBoolean(getClientSideFilter()));
+
+        registration2.remove();
+        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
+    }
+
     @Override
     protected HasListDataView<String, ComboBoxListDataView<String>> getComponent() {
         return new ComboBox<>();
+    }
+
+    private ComboBox<String> getDefaultLocaleComboBox() {
+        return new ComboBox<String>() {
+            @Override
+            protected Locale getLocale() {
+                return Locale.getDefault();
+            }
+        };
+    }
+
+    private void setComboBoxTextFilter(ComboBox<String> comboBox,
+                                       String filter) {
+        comboBox.getElement().setProperty("filter", filter);
+    }
+
+
+    private String getClientSideFilter() {
+        return component.getElement().getProperty("_clientSideFilter");
     }
 
     private static class Item {

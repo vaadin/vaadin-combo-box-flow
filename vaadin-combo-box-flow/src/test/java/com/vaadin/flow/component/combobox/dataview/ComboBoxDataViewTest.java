@@ -31,6 +31,8 @@ import com.vaadin.flow.shared.Registration;
 
 public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
+    private ComboBox<String> comboBox;
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -38,7 +40,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
     public void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
-        ComboBox<String> comboBox = getComponent();
+        comboBox = getComponent();
         dataView = comboBox.setItems(dataProvider, textFilter -> item -> true);
         component = comboBox;
     }
@@ -93,10 +95,16 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
             }
         };
 
+        DataCommunicator<Item> dataCommunicator = new DataCommunicator<>(
+                (item, jsonObject) -> {
+                }, null, null, comboBox.getElement().getNode());
+        dataCommunicator.setDataProvider(dataProvider, null);
+
         // Generic combo box data view
-        DataView<Item> dataView = comboBox.setItems(dataProvider);
-        DataKeyMapper<Item> keyMapper = comboBox.getDataCommunicator()
-                .getKeyMapper();
+        DataView<Item> dataView = new ComboBoxDataView<>(dataCommunicator,
+                comboBox);
+
+        DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
         items.forEach(keyMapper::key);
 
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
@@ -106,7 +114,9 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
 
         // In-memory combo box data view
-        dataView = comboBox.setItems(DataProvider.ofCollection(items));
+        dataCommunicator.setDataProvider(DataProvider.ofCollection(items),
+                null);
+        dataView = new ComboBoxListDataView<>(dataCommunicator, comboBox);
         // We need to repopulate the keyMapper after setting a new data provider
         items.forEach(keyMapper::key);
 
@@ -240,6 +250,19 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
                         + "SerializablePredicate<T>>)"
                         + "%noverloaded method instead"));
         component.setItems(dataProvider);
+    }
+
+    @Test
+    public void addItemCountChangeListener_serverSideFilterAlwaysEnabled() {
+        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
+
+        dataView.addItemCountChangeListener(event -> {});
+
+        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
+    }
+
+    private String getClientSideFilter() {
+        return comboBox.getElement().getProperty("_clientSideFilter");
     }
 
     @Override

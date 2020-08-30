@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -51,6 +52,7 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.provider.Query;
@@ -106,6 +108,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+    private static final String PROP_CLIENT_SIDE_FILTER = "_clientSideFilter";
+
     private Registration dataProviderListener = null;
     private boolean shouldForceServerSideFiltering = false;
 
@@ -222,6 +226,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     // together with the response so client may know for what filter data is
     // provided.
     private String lastFilter;
+
+    /*
+     * Holds the item count listeners count.
+     * If the value > 0, then the client side filter will be sent to server
+     * forcibly, in order to let the items size updated and item count change
+     * event triggered (if, of course, the size has changed).
+     */
+    private AtomicInteger itemCountListeners = new AtomicInteger(0);
 
     private DataCommunicator<T> dataCommunicator;
     private DataCommunicatorInitializer dataCommunicatorInitializer;
@@ -435,8 +447,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The returned data view object can be used for further access to combo box
      * items, or later on fetched with {@link #getListDataView()}. For using
-     * lazy data load, use one of the {@code setItems} overloaded methods whose
-     * take a fetch callback as a parameter instead.
+     * lazy data loading, use one of the {@code setItems} methods which take
+     * a fetch callback parameter instead.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -467,8 +479,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The returned data view object can be used for further access to combo box
      * items, or later on fetched with {@link #getListDataView()}. For using
-     * lazy data load, use one of the {@code setItems} overloaded methods whose
-     * take a fetch callback as a parameter instead.
+     * lazy data loading, use one of the {@code setItems} methods which take
+     * a fetch callback parameter instead.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -510,10 +522,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * Use another overloaded method with filter converter
      * {@link #setItems(InMemoryDataProvider, SerializableFunction)}
-     * 
+     *
      * @throws UnsupportedOperationException
      *
      * @see #setItems(InMemoryDataProvider, SerializableFunction)
+     *
+     * @deprecated does not work so don't use
      */
     @Override
     public ComboBoxDataView<T> setItems(InMemoryDataProvider<T> dataProvider) {
@@ -538,6 +552,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * {@code (String nameFilter) -> person -> person.getName().equalsIgnoreCase
      * (nameFilter);}
      * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
+     * <p>
      * Note! Using a {@link ListDataProvider} instead of a
      * {@link InMemoryDataProvider} is recommended to get access to
      * {@link ListDataView} API by using {@link #setItems(ListDataProvider)}.
@@ -558,7 +577,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // We don't use DataProvider.withConvertedFilter() here because its
         // implementation does not apply the filter converter if Query has a
         // null filter
-        DataProvider<T, String> convertedDataProvider = new DataProviderWrapper<T, String, SerializablePredicate<T>>(
+        DataProvider<T, String> convertedDataProvider =
+                new DataProviderWrapper<T, String, SerializablePredicate<T>>(
                 inMemoryDataProvider) {
             @Override
             protected SerializablePredicate<T> getFilter(
@@ -570,6 +590,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                                 .test(item));
             }
         };
+
+        // As well as for ListDataProvider, filtering will be handled in the
+        // client-side if the size of the data set is less than the page size.
+        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
+            userProvidedFilter = UserProvidedFilter.NO;
+        }
+
         return setItems(convertedDataProvider);
     }
 
@@ -585,7 +612,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxDataView<T> getGenericDataView() {
-        return new ComboBoxDataView<>(getDataCommunicator(), this);
+        return new ComboBoxDataView<>(dataCommunicator, this);
     }
 
     @Override
@@ -614,7 +641,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxLazyDataView<T> getLazyDataView() {
-        return new ComboBoxLazyDataView<>(getDataCommunicator(), this);
+        return new ComboBoxLazyDataView<>(dataCommunicator, this);
     }
 
     @Override
@@ -642,7 +669,30 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxListDataView<T> getListDataView() {
-        return new ComboBoxListDataView<>(dataCommunicator, this);
+        return new ComboBoxListDataView<T>(dataCommunicator, this) {
+            @Override
+            public Registration addItemCountChangeListener(
+                    ComponentEventListener<ItemCountChangeEvent<?>> listener) {
+
+                Registration registration =
+                        super.addItemCountChangeListener(listener);
+
+                // Client filtering is usually enabled only for in-memory case,
+                // so override 'addItemCountChangeListener' method only for
+                // list data view
+                itemCountListeners.incrementAndGet();
+
+                return Registration.combine(registration, () -> {
+                    if (itemCountListeners.decrementAndGet() == 0) {
+                        // Retrieve client side filter to default, because
+                        // there are no item count listeners remain.
+                        // For in-memory data 'UserProvidedFilter' is always NO
+                        setClientSideFilter(dataCommunicator
+                                        .getItemCount() <= getPageSizeDouble());
+                    }
+                });
+            }
+        };
     }
 
     /**
@@ -900,7 +950,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private void refreshAllData(boolean forceServerSideFiltering) {
         setClientSideFilter(!forceServerSideFiltering
-                && dataCommunicator.getItemCount() <= getPageSizeDouble());
+                && dataCommunicator.getItemCount() <= getPageSizeDouble()
+                // We do want to perform server side filtering (send client
+                // filter to the server) if there is at least one item count
+                // change listener added, even in case of in-memory data
+                // provider and even if the item count < page size.
+                // This allows us be always notified about size change.
+                && itemCountListeners.get() == 0);
 
         reset();
     }
@@ -1026,8 +1082,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * The returned data view object can be used for further access to combo box
      * items, or later on fetched with {@link #getListDataView()}. For using
-     * lazy data load, use one of the {@code setItems} overloaded methods whose
-     * take a fetch callback as a parameter instead.
+     * lazy data loading, use one of the {@code setItems} methods which take
+     * a fetch callback parameter instead.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -1054,15 +1110,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return dataCommunicator.getDataProvider();
         }
         return null;
-    }
-
-    /**
-     * Returns the data communicator of this ComboBox.
-     *
-     * @return the data communicator, not {@code null}
-     */
-    public DataCommunicator<T> getDataCommunicator() {
-        return dataCommunicator;
     }
 
     /**
@@ -1482,7 +1529,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void setClientSideFilter(boolean clientSideFilter) {
-        getElement().setProperty("_clientSideFilter", clientSideFilter);
+        getElement().setProperty(PROP_CLIENT_SIDE_FILTER, clientSideFilter);
     }
 
     private void reset() {
