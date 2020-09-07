@@ -50,13 +50,6 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
                             .toString());
             Logger.getLogger(getClass().getName()).info(String.format(
                     "DataProvider Query : limit %s offset %s", limit, offset));
-//            return IntStream.range(0, DEFAULT_DATA_PROVIDER_SIZE)
-//                    .mapToObj(index -> "DataProvider Item " + index)
-//                    .filter(item -> query.getFilter()
-//                            .map(filter -> item.toLowerCase()
-//                                    .contains(filter.toLowerCase()))
-//                            .orElse(true))
-//                    .skip(offset).limit(limit);
             return IntStream.range(offset, offset + limit)
                     .mapToObj(index -> "DataProvider Item " + index);
         }
@@ -255,12 +248,5 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
                 .format("Callback Query : limit %s offset %s", limit, offset));
         return IntStream.range(offset, lastItemToFetch)
                 .mapToObj(index -> "Callback Item " + index);
-//        return IntStream.range(0, DEFAULT_DATA_PROVIDER_SIZE)
-//                .mapToObj(index -> "Callback Item " + index)
-//                .filter(item -> query.getFilter()
-//                        .map(filter -> item.toLowerCase()
-//                                .contains(filter.toLowerCase()))
-//                        .orElse(true))
-//                .skip(offset).limit(lastItemToFetch);
     }
 }

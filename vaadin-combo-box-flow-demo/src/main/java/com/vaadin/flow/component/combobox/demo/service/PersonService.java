@@ -2,7 +2,6 @@ package com.vaadin.flow.component.combobox.demo.service;
 
 import com.vaadin.flow.component.combobox.demo.data.PersonData;
 import com.vaadin.flow.component.combobox.demo.entity.Person;
-import com.vaadin.flow.data.provider.Query;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,27 +18,22 @@ public class PersonService {
         this.personData = new PersonData(personCount);
     }
 
-    public Stream<Person> fetch(Query<Person, String> query) {
+    public Stream<Person> fetch(String filter, int offset, int limit) {
         return personData.getPersons().stream()
-                .filter(person -> query.getFilter()
-                        .map(filter -> person.toString().toLowerCase()
-                                .startsWith(filter.toLowerCase()))
-                        .orElse(true))
-                .skip(query.getOffset()).limit(query.getLimit());
+                .filter(person -> filter == null || person.toString()
+                        .toLowerCase().startsWith(filter.toLowerCase()))
+                .skip(offset).limit(limit);
     }
 
-    public int count(Query<Person, String> query) {
+    public int count(String filter) {
         return (int) personData.getPersons().stream()
-                .filter(person -> query.getFilter()
-                        .map(filter -> person.toString().toLowerCase()
-                                .startsWith(filter.toLowerCase()))
-                        .orElse(true))
+                .filter(person -> filter == null || person.toString()
+                        .toLowerCase().startsWith(filter.toLowerCase()))
                 .count();
     }
 
     public Stream<Person> fetchPage(String filter, int page, int pageSize) {
-        return fetch(
-                new Query<>(page * pageSize, pageSize, null, null, filter));
+        return fetch(filter, page * pageSize, pageSize);
     }
 
     public int count() {

@@ -261,6 +261,36 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
     }
 
+    @Test
+    public void addItemCountChangeListener_serverSideFilterEnabled() {
+        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
+
+        dataView.addItemCountChangeListener(event -> {});
+
+        // Trigger ComboBox::refreshAllData()
+        dataProvider.refreshAll();
+
+        Assert.assertFalse(Boolean.parseBoolean(getClientSideFilter()));
+    }
+
+    @Test
+    public void addItemCountChangeListener_removeListeners_serverSideFilterDisabled() {
+        Registration registration1 =
+                dataView.addItemCountChangeListener(event -> {});
+
+        Registration registration2 =
+                dataView.addItemCountChangeListener(event -> {});
+
+        // Trigger ComboBox::refreshAllData()
+        dataProvider.refreshAll();
+
+        registration1.remove();
+        Assert.assertFalse(Boolean.parseBoolean(getClientSideFilter()));
+
+        registration2.remove();
+        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
+    }
+
     private String getClientSideFilter() {
         return comboBox.getElement().getProperty("_clientSideFilter");
     }

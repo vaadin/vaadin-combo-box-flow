@@ -529,6 +529,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @deprecated does not work so don't use
      */
+    @Deprecated
     @Override
     public ComboBoxDataView<T> setItems(InMemoryDataProvider<T> dataProvider) {
         throw new UnsupportedOperationException(
@@ -612,7 +613,22 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxDataView<T> getGenericDataView() {
-        return new ComboBoxDataView<>(dataCommunicator, this);
+        return new ComboBoxDataView<T>(dataCommunicator, this) {
+            @Override
+            public Registration addItemCountChangeListener(
+                    ComponentEventListener<ItemCountChangeEvent<?>> listener) {
+
+                Registration registration =
+                        super.addItemCountChangeListener(listener);
+
+                // Client filtering is usually enabled only for in-memory case,
+                // so override 'addItemCountChangeListener' method only for
+                // in-memory data providers in order to keep server
+                // filtering until there is at least one item count change
+                // listener
+                return getItemCountChangeRegistration(registration);
+            }
+        };
     }
 
     @Override
@@ -679,18 +695,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
                 // Client filtering is usually enabled only for in-memory case,
                 // so override 'addItemCountChangeListener' method only for
-                // list data view
-                itemCountListeners.incrementAndGet();
+                // in-memory data providers in order to keep server
+                // filtering until there is at least one item count change
+                // listener
+                return getItemCountChangeRegistration(registration);
 
-                return Registration.combine(registration, () -> {
-                    if (itemCountListeners.decrementAndGet() == 0) {
-                        // Retrieve client side filter to default, because
-                        // there are no item count listeners remain.
-                        // For in-memory data 'UserProvidedFilter' is always NO
-                        setClientSideFilter(dataCommunicator
-                                        .getItemCount() <= getPageSizeDouble());
-                    }
-                });
             }
         };
     }
@@ -1567,6 +1576,21 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
     }
 
+    private Registration getItemCountChangeRegistration(Registration registration) {
+        // Increment stored item count change listeners
+        itemCountListeners.incrementAndGet();
+
+        return Registration.combine(registration, () -> {
+            if (itemCountListeners.decrementAndGet() == 0) {
+                // Retrieve client side filter to default, because
+                // there are no item count listeners remain.
+                // For in-memory data 'UserProvidedFilter' is always NO
+                setClientSideFilter(dataCommunicator
+                        .getItemCount() <= getPageSizeDouble());
+            }
+        });
+    }
+
     /**
      * Callback for Data Communicator lazy initialization
      */
@@ -1574,4 +1598,5 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private interface DataCommunicatorInitializer extends Serializable {
         void init();
     }
+
 }

@@ -275,7 +275,9 @@ public class ComboBoxView extends DemoView {
          * When the user scrolls to the end, combo box will automatically 
          * extend and fetch more items until the backend runs out of items.
          */
-        comboBox.setItems(service::fetch);
+        comboBox.setItems(
+                query -> service.fetch(query.getFilter().orElse(null),
+                        query.getOffset(), query.getLimit()));
         // end-source-example
         //@formatter:on
         comboBox.setId("fetch-callback");
@@ -298,7 +300,10 @@ public class ComboBoxView extends DemoView {
          * The second callback should provide the number of items that match
          * the query.
          */
-        comboBox.setItems(service::fetch, service::count);
+        comboBox.setItems(
+                query -> service.fetch(query.getFilter().orElse(null),
+                        query.getOffset(), query.getLimit()),
+                query -> service.count(query.getFilter().orElse(null)));
         // end-source-example
         //@formatter:on
         comboBox.setId("with-exact-items-count");
@@ -317,7 +322,8 @@ public class ComboBoxView extends DemoView {
         ComboBox<Person> comboBox = new ComboBox<>();
 
         ComboBoxLazyDataView<Person> lazyDataView = comboBox.setItems(
-                service::fetch);
+                query -> service.fetch(query.getFilter().orElse(null),
+                        query.getOffset(), query.getLimit()));
 
         /*
          * By default, the combo box will initially adjust the scrollbar to 200
@@ -365,9 +371,9 @@ public class ComboBoxView extends DemoView {
          * is possible to get the page number and page size from Query API.
          */
         comboBox.setItems(
-                query -> service.fetchPage(query.getFilter().orElse(""),
+                query -> service.fetchPage(query.getFilter().orElse(null),
                         query.getPage(), query.getPageSize()),
-                service::count);
+                query -> service.count(query.getFilter().orElse(null)));
 
         // end-source-example
         //@formatter:on
@@ -444,7 +450,7 @@ public class ComboBoxView extends DemoView {
 
         // end-source-example
         personAgeFilter.setLabel("Filter Persons with age more than:");
-        personAgeFilter.setWidth("250px");
+        personAgeFilter.setWidth(WIDTH_STRING);
         addCard("Filtering", "Filtering and Sorting with Data View", comboBox,
                 personAgeFilter, sortPersons);
     }

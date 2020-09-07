@@ -127,7 +127,7 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         Registration registration2 =
                 dataView.addItemCountChangeListener(event -> {});
 
-        // Trigger refresh all event
+        // Trigger ComboBox::refreshAllData()
         dataView.setFilter(item -> true);
 
         registration1.remove();
