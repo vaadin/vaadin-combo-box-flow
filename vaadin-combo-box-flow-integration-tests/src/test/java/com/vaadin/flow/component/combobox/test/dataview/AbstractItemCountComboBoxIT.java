@@ -56,8 +56,8 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     protected void doScroll(int itemToScroll, int expectedItems, int fetchIndex,
             int start, int end, String expectedItemText) {
         scrollToItemAndVerifyLabel(comboBoxElement, itemToScroll, expectedItemText);
-        // TODO: give an array of ranges as a parameter for this method,
-        //  because combo box might scroll to the target item several times
+        // TODO https://github.com/vaadin/vaadin-combo-box-flow/issues/390:
+        //  implement this check after the scrolling issue has been fixed
         // verifyFetchForUndefinedSizeCallback(fetchIndex, Range.between(start,
         //        end));
         verifyItemsSize(expectedItems);
