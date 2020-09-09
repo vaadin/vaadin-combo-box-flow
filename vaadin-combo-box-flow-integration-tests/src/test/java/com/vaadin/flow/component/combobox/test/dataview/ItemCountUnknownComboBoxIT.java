@@ -98,23 +98,41 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         doScroll(1000, 1200, 6, 950, 1100, "Callback Item 1000");
     }
 
-    // @Test TODO
-    public void undefinedSize_switchesToInitialEstimateSizeLargerThanCurrentEstimate_sizeChanges() {
+    @Test
+    public void undefinedSize_switchesToEstimateSizeLargerThanCurrentEstimate_sizeChanges() {
+        open(1000);
 
+        setEstimate(300);
+
+        verifyItemsSize(300);
+
+        setEstimate(600);
+
+        // Force updating the combobox items size by scrolling one page forward
+        doScroll(99, 600, 1, 0, 100, "Callback Item 99");
     }
 
-    // @Test TODO
-    public void undefinedSize_switchesToInitialEstimateSizeLessThanCurrentEstimate_estimateDiscarded() {
+    @Test
+    public void undefinedSize_switchesToEstimateSizeLessThanCurrentEstimate_estimateDiscarded() {
+        open(1000);
 
-    }
+        setEstimate(600);
 
-    // @Test TODO
-    public void undefinedSize_switchesToEstimateCallback_sizeChanges() {
+        verifyItemsSize(600);
 
-    }
+        // Change estimation to the lower value is still fine, because it is
+        // larger than assumed size
+        setEstimate(300);
 
-    // @Test TODO
-    public void undefinedSize_switchesToEstimateCallbackSizeLessThanCurrent_throws() {
+        // Force updating the combobox items size by scrolling one page forward,
+        // and check that estimation is still applied
+        doScroll(99, 300, 1, 0, 100, "Callback Item 99");
 
+        setEstimate(50);
+
+        // Scroll one page forward and check that the estimated size does not
+        // go to client, because requestedRange.getEnd() > itemCountEstimate,
+        // and it does not trigger the size reset.
+        doScroll(199, 300, 1, 0, 100, "Callback Item 199");
     }
 }
