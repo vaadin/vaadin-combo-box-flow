@@ -553,6 +553,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
             setupDataProviderListener(dataProvider);
 
+            refreshAllData(shouldForceServerSideFiltering);
+
             userProvidedFilter = UserProvidedFilter.UNDECIDED;
         };
 
@@ -593,7 +595,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 refreshAllData(shouldForceServerSideFiltering);
             }
         });
-        refreshAllData(shouldForceServerSideFiltering);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider != null && dataProviderListener == null) {
+            setupDataProviderListener(dataProvider);
+        }
     }
 
     @Override
