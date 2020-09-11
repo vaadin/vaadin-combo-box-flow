@@ -82,7 +82,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
 
     private int fetchQueryCount = 0;
     private int dataProviderSize = DEFAULT_DATA_PROVIDER_SIZE;
-    private int fetchCallbackSize = -1;
+    private int fetchCallbackSize = DEFAULT_DATA_PROVIDER_SIZE * 10;
 
     public AbstractItemCountComboBoxPage() {
         initComboBox();
@@ -234,10 +234,6 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
     private Stream<String> fakeFetch(Query<String, String> query) {
         int limit = query.getLimit();
         int offset = query.getOffset();
-        int lastItemToFetch = offset + limit;
-        if (fetchCallbackSize > 0 && (lastItemToFetch) > fetchCallbackSize) {
-            lastItemToFetch = fetchCallbackSize;
-        }
         Div log = new Div();
         log.setId("log-" + fetchQueryCount);
         log.setText(fetchQueryCount + ":" + Range
@@ -246,7 +242,13 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
         logPanel.addComponentAsFirst(log);
         Logger.getLogger(getClass().getName()).info(String
                 .format("Callback Query : limit %s offset %s", limit, offset));
-        return IntStream.range(offset, lastItemToFetch)
-                .mapToObj(index -> "Callback Item " + index);
+        return IntStream.range(0, fetchCallbackSize)
+                .mapToObj(index -> "Callback Item " + index).filter(item -> {
+                    if (query.getFilter().isPresent()) {
+                        return item.contains(query.getFilter().get());
+                    } else {
+                        return true;
+                    }
+                }).skip(offset).limit(limit);
     }
 }

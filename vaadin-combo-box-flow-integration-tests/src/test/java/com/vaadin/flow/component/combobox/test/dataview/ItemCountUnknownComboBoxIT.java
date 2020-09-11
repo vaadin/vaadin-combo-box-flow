@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.Keys;
 
 @TestPath("item-count-unknown")
 public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
@@ -134,5 +135,20 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // go to client, because requestedRange.getEnd() > itemCountEstimate,
         // and it does not trigger the size reset.
         doScroll(199, 300, 1, 0, 100, "Callback Item 199");
+    }
+
+    @Test
+    public void undefinedSize_enterClientFilter_displaysFilteredItem() {
+        open(300);
+
+        comboBoxElement.openPopup();
+        assertLoadedItemsCount("Should be 50 items before filtering", 50,
+                comboBoxElement);
+
+        // Apply text filter
+        comboBoxElement.sendKeys("Callback Item 250", Keys.ENTER);
+
+        waitForItems(comboBoxElement, items -> items.size() == 1
+                && "Callback Item 250".equals(getItemLabel(items, 0)));
     }
 }
