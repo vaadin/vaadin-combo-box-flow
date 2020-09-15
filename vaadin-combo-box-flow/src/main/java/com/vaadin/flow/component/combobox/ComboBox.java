@@ -536,7 +536,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataCommunicatorInitializer = null;
             if(lazyOpenRegistration != null) {
                 lazyOpenRegistration.remove();
-                lazyOpenRegistration=null;
+                lazyOpenRegistration = null;
             }
             scheduleRender();
             SerializableConsumer<C> providerFilterSlot = dataCommunicator
