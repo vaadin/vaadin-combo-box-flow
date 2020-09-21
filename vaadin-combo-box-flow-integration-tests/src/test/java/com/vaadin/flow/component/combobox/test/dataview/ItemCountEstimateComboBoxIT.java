@@ -72,11 +72,7 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsSize(initialEstimate);
 
         setCountCallback();
-        // ComboBox scroller jumps up when the estimated size has been reached,
-        // and thus, we have to open the combo box and scroll again to force
-        // the items fetch.
-        // https://github.com/vaadin/vaadin-combo-box-flow/issues/386
-        scrollToItem(comboBoxElement, 100);
+
         verifyItemsSize(1000);
     }
 
@@ -88,18 +84,12 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
 
         setEstimate(2000);
 
-        // ComboBox scroller jumps up when the estimated size has been reached,
-        // and thus, we have to open the combo box and scroll again to force
-        // the items fetch.
-        // https://github.com/vaadin/vaadin-combo-box-flow/issues/386
-        scrollToItem(comboBoxElement, 100);
         verifyItemsSize(2000);
 
         scrollToItem(comboBoxElement, 1999);
-        verifyItemsSize(2000 + 200);
+        verifyItemsSize(2200);
 
         setEstimate(3000);
-        scrollToItem(comboBoxElement, 100);
         verifyItemsSize(3000);
     }
 
@@ -112,20 +102,13 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
         scrollToItem(comboBoxElement, 1500);
         setEstimate(1501);
 
-        // TODO: scrolling to 100 does not update the items size for some reason
-        scrollToItem(comboBoxElement, 50);
         verifyItemsSize(1501);
 
         setEstimate(1600);
-        scrollToItem(comboBoxElement, 100);
         verifyItemsSize(1600);
 
         scrollToItem(comboBoxElement, 1100);
         setEstimate(1300);
-        // For this verification to work, we also need to scroll closely to
-        // estimated size, so as to force the combo box to request the
-        // desired range and update the combo box size
-        scrollToItem(comboBoxElement, 1200);
         verifyItemsSize(1300);
     }
 

@@ -146,30 +146,6 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 comboBox, index);
     }
 
-    /**
-     * Since the combo box scrolls back to 0 position when a new estimated
-     * size is sent from data communicator to combo box client part, this
-     * method makes additional attempts to scroll to the target item.
-     * @param comboBox combo box element to scroll with
-     * @param index desired item target
-     * @param itemText target item label text
-     */
-    protected void scrollToItemAndVerifyLabel(ComboBoxElement comboBox, int index,
-                                              String itemText) {
-        final int MAX_ATTEMPTS = 10;
-        for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-            try {
-                scrollToItem(comboBox, index);
-                waitUntilTextInContent(itemText);
-                return;
-            } catch (TimeoutException ignore) {
-                // Scroll again and check the item present in the list
-            }
-        }
-        Assert.fail(String.format("Failed to scroll combo box to item '%d'. " +
-                "Item text '%s' is not rendered", index, itemText));
-    }
-
     protected void waitUntilTextInContent(String text) {
         waitUntil(e -> {
             List<String> overlayContents = getOverlayContents();

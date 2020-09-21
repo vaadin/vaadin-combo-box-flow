@@ -16,14 +16,13 @@
 
 package com.vaadin.flow.component.combobox.test.dataview;
 
-import static com.vaadin.flow.component.combobox.test.dataview.AbstractItemCountComboBoxPage.DEFAULT_DATA_PROVIDER_SIZE;
-
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.Keys;
+
+import static com.vaadin.flow.component.combobox.test.dataview.AbstractItemCountComboBoxPage.DEFAULT_DATA_PROVIDER_SIZE;
 
 @TestPath("item-count-unknown")
 public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
@@ -70,17 +69,13 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
 
         doScroll(299, actualSize, 2, 150, actualSize, "Callback Item 299");
 
-        Assert.assertEquals(300, getItems(comboBoxElement).size());
-
         // change callback backend size limit
         setUnknownCountBackendSize(DEFAULT_DATA_PROVIDER_SIZE);
         // combo box has scrolled to end -> switch to defined size callback
         // -> new size updated and more items fetched
         setCountCallback();
 
-        // Open dropdown and scroll to the end again, check the DP size
-        doScroll(299, DEFAULT_DATA_PROVIDER_SIZE, 2, 150, actualSize,
-                "Callback Item 299");
+        verifyItemsSize(DEFAULT_DATA_PROVIDER_SIZE);
 
         // Check that combo box is scrolled over 'actualSize' after switching
         // to defined size
@@ -90,13 +85,14 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // switching back to undefined size, nothing changes
         setUnknownCount();
 
+        verifyItemsSize(DEFAULT_DATA_PROVIDER_SIZE);
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, 2, 150, actualSize,
                 "Callback Item 500");
 
         // increase backend size and scroll to current end
         setUnknownCountBackendSize(2000);
         // size has been increased again by default size
-        doScroll(1000, 1200, 6, 950, 1100, "Callback Item 1000");
+        doScroll(1000, 1200, 6, 950, 1100, "Callback Item 999");
     }
 
     @Test
@@ -125,16 +121,14 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // larger than assumed size
         setEstimate(300);
 
-        // Force updating the combobox items size by scrolling one page forward,
-        // and check that estimation is still applied
-        doScroll(99, 300, 1, 0, 100, "Callback Item 99");
+        verifyItemsSize(300);
 
         setEstimate(50);
 
-        // Scroll one page forward and check that the estimated size does not
-        // go to client, because requestedRange.getEnd() > itemCountEstimate,
-        // and it does not trigger the size reset.
-        doScroll(199, 300, 1, 0, 100, "Callback Item 199");
+        // Check that the estimated size does not go to client, because
+        // requestedRange.getEnd() > itemCountEstimate, and it does not
+        // trigger the size reset.
+        verifyItemsSize(300);
     }
 
     @Test
