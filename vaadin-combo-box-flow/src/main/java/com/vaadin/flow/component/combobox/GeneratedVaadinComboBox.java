@@ -1424,8 +1424,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
             SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if (getElement().getProperty("value") == null && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -1444,8 +1443,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     public GeneratedVaadinComboBox(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if (getElement().getProperty("value") == null && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
@@ -1475,8 +1473,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
             SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
-        if (initialValue != null) {
-            setModelValue(initialValue, false);
+        if (getElement().getProperty("value") == null && initialValue != null) {
             setPresentationValue(initialValue);
         }
     }
