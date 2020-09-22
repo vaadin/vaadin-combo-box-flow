@@ -78,7 +78,8 @@ public class ComboBoxTest {
     private class ComboBoxWithInitialValue
             extends GeneratedVaadinComboBox<ComboBoxWithInitialValue, String> {
         ComboBoxWithInitialValue() {
-            super("", null, String.class, value -> value, value -> value);
+            super("", null, String.class, (combo, value) -> value,
+                    (combo, value) -> value, true);
         }
     }
 
