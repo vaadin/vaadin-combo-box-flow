@@ -1,12 +1,14 @@
 package com.vaadin.flow.component.combobox.dataview;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -26,6 +28,9 @@ public class ComboBoxLazyDataViewTest {
     private DataCommunicatorTest.MockUI ui;
     private DataCommunicator<String> dataCommunicator;
     private ArrayUpdater arrayUpdater;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -84,28 +89,33 @@ public class ComboBoxLazyDataViewTest {
 
     @Test
     public void setItemCountCallback_setAnotherCountCallback_itemCountChanged() {
-        final List<Integer> itemCounts = new ArrayList<>(2);
+        final AtomicInteger itemCount = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
-                event -> itemCounts.add(event.getItemCount()));
+                event -> itemCount.set(event.getItemCount()));
         dataCommunicator.setRequestedRange(0, 50);
 
         fakeClientCommunication();
 
-        // size = 3 from test data provider (this.dataProvider) and size = 0
-        // from empty list data provider created by default in combo box
-        // constructor
-        Assert.assertArrayEquals(
+        Assert.assertEquals(
                 "Expected two item count event from two data communicators",
-                new Integer[] { 3, 0 }, itemCounts.toArray());
-
-        itemCounts.clear();
+                3, itemCount.getAndSet(0));
 
         dataView.setItemCountCallback(query -> 2);
 
         fakeClientCommunication();
 
-        Assert.assertArrayEquals("Invalid item count reported",
-                new Integer[] { 2 }, itemCounts.toArray());
+        Assert.assertEquals("Invalid item count reported", 2, itemCount.get());
+    }
+
+    @Test
+    public void getLazyDataView_emptyDataCommunicator_throws() {
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("Cannot create an instance of "
+                + "LazyDataView without setting the backend callback(s). "
+                + "Please use one of the ComboBox's 'setItems' methods to "
+                + "setup on how the items should be fetched from backend");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.getLazyDataView();
     }
 
     private void fakeClientCommunication() {

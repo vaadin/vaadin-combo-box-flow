@@ -613,6 +613,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxDataView<T> getGenericDataView() {
+        createDataCommunicatorIfEmpty();
         return new ComboBoxDataView<T>(dataCommunicator, this) {
             @Override
             public Registration addItemCountChangeListener(
@@ -652,11 +653,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * If the items are not fetched lazily an exception is thrown. When the
      * items are in-memory, use {@link #getListDataView()} instead.
      *
+     * @throws IllegalStateException if no items fetch callback(s) set
+     *
      * @return the lazy data view that provides access to the data bound to the
      *         ComboBox
      */
     @Override
     public ComboBoxLazyDataView<T> getLazyDataView() {
+        if (dataCommunicator == null) {
+            throw new IllegalStateException("Cannot create an instance of "
+                    + "LazyDataView without setting the backend callback(s). "
+                    + "Please use one of the ComboBox's 'setItems' methods to "
+                    + "setup on how the items should be fetched from backend");
+        }
         return new ComboBoxLazyDataView<>(dataCommunicator, this);
     }
 
@@ -685,6 +694,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxListDataView<T> getListDataView() {
+        createDataCommunicatorIfEmpty();
         return new ComboBoxListDataView<T>(dataCommunicator, this) {
             @Override
             public Registration addItemCountChangeListener(
@@ -702,6 +712,21 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
             }
         };
+    }
+
+    @Override
+    public ComboBoxLazyDataView<T> setItems(CallbackDataProvider.FetchCallback<T, String> fetchCallback) {
+        ComboBoxLazyDataView<T> lazyDataView =
+                HasLazyDataView.super.setItems(fetchCallback);
+
+        assert this.dataCommunicatorInitializer != null :
+                "Data Communicator Initializer should be not null";
+
+        this.dataCommunicatorInitializer =
+                this.dataCommunicatorInitializer.andThen(
+                        () -> this.dataCommunicator.setDefinedSize(false));
+
+        return lazyDataView;
     }
 
     /**
@@ -1567,12 +1592,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
              * are set explicitly or in-memory Data Provider is used.
              */
             dataCommunicatorInitializer.init();
-        } else if (dataCommunicator == null) {
+        } else {
+            createDataCommunicatorIfEmpty();
+        }
+    }
+
+    private void createDataCommunicatorIfEmpty() {
+        if (dataCommunicator == null) {
             /*
              * If the user hasn't provided any data, initialize with empty data
              * set.
              */
-            setItems();
+            setItems(new ArrayList<>(0));
         }
     }
 
@@ -1597,6 +1628,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @FunctionalInterface
     private interface DataCommunicatorInitializer extends Serializable {
         void init();
+
+        default DataCommunicatorInitializer andThen(DataCommunicatorInitializer after) {
+            Objects.requireNonNull(after,
+                    "Data Communicator Initializer cannot be null");
+            return () -> {
+                init();
+                after.init();
+            };
+        }
     }
 
 }

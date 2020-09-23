@@ -24,6 +24,7 @@ public class ItemCountEstimateComboBoxPage extends AbstractItemCountComboBoxPage
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        super.beforeEnter(event);
         event.getRouteParameters().get("estimate")
                 .ifPresent(string -> itemCountEstimateInput
                         .setValue(Integer.parseInt(string)));

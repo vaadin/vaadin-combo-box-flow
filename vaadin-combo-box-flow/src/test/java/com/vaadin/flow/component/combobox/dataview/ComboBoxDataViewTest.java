@@ -42,6 +42,9 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         dataProvider = new CustomInMemoryDataProvider<>(items);
         comboBox = getComponent();
         dataView = comboBox.setItems(dataProvider, textFilter -> item -> true);
+        // Open the comboBox explicitly, because it is not initialized
+        // eagerly with in-memory data provider
+        comboBox.setOpened(true);
         component = comboBox;
     }
 
@@ -211,6 +214,10 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         ComboBoxDataView<String> dataView = comboBox.setItems(
                 inMemoryDataProvider,
                 textFilter -> item -> item.startsWith(textFilter));
+
+        // Open the comboBox explicitly, because it is not initialized
+        // eagerly with in-memory data provider
+        comboBox.setOpened(true);
 
         // We expect that the current implementation of 'setItems' with IMDP
         // will delegate to 'setItems(DataProvider)'

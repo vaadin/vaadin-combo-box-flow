@@ -25,6 +25,7 @@ public class ItemCountEstimateIncreaseComboBoxPage
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        super.beforeEnter(event);
         event.getRouteParameters().get("increase").ifPresent(string -> {
             int size = Integer.parseInt(string);
             itemCountEstimateIncreaseInput.setValue(size);

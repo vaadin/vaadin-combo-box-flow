@@ -24,6 +24,7 @@ public class ItemCountUnknownComboBoxPage extends AbstractItemCountComboBoxPage 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        super.beforeEnter(event);
         switchToUndefinedSize();
         event.getRouteParameters().get("count")
                 .ifPresent(string -> fetchCallbackSizeInput

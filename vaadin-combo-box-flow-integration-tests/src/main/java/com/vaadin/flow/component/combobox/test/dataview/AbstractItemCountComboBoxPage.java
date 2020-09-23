@@ -30,6 +30,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.internal.Range;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.RouterLink;
 
@@ -107,6 +108,11 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
         initEstimateOptions();
         initDataCommunicatorOptions();
         initNavigationLinks();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        comboBox.setOpened(true);
     }
 
     private void initNavigationLinks() {

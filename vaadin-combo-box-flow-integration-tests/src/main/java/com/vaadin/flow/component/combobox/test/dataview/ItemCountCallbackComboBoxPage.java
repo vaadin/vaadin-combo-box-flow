@@ -24,6 +24,7 @@ public class ItemCountCallbackComboBoxPage extends AbstractItemCountComboBoxPage
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        super.beforeEnter(event);
         event.getRouteParameters().get("count")
                 .ifPresent(string -> dataProviderSizeInput
                         .setValue(Integer.parseInt(string)));
