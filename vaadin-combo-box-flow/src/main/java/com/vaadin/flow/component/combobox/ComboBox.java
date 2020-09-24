@@ -110,6 +110,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_VALUE = "value";
     private static final String PROP_CLIENT_SIDE_FILTER = "_clientSideFilter";
 
+    private static final String COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE =
+            "Trying to use exact size with a lazy loading component"
+            + " without either providing a count callback for the"
+            + " component to fetch the count of the items or a data"
+            + " provider that implements the size query. Provide the "
+            + "callback for fetching item count with%n"
+            + "comboBox.getLazyDataView().withDefinedSize(CallbackDataProvider.CountCallback);"
+            + "%nor switch to undefined size with%n"
+            + "comboBox.getLazyDataView().withUndefinedSize()";
+
     private Registration dataProviderListener = null;
     private boolean shouldForceServerSideFiltering = false;
 
@@ -167,6 +177,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         private UpdateQueue(int size) {
             enqueue("$connector.updateSize", size);
+
+            // Update the server side property with the latest value of items
+            // count
+            getElement().setProperty("size", size);
         }
 
         @Override
@@ -716,8 +730,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public ComboBoxLazyDataView<T> setItems(CallbackDataProvider.FetchCallback<T, String> fetchCallback) {
-        ComboBoxLazyDataView<T> lazyDataView =
-                HasLazyDataView.super.setItems(fetchCallback);
+        ComboBoxLazyDataView<T> lazyDataView = setItems(
+                DataProvider.fromFilteringCallbacks(fetchCallback, query -> {
+                    throw new IllegalStateException(
+                            COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE);
+                }));
 
         assert this.dataCommunicatorInitializer != null :
                 "Data Communicator Initializer should be not null";
@@ -789,14 +806,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 query.getFilter().orElse(null), query.getOffset(),
                 query.getLimit()), query -> {
                     throw new IllegalStateException(
-                            "Trying to use exact size with a lazy loading component"
-                                    + " without either providing a count callback for the"
-                                    + " component to fetch the count of the items or a data"
-                                    + " provider that implements the size query. Provide the "
-                                    + "callback for fetching item count with%n"
-                                    + "comboBox.getLazyDataView().withDefinedSize(CallbackDataProvider.CountCallback);"
-                                    + "%nor switch to undefined size with%n"
-                                    + "comboBox.getLazyDataView().withUndefinedSize();");
+                            COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE);
                 }, filterConverter);
     }
 
