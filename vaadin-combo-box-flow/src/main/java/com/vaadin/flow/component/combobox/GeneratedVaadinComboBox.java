@@ -393,7 +393,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * the returned value may not be the same as in client side.
      * </p>
      * 
-     * @return the {@code size} property fromw the webcomponent
+     * @return the {@code size} property from the webcomponent
      */
     protected double getSizeDouble() {
         return getElement().getProperty("size", 0.0);
