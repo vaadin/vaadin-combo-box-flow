@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.combobox.dataview;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
@@ -95,28 +95,22 @@ public class ComboBoxLazyDataViewTest {
 
     @Test
     public void setItemCountCallback_setAnotherCountCallback_itemCountChanged() {
-        final List<Integer> itemCounts = new ArrayList<>(2);
+        final AtomicInteger itemCount = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
-                event -> itemCounts.add(event.getItemCount()));
+                event -> itemCount.set(event.getItemCount()));
         dataCommunicator.setRequestedRange(0, 50);
 
         fakeClientCommunication();
 
-        // size = 3 from test data provider (this.dataProvider) and size = 0
-        // from empty list data provider created by default in combo box
-        // constructor
-        Assert.assertArrayEquals(
-                "Expected two item count event from two data communicators",
-                new Integer[] { 3, 0 }, itemCounts.toArray());
-
-        itemCounts.clear();
+        Assert.assertEquals("Expected 3 items before setItemCountCallback()", 3,
+                itemCount.getAndSet(0));
 
         dataView.setItemCountCallback(query -> 2);
 
         fakeClientCommunication();
 
-        Assert.assertArrayEquals("Invalid item count reported",
-                new Integer[] { 2 }, itemCounts.toArray());
+        Assert.assertEquals("Expected 2 items after setItemCountCallback()", 2,
+                itemCount.get());
     }
 
     @Test
@@ -130,8 +124,8 @@ public class ComboBoxLazyDataViewTest {
     @Test
     public void lazyDataViewAPI_comboBoxNotOpenedYet_dataProviderVerificationPassed() {
         ComboBox<String> comboBox = new ComboBox<>();
-        ComboBoxLazyDataView<String> dataView =
-                comboBox.setItems(query -> Stream.of("foo"));
+        ComboBoxLazyDataView<String> dataView = comboBox
+                .setItems(query -> Stream.of("foo"));
         dataView.setItemCountEstimate(1000);
         dataView.setItemCountEstimateIncrease(1000);
         dataView.setItemCountUnknown();

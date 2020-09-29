@@ -906,6 +906,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         setupDataProviderListener(dataProvider);
 
+        refreshAllData(shouldForceServerSideFiltering);
+
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
         // Register an opened listener to enable fetch and size queries to
@@ -1081,7 +1083,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 filterText -> item -> itemFilter.test(item, filterText));
 
         // Enable fetch and size queries eagerly because in-memory
-        // data is used (ListDataProvider)
+        // data is used and getting the collection size is not so
+        // heavy like a database call
         enableDataProviderFetch();
     }
 
@@ -1567,8 +1570,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void enableDataProviderFetch() {
-        dataCommunicator.setSilentMode(false);
-        refreshAllData(shouldForceServerSideFiltering);
+        dataCommunicator.setFetchDisabled(false);
     }
 
     private Registration getItemCountChangeRegistration(Registration registration) {
