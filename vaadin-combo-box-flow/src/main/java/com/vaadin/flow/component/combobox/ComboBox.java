@@ -250,7 +250,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private AtomicInteger itemCountListeners = new AtomicInteger(0);
 
     private DataCommunicator<T> dataCommunicator;
-    private DataCommunicatorInitializer dataCommunicatorInitializer;
     private Registration lazyOpenRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
@@ -293,6 +292,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setPageSize(pageSize);
 
         addAttachListener(e -> initConnector());
+
+        runBeforeClientResponse(ui -> {
+            // If user didn't provide any data, initialize with empty data set.
+            initDataCommunicatorIfEmpty();
+        });
     }
 
     /**
@@ -627,7 +631,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxDataView<T> getGenericDataView() {
-        createDataCommunicatorIfEmpty();
+        initDataCommunicatorIfEmpty();
         return new ComboBoxDataView<T>(dataCommunicator, this) {
             @Override
             public Registration addItemCountChangeListener(
@@ -674,12 +678,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxLazyDataView<T> getLazyDataView() {
-        if (dataCommunicator == null) {
-            throw new IllegalStateException("Cannot create an instance of "
-                    + "LazyDataView without setting the backend callback(s). "
-                    + "Please use one of the ComboBox's 'setItems' methods to "
-                    + "setup on how the items should be fetched from backend");
-        }
+        initDataCommunicatorIfEmpty();
         return new ComboBoxLazyDataView<>(dataCommunicator, this);
     }
 
@@ -708,7 +707,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxListDataView<T> getListDataView() {
-        createDataCommunicatorIfEmpty();
+        initDataCommunicatorIfEmpty();
         return new ComboBoxListDataView<T>(dataCommunicator, this) {
             @Override
             public Registration addItemCountChangeListener(
@@ -726,24 +725,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
             }
         };
-    }
-
-    @Override
-    public ComboBoxLazyDataView<T> setItems(CallbackDataProvider.FetchCallback<T, String> fetchCallback) {
-        ComboBoxLazyDataView<T> lazyDataView = setItems(
-                DataProvider.fromFilteringCallbacks(fetchCallback, query -> {
-                    throw new IllegalStateException(
-                            COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE);
-                }));
-
-        assert this.dataCommunicatorInitializer != null :
-                "Data Communicator Initializer should be not null";
-
-        this.dataCommunicatorInitializer =
-                this.dataCommunicatorInitializer.andThen(
-                        () -> this.dataCommunicator.setDefinedSize(false));
-
-        return lazyDataView;
     }
 
     /**
@@ -888,13 +869,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
 
         if (dataCommunicator == null) {
+            // Create data communicator with postponed initialisation
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
-                            .callJsFunction("$connector.updateData", data),
-                    getElement().getNode());
+                    .callJsFunction("$connector.updateData", data),
+                    getElement().getNode(), true);
             dataCommunicator.setPageSize(getPageSize());
         }
 
+        scheduleRender();
         setValue(null);
 
         SerializableFunction<String, C> convertOrNull = filterText -> {
@@ -905,38 +888,30 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return filterConverter.apply(filterText);
         };
 
-        // Postpone data communicator provider initialization in order to
-        // trigger item count request and data fetch upon clicking on combobox
-        dataCommunicatorInitializer = () -> {
-            dataCommunicatorInitializer = null;
-            if (lazyOpenRegistration != null) {
-                lazyOpenRegistration.remove();
-                lazyOpenRegistration = null;
+        if (lazyOpenRegistration != null) {
+            lazyOpenRegistration.remove();
+            lazyOpenRegistration = null;
+        }
+        SerializableConsumer<C> providerFilterSlot = dataCommunicator
+                .setDataProvider(dataProvider,
+                        convertOrNull.apply(getFilterString()));
+
+        filterSlot = filter -> {
+            if (!Objects.equals(filter, lastFilter)) {
+                providerFilterSlot.accept(convertOrNull.apply(filter));
+                lastFilter = filter;
             }
-            scheduleRender();
-            SerializableConsumer<C> providerFilterSlot = dataCommunicator
-                    .setDataProvider(dataProvider,
-                            convertOrNull.apply(getFilterString()));
-
-            filterSlot = filter -> {
-                if (!Objects.equals(filter, lastFilter)) {
-                    providerFilterSlot.accept(convertOrNull.apply(filter));
-                    lastFilter = filter;
-                }
-            };
-
-            shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
-            setupDataProviderListener(dataProvider);
-
-            refreshAllData(shouldForceServerSideFiltering);
-
-            userProvidedFilter = UserProvidedFilter.UNDECIDED;
         };
 
-        // Register an opened listener to initialize the dataprovider
-        // when the dropdown opens.
-        lazyOpenRegistration = getElement().addPropertyChangeListener("opened",
-                this::executeRegistration);
+        shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
+        setupDataProviderListener(dataProvider);
+
+        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+
+        // Register an opened listener to enable fetch and size queries to
+        // data provider when the dropdown opens.
+        lazyOpenRegistration = getElement()
+                .addPropertyChangeListener("opened", this::executeRegistration);
     }
 
     /**
@@ -953,10 +928,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 lazyOpenRegistration.remove();
                 lazyOpenRegistration = null;
             }
-            if (dataCommunicatorInitializer != null) {
-                getDataCommunicator();
-                reset();
-            }
+            enableDataProviderFetch();
         }
     }
 
@@ -1108,9 +1080,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setDataProvider(listDataProvider,
                 filterText -> item -> itemFilter.test(item, filterText));
 
-        // Force the data communicator initialization eagerly because in-memory
+        // Enable fetch and size queries eagerly because in-memory
         // data is used (ListDataProvider)
-        initDataCommunicator();
+        enableDataProviderFetch();
     }
 
     /**
@@ -1541,12 +1513,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void confirmUpdate(int id) {
-        getDataCommunicator().confirmUpdate(id);
+        dataCommunicator.confirmUpdate(id);
     }
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
-        getDataCommunicator().setRequestedRange(start, length);
+        dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
         // Send (possibly updated) key for the selected value
         getElement().executeJs("this._selectedKey=$0",
@@ -1555,7 +1527,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void resetDataCommunicator() {
-        getDataCommunicator().reset();
+        dataCommunicator.reset();
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -1588,33 +1560,15 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
-    private DataCommunicator<T> getDataCommunicator() {
-        initDataCommunicator();
-        return dataCommunicator;
-    }
-
-    private void initDataCommunicator() {
-        if (dataCommunicatorInitializer != null) {
-            /*
-             * Init the Data Communicator: 1. Lazily, when the data lazy loading
-             * is used. Initialization occurs when the user clicks on the
-             * dropdown to view the list of items. 2. Eagerly, when the items
-             * are set explicitly or in-memory Data Provider is used.
-             */
-            dataCommunicatorInitializer.init();
-        } else {
-            createDataCommunicatorIfEmpty();
-        }
-    }
-
-    private void createDataCommunicatorIfEmpty() {
+    private void initDataCommunicatorIfEmpty() {
         if (dataCommunicator == null) {
-            /*
-             * If the user hasn't provided any data, initialize with empty data
-             * set.
-             */
-            setItems(new ArrayList<>(0));
+            setItems(new DataCommunicator.EmptyDataProvider<>());
         }
+    }
+
+    private void enableDataProviderFetch() {
+        dataCommunicator.setSilentMode(false);
+        refreshAllData(shouldForceServerSideFiltering);
     }
 
     private Registration getItemCountChangeRegistration(Registration registration) {
@@ -1630,23 +1584,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         .getItemCount() <= getPageSizeDouble());
             }
         });
-    }
-
-    /**
-     * Callback for Data Communicator lazy initialization
-     */
-    @FunctionalInterface
-    private interface DataCommunicatorInitializer extends Serializable {
-        void init();
-
-        default DataCommunicatorInitializer andThen(DataCommunicatorInitializer after) {
-            Objects.requireNonNull(after,
-                    "Data Communicator Initializer cannot be null");
-            return () -> {
-                init();
-                after.init();
-            };
-        }
     }
 
 }
