@@ -125,29 +125,27 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     /**
      * A callback method for fetching items. The callback is provided with a
-     * non-null filter, offset index and limit.
+     * non-null string filter, offset index and limit.
      *
      * @param <T>
      *            item (bean) type in ComboBox
-     * @param <F>
-     *            filter type
      */
     @FunctionalInterface
-    public interface FetchItemsCallback<T, F> extends Serializable {
+    public interface FetchItemsCallback<T> extends Serializable {
 
         /**
          * Returns a stream of items that match the given filter, limiting the
          * results with given offset and limit.
          *
          * @param filter
-         *            a non-null filter
+         *            a non-null filter string
          * @param offset
          *            the first index to fetch
          * @param limit
          *            the fetched item count
          * @return stream of items
          */
-        Stream<T> fetchItems(F filter, int offset, int limit);
+        Stream<T> fetchItems(String filter, int offset, int limit);
     }
 
     private class CustomValueRegistration implements Registration {
@@ -178,8 +176,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         private UpdateQueue(int size) {
             enqueue("$connector.updateSize", size);
 
-            // Update the server side property with the latest value of items
-            // count
+            // Trigger size update on the client side.
+            // This is exclusively needed for supporting immediate update of the
+            // dropdown scroller size when the
+            // LazyDataView::setItemCountEstimate() has been called, i.e. as
+            // soon as the user opens the dropdown. Otherwise, the scroller
+            // size update would be triggered only after a manual scrolling to
+            // the next page, which is a bad UX.
             getElement().setProperty("size", size);
         }
 
@@ -293,10 +296,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         addAttachListener(e -> initConnector());
 
-        runBeforeClientResponse(ui -> {
-            // If user didn't provide any data, initialize with empty data set.
-            initDataCommunicatorIfEmpty();
-        });
+        setItems(new DataCommunicator.EmptyDataProvider<>());
     }
 
     /**
@@ -368,16 +368,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setValue(T value) {
-        if (dataCommunicator == null) {
-            if (value == null) {
-                return;
-            } else {
-                throw new IllegalStateException(
-                        "Cannot set a value for a ComboBox without items. "
-                                + "Use setItems or setDataProvider to populate "
-                                + "items into the ComboBox before setting a value.");
-            }
-        }
         super.setValue(value);
         refreshValue();
     }
@@ -631,7 +621,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxDataView<T> getGenericDataView() {
-        initDataCommunicatorIfEmpty();
         return new ComboBoxDataView<T>(dataCommunicator, this) {
             @Override
             public Registration addItemCountChangeListener(
@@ -662,9 +651,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * used when the items are provided lazily from the backend with:
      * <ul>
      * <li>{@link #setItems(CallbackDataProvider.FetchCallback)}</li>
-     * <li>{@link #setItems(FetchItemsCallback, SerializableFunction)}</>
+     * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, SerializableFunction)}</>
      * <li>{@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}</li>
-     * <li>{@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback, SerializableFunction)}
+     * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback, SerializableFunction)}
      * </li>
      * <li>{@link #setItems(BackEndDataProvider)}</li>
      * </ul>
@@ -678,7 +667,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxLazyDataView<T> getLazyDataView() {
-        initDataCommunicatorIfEmpty();
         return new ComboBoxLazyDataView<>(dataCommunicator, this);
     }
 
@@ -707,7 +695,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxListDataView<T> getListDataView() {
-        initDataCommunicatorIfEmpty();
         return new ComboBoxListDataView<T>(dataCommunicator, this) {
             @Override
             public Registration addItemCountChangeListener(
@@ -779,16 +766,17 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return LazyDataView instance for further configuration
      */
-    public <C> ComboBoxLazyDataView<T> setItems(
-            FetchItemsCallback<T, C> fetchCallback,
+    public <C> ComboBoxLazyDataView<T> setItemsWithFilterConverter(
+            CallbackDataProvider.FetchCallback<T, C> fetchCallback,
             SerializableFunction<String, C> filterConverter) {
         Objects.requireNonNull(fetchCallback, "Fetch callback cannot be null");
-        return setItems(query -> fetchCallback.fetchItems(
-                query.getFilter().orElse(null), query.getOffset(),
-                query.getLimit()), query -> {
+        ComboBoxLazyDataView<T> lazyDataView = setItemsWithFilterConverter(
+                fetchCallback, query -> {
                     throw new IllegalStateException(
                             COUNT_QUERY_WITH_UNDEFINED_SIZE_ERROR_MESSAGE);
                 }, filterConverter);
+        lazyDataView.setItemCountUnknown();
+        return lazyDataView;
     }
 
     /**
@@ -826,7 +814,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return LazyDataView instance for further configuration
      */
-    public <C> ComboBoxLazyDataView<T> setItems(
+    public <C> ComboBoxLazyDataView<T> setItemsWithFilterConverter(
             CallbackDataProvider.FetchCallback<T, C> fetchCallback,
             CallbackDataProvider.CountCallback<T, C> countCallback,
             SerializableFunction<String, C> filterConverter) {
@@ -868,13 +856,26 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             userProvidedFilter = UserProvidedFilter.YES;
         }
 
+        // Fetch from data provider is enabled eagerly if the data provider
+        // is of in-memory type and it's not empty (no need to fetch from
+        // empty data provider). Otherwise, the fetch will be postponed until
+        // dropdown open event
+        final boolean enableFetch = InMemoryDataProvider.class
+                .isAssignableFrom(dataProvider.getClass())
+                && !DataCommunicator.EmptyDataProvider.class
+                        .isAssignableFrom(dataProvider.getClass());
+
         if (dataCommunicator == null) {
             // Create data communicator with postponed initialisation
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
                     .callJsFunction("$connector.updateData", data),
-                    getElement().getNode(), true);
+                    getElement().getNode(), enableFetch);
             dataCommunicator.setPageSize(getPageSize());
+        } else {
+            // Enable/disable items fetch from data provider depending on the
+            // data provider type
+            dataCommunicator.setFetchEnabled(enableFetch);
         }
 
         scheduleRender();
@@ -888,10 +889,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             return filterConverter.apply(filterText);
         };
 
-        if (lazyOpenRegistration != null) {
-            lazyOpenRegistration.remove();
-            lazyOpenRegistration = null;
-        }
         SerializableConsumer<C> providerFilterSlot = dataCommunicator
                 .setDataProvider(dataProvider,
                         convertOrNull.apply(getFilterString()));
@@ -910,14 +907,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
-        // Register an opened listener to enable fetch and size queries to
-        // data provider when the dropdown opens.
-        lazyOpenRegistration = getElement()
-                .addPropertyChangeListener("opened", this::executeRegistration);
+        if (lazyOpenRegistration == null && !enableFetch) {
+            // Register an opened listener to enable fetch and size queries to
+            // data provider when the dropdown opens.
+            lazyOpenRegistration = getElement().addPropertyChangeListener(
+                    "opened", this::executeRegistration);
+        }
     }
 
     /**
-     * Initialize {@link DataCommunicator} with the lazy {@link DataProvider}
+     * Enables {@link DataCommunicator} to fetch items from {@link DataProvider}
      * when the open property changes for a lazy combobox. Clean registration on
      * initialization.
      *
@@ -926,11 +925,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     private void executeRegistration(PropertyChangeEvent event) {
         if (event.getValue().equals(Boolean.TRUE)) {
-            if (lazyOpenRegistration != null) {
-                lazyOpenRegistration.remove();
-                lazyOpenRegistration = null;
-            }
-            enableDataProviderFetch();
+            removeLazyOpenRegistration();
+            dataCommunicator.setFetchEnabled(true);
         }
     }
 
@@ -963,6 +959,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataProviderListener.remove();
             dataProviderListener = null;
         }
+        removeLazyOpenRegistration();
         super.onDetach(detachEvent);
     }
 
@@ -1040,7 +1037,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *             which provide access to {@link ComboBoxLazyDataView}
      */
     @Deprecated
-    public void setDataProvider(FetchItemsCallback<T, String> fetchItems,
+    public void setDataProvider(FetchItemsCallback<T> fetchItems,
             SerializableFunction<String, Integer> sizeCallback) {
         Objects.requireNonNull(fetchItems, "Fetch callback cannot be null");
         Objects.requireNonNull(sizeCallback, "Size callback cannot be null");
@@ -1081,11 +1078,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         setDataProvider(listDataProvider,
                 filterText -> item -> itemFilter.test(item, filterText));
-
-        // Enable fetch and size queries eagerly because in-memory
-        // data is used and getting the collection size is not so
-        // heavy like a database call
-        enableDataProviderFetch();
     }
 
     /**
@@ -1563,16 +1555,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
-    private void initDataCommunicatorIfEmpty() {
-        if (dataCommunicator == null) {
-            setItems(new DataCommunicator.EmptyDataProvider<>());
-        }
-    }
-
-    private void enableDataProviderFetch() {
-        dataCommunicator.setFetchDisabled(false);
-    }
-
     private Registration getItemCountChangeRegistration(Registration registration) {
         // Increment stored item count change listeners
         itemCountListeners.incrementAndGet();
@@ -1586,6 +1568,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                         .getItemCount() <= getPageSizeDouble());
             }
         });
+    }
+
+    private void removeLazyOpenRegistration() {
+        if (lazyOpenRegistration != null) {
+            lazyOpenRegistration.remove();
+            lazyOpenRegistration = null;
+        }
     }
 
 }

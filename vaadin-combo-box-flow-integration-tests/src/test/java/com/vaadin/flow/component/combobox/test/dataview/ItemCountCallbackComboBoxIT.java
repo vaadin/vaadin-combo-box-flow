@@ -16,7 +16,6 @@
 
 package com.vaadin.flow.component.combobox.test.dataview;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
@@ -26,42 +25,42 @@ import com.vaadin.flow.testutil.TestPath;
 public class ItemCountCallbackComboBoxIT extends AbstractItemCountComboBoxIT {
 
     @Test
-    public void itemCountCallbackCallback_scrolledToMiddleAndSwitchesToUndefinedSize_canScrollPastOldKnownSize() {
+    public void itemCountCallbackCallback_scrolledToMiddleAndSwitchesToUndefinedCount_canScrollPastOldKnownCount() {
         open(500);
 
         scrollToItem(comboBoxElement, 250);
 
-        verifyItemsSize(500);
+        verifyItemsCount(500);
 
-        setUnknownCountBackendSize(1000);
+        setUnknownCountBackendItemsCount(1000);
         setUnknownCount();
 
-        verifyItemsSize(500);
+        verifyItemsCount(500);
 
         scrollToItem(comboBoxElement, 500);
 
-        verifyItemsSize(700);
+        verifyItemsCount(700);
     }
 
     @Test
-    public void itemCountCallbackCallback_scrolledToEndAndSwitchesToUndefinedSize_sizeIsIncreased() {
+    public void itemCountCallbackCallback_scrolledToEndAndSwitchesToUndefinedCount_itemCountIsIncreased() {
         open(5800);
 
-        verifyItemsSize(5800);
+        verifyItemsCount(5800);
 
         scrollToItem(comboBoxElement, 5800);
         waitUntilTextInContent("Callback Item " + 5799);
 
-        verifyItemsSize(5800);
+        verifyItemsCount(5800);
 
-        setUnknownCountBackendSize(10000);
+        setUnknownCountBackendItemsCount(10000);
         setUnknownCount();
 
-        verifyItemsSize(6000);
+        verifyItemsCount(6000);
 
         scrollToItem(comboBoxElement, 6000);
 
-        verifyItemsSize(6200);
+        verifyItemsCount(6200);
     }
 
 }

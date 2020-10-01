@@ -283,11 +283,12 @@ public class ComboBoxTest {
     }
 
     @Test
-    public void setValueWithoutItems_throw() {
-        expectIllegalStateException(
-                "Cannot set a value for a ComboBox without items.");
+    public void setValueWithoutItems_valueIsSet() {
         ComboBox<String> combo = new ComboBox<>();
         combo.setValue("foo");
+        // Since the combo box is always initialised with data communicator on
+        // instantiation phase, setting the value is possible
+        Assert.assertEquals("foo", combo.getValue());
     }
 
     @Test

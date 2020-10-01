@@ -16,6 +16,8 @@
 
 package com.vaadin.flow.component.combobox.test.dataview;
 
+import java.util.Arrays;
+
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.test.AbstractComboBoxIT;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
@@ -33,7 +35,7 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     // how many items it shows, so changing this is a bad idea ...
     private static final Dimension TARGET_SIZE = new Dimension(1000, 900);
     protected ComboBoxElement comboBoxElement;
-    protected int sizeIncreasePageCount = 4;
+    protected int countIncreasePageCount = 4;
     protected int pageSize = new ComboBox<String>().getPageSize();
 
     @Override
@@ -45,23 +47,20 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
         comboBoxElement = $(ComboBoxElement.class).first();
     }
 
-    protected void open(int size) {
-        String url = getRootURL() + getTestPath() + "/" + size;
+    protected void open(int itemCount) {
+        String url = getRootURL() + getTestPath() + "/" + itemCount;
         getDriver().get(url);
 
         getDriver().manage().window().setSize(TARGET_SIZE);
         comboBoxElement = $(ComboBoxElement.class).first();
     }
 
-    protected void doScroll(int itemToScroll, int expectedItems, int fetchIndex,
-            int start, int end, String expectedItemText) {
+    protected void doScroll(int itemToScroll, int expectedItems,
+            String expectedItemText, RangeLog... rangeLogs) {
         scrollToItem(comboBoxElement, itemToScroll);
         waitUntilTextInContent(expectedItemText);
-        // TODO https://github.com/vaadin/vaadin-combo-box-flow/issues/390:
-        //  implement this check after the scrolling issue has been fixed
-        // verifyFetchForUndefinedSizeCallback(fetchIndex, Range.between(start,
-        //        end));
-        verifyItemsSize(expectedItems);
+        verifyFetchForUndefinedItemCountCallback(rangeLogs);
+        verifyItemsCount(expectedItems);
     }
 
     protected void setUnknownCount() {
@@ -75,10 +74,10 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
                 .click();
     }
 
-    protected void setUnknownCountBackendSize(int size) {
+    protected void setUnknownCountBackendItemsCount(int itemsCount) {
         $(IntegerFieldElement.class).id(
                 AbstractItemCountComboBoxPage.UNDEFINED_SIZE_BACKEND_SIZE_INPUT_ID)
-                .setValue(size + "");
+                .setValue(itemsCount + "");
     }
 
     protected void setEstimateIncrease(int estimateIncrease) {
@@ -94,18 +93,49 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     }
 
     protected int getDefaultInitialItemCount() {
-        return pageSize * sizeIncreasePageCount;
+        return pageSize * countIncreasePageCount;
     }
 
-    protected void verifyItemsSize(int size) {
-        Assert.assertEquals("Item count doesn't match", size,
+    protected void verifyItemsCount(int itemCount) {
+        Assert.assertEquals("Item count doesn't match", itemCount,
                 getItems(comboBoxElement).size());
     }
 
-    protected void verifyFetchForUndefinedSizeCallback(int index, Range range) {
-        WebElement log = findElement(By.id("log-" + index));
-        Assert.assertEquals("Invalid range for index " + index,
-                index + ":" + range.toString(), log.getText());
+    protected void verifyFetchForUndefinedItemCountCallback(
+            RangeLog... rangeLogs) {
+        Arrays.stream(rangeLogs).forEach(rangeLog -> {
+            int index = rangeLog.getIndex();
+            WebElement log = findElement(By.id("log-" + index));
+            Assert.assertEquals("Invalid range for index " + index,
+                    index + ":" + rangeLog.getRange().toString(),
+                    log.getText());
+        });
+    }
+
+    protected static class RangeLog {
+        private Range range;
+        private int index;
+
+        public RangeLog(int index, Range range) {
+            this.range = range;
+            this.index = index;
+        }
+
+        public static RangeLog of(int index, Range range) {
+            return new RangeLog(index, range);
+        }
+
+        public static RangeLog of(int index, int from, int to) {
+            return new RangeLog(index, Range.between(from, to));
+        }
+
+        public Range getRange() {
+            return range;
+        }
+
+        public int getIndex() {
+            return index;
+        }
     }
 
 }

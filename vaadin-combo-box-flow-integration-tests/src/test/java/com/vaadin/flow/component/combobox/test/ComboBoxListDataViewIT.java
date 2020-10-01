@@ -11,61 +11,93 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.S
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.SHOW_PREVIOUS_DATA;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 @TestPath("combobox-list-data-view-page")
 public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
 
-    @Test
-    public void comboBoxDataViewReturnsExpectedData() {
+    private ComboBoxElement comboBox;
+
+    @Before
+    public void init() {
         open();
-        ComboBoxElement comboBox = getComboBox();
+        waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
+                .size() > 0);
+        comboBox = $(ComboBoxElement.class).first();
+    }
 
+    @Test
+    public void getItemCount_showsInitialItemsCount() {
         verifyDataProviderItemCount("Expected initial item count = 250", 250);
+    }
 
+    @Test
+    public void getItem_showsItemOnIndex() {
         verifyNoPersonsSelected();
 
-        Assert.assertFalse("Item row 0 should not have previous data.",
-                isButtonEnabled(SHOW_PREVIOUS_DATA));
-        Assert.assertTrue("Item row 0 has next data.",
+        showSelectedPerson();
+
+        verifySelectedPerson(0);
+    }
+
+    @Test
+    public void getNextItem_showsNextItemFromSelected() {
+        Assert.assertTrue("Next item button should be enabled for first item",
                 isButtonEnabled(SHOW_NEXT_DATA));
 
-        showSelectedPerson();
+        showNextPerson();
 
         verifySelectedPerson(1);
 
-        showNextPerson();
-
-        verifySelectedPerson(2);
-
-        selectItem(5);
+        selectItem(248);
 
         showSelectedPerson();
 
-        verifySelectedPerson(6);
+        verifySelectedPerson(248);
 
         showNextPerson();
 
-        verifySelectedPerson(7);
+        verifySelectedPerson(249);
+
+        Assert.assertFalse("Next item button should be disabled for last item",
+                isButtonEnabled(SHOW_NEXT_DATA));
+    }
+
+    @Test
+    public void getPreviousItem_showsNextItem() {
+        Assert.assertFalse(
+                "Previous item button should be disabled for first item",
+                isButtonEnabled(SHOW_PREVIOUS_DATA));
+
+        selectItem(249);
+
+        Assert.assertTrue(
+                "Previous item button should be enabled for last item",
+                isButtonEnabled(SHOW_PREVIOUS_DATA));
 
         showPreviousPerson();
 
-        verifySelectedPerson(5);
+        verifySelectedPerson(248);
+    }
 
+    @Test
+    public void setFilter_clientAndServerSideFiltersSet_filtersAppliedToItems() {
         // Filter by Age (programmatic filter)
         setAgeFilter("50");
 
-        // There are 3 persons with an age = 50
+        // There are 2 persons with an age = 50 (Person 50 and Person 150)
         verifyDataProviderItemCount(
-                "Expected size = 3 after applying " + "programmatic filter", 3);
+                "Expected size = 2 after applying programmatic filter", 2);
 
         comboBox.openPopup();
-        assertLoadedItemsCount("Should be 3 persons after filtering", 3,
+        assertLoadedItemsCount("Should be 2 persons after filtering", 2,
                 comboBox);
 
         // Apply text filter
@@ -79,10 +111,21 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
         verifyDataProviderItemCount("Expected item count = 1 after applying "
                 + "the programmatic filter and text filter", 1);
 
-        // Reset Filters
+        // Reset client filter
         resetTextFilter(comboBox);
+
+        // Check there are 2 Persons after resetting the client filter
+        waitForItems(comboBox, items -> items.size() == 2);
+
+        // Reset server filter
         resetAgeFilter();
 
+        // Check there are 250 Persons again after resetting all filters
+        waitForItems(comboBox, items -> items.size() == 250);
+    }
+
+    @Test
+    public void addItemCountChangeListener_newItemAdded_itemCountChanged() {
         // Add custom value
         comboBox.sendKeys("Person NEW", Keys.ENTER);
         verifyDataProviderItemCount(
@@ -100,8 +143,10 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
         comboBox.openPopup();
         verifyDataProviderItemCount(
                 "Expected item count = 250 after removing an item", 250);
+    }
 
-        // Sorting
+    @Test
+    public void setSortOrder_itemsSortedByName() {
         reverseSorting();
 
         selectItem(0);
@@ -160,10 +205,6 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
     private void verifyNoPersonsSelected() {
         Assert.assertEquals("Initial selection should be 0", "0",
                 $(IntegerFieldElement.class).id(ITEM_SELECT).getValue());
-    }
-
-    private ComboBoxElement getComboBox() {
-        return $(ComboBoxElement.class).first();
     }
 
     private void verifyDataProviderItemCount(String message,

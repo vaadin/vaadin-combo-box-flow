@@ -40,6 +40,8 @@ public class ComboBoxListDataViewPage extends Div {
         comboBox.addCustomValueSetListener(event -> {
             Person newPerson = new Person();
             newPerson.setFirstName(event.getDetail());
+            // set ID outside the range of persons [0, 250)
+            newPerson.setId(999);
             dataView.addItem(newPerson);
             comboBox.setValue(newPerson);
         });
@@ -64,16 +66,23 @@ public class ComboBoxListDataViewPage extends Div {
 
         // Navigation
         NativeButton showNextData = new NativeButton("Next person",
-                event -> itemData.setText("Item: " + dataView
-                        .getNextItem(dataView.getItem(itemSelect.getValue()))
-                        .get().getFirstName()));
+                event -> {
+                    itemData.setText("Item: " + dataView
+                            .getNextItem(
+                                    dataView.getItem(itemSelect.getValue()))
+                            .get().getFirstName());
+                    itemSelect.setValue(itemSelect.getValue() + 1);
+                });
         showNextData.setId(SHOW_NEXT_DATA);
 
         NativeButton showPreviousData = new NativeButton("Previous person",
-                event -> itemData.setText("Item: " + dataView
-                        .getPreviousItem(
-                                dataView.getItem(itemSelect.getValue()))
-                        .get().getFirstName()));
+                event -> {
+                    itemData.setText("Item: " + dataView
+                            .getPreviousItem(
+                                    dataView.getItem(itemSelect.getValue()))
+                            .get().getFirstName());
+                    itemSelect.setValue(itemSelect.getValue() - 1);
+                });
 
         // Remove item
         NativeButton removePerson = new NativeButton("Remove person", event -> {
@@ -124,7 +133,7 @@ public class ComboBoxListDataViewPage extends Div {
     }
 
     private List<Person> generatePersonItems() {
-        return IntStream.range(1, 251)
+        return IntStream.range(0, 250)
                 .mapToObj(index -> new Person(index, "Person " + index, "lastName",
                         index % 100, new Person.Address(), "1234567890"))
                 .collect(Collectors.toList());

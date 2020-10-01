@@ -16,7 +16,6 @@
 
 package com.vaadin.flow.component.combobox.test.dataview;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
@@ -29,73 +28,73 @@ public class ItemCountEstimateIncreaseComboBoxIT extends AbstractItemCountComboB
         int customIncrease = 333;
         open(customIncrease);
 
-        verifyItemsSize(getDefaultInitialItemCount());
+        verifyItemsCount(getDefaultInitialItemCount());
 
         scrollToItem(comboBoxElement, 190);
 
         int newCount = getDefaultInitialItemCount() + customIncrease;
-        verifyItemsSize(newCount);
+        verifyItemsCount(newCount);
 
         customIncrease = 500;
         setEstimateIncrease(customIncrease);
 
         scrollToItem(comboBoxElement, newCount - 10);
 
-        verifyItemsSize(newCount + customIncrease);
+        verifyItemsCount(newCount + customIncrease);
     }
 
     @Test
-    public void customIncrease_reachesEndBeforeEstimate_sizeChanges() {
+    public void customIncrease_reachesEndBeforeEstimate_itemCountChanges() {
         open(300);
 
-        verifyItemsSize(200);
+        verifyItemsCount(200);
 
         scrollToItem(comboBoxElement, 190);
 
-        verifyItemsSize(500);
+        verifyItemsCount(500);
 
-        setUnknownCountBackendSize(469);
+        setUnknownCountBackendItemsCount(469);
 
         scrollToItem(comboBoxElement, 444);
 
-        verifyItemsSize(469);
+        verifyItemsCount(469);
     }
 
     @Test
     public void customIncrease_scrollsFarFromExactCount_countIsResolved() {
         open(3000);
-        setUnknownCountBackendSize(469);
+        setUnknownCountBackendItemsCount(469);
         scrollToItem(comboBoxElement, 200);
-        verifyItemsSize(3200);
+        verifyItemsCount(3200);
 
         scrollToItem(comboBoxElement, 1000);
 
-        verifyItemsSize(469);
+        verifyItemsCount(469);
     }
 
     @Test
-    public void customIncreaseScrolledToEnd_newIncreaseSet_newEstimateSizeNotApplied() {
+    public void customIncreaseScrolledToEnd_newIncreaseSet_newEstimateCountNotApplied() {
         open(300);
-        int unknownCountBackendSize = 444;
-        setUnknownCountBackendSize(unknownCountBackendSize);
-        verifyItemsSize(200);
+        int unknownCountBackendItemsCount = 444;
+        setUnknownCountBackendItemsCount(unknownCountBackendItemsCount);
+        verifyItemsCount(200);
 
-        scrollToItem(comboBoxElement, 190); // trigger size bump
+        scrollToItem(comboBoxElement, 190); // trigger item count bump
         scrollToItem(comboBoxElement, 500);
 
-        verifyItemsSize(unknownCountBackendSize);
+        verifyItemsCount(unknownCountBackendItemsCount);
 
         // Open the combo box drop down and scroll again to last item
-        scrollToItem(comboBoxElement, unknownCountBackendSize - 1);
-        waitUntilTextInContent("Callback Item " + (unknownCountBackendSize - 1));
+        scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
+        waitUntilTextInContent("Callback Item " + (unknownCountBackendItemsCount - 1));
 
         // since the end was reached, only a reset() to data provider will reset
-        // estimated size
+        // estimated count
         setEstimateIncrease(600);
-        verifyItemsSize(unknownCountBackendSize);
+        verifyItemsCount(unknownCountBackendItemsCount);
         // Open the combo box drop down and scroll again to last item
-        scrollToItem(comboBoxElement, unknownCountBackendSize - 1);
-        waitUntilTextInContent("Callback Item " + (unknownCountBackendSize - 1));
+        scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
+        waitUntilTextInContent("Callback Item " + (unknownCountBackendItemsCount - 1));
     }
 
 }

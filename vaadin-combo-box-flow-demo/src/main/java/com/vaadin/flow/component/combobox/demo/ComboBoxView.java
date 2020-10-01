@@ -297,8 +297,8 @@ public class ComboBoxView extends DemoView {
          * By using these callbacks the ComboBox doesn't load all the items to
          * the server memory right away. The ComboBox calls the first provided
          * callback to fetch items from the given range with the given filter.
-         * The second callback should provide the number of items that match
-         * the query.
+         * The second callback provides the number of items that match the
+         * query.
          */
         comboBox.setItems(
                 query -> service.fetch(query.getFilter().orElse(null),
@@ -372,8 +372,7 @@ public class ComboBoxView extends DemoView {
          */
         comboBox.setItems(
                 query -> service.fetchPage(query.getFilter().orElse(null),
-                        query.getPage(), query.getPageSize()),
-                query -> service.count(query.getFilter().orElse(null)));
+                        query.getPage(), query.getPageSize()));
 
         // end-source-example
         //@formatter:on
@@ -423,6 +422,8 @@ public class ComboBoxView extends DemoView {
     private void filteringAndSortingWithDataView() {
         // begin-source-example
         // source-example-heading: Filtering and Sorting with Data View
+        // PersonService can be found:
+        // https://github.com/vaadin/vaadin-combo-box-flow/tree/master/vaadin-combo-box-flow-demo/src/main/java/com/vaadin/flow/component/combobox/demo/service/PersonService.java
         ComboBox<Person> comboBox = new ComboBox<>("Persons");
         PersonService personService = new PersonService();
 

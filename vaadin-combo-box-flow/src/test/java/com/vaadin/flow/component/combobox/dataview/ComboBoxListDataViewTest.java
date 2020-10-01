@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.combobox.dataview;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,31 +42,56 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     @Test
     public void getItems_withTextFilter_filteredItemsObtained() {
         ComboBox<String> comboBox = getDefaultLocaleComboBox();
-        setComboBoxTextFilter(comboBox, "middle");
         ComboBoxListDataView<String> dataView = comboBox.setItems(items);
-        Stream<String> allItems = dataView.getItems();
+        setClientFilter(comboBox, "middle");
+        Stream<String> filteredItems = dataView.getItems();
         Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "middle" }, allItems.toArray());
+                new String[] { "middle" }, filteredItems.toArray());
+
+        // Remove the filters
+        setClientFilter(comboBox, "");
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set",
+                new String[] { "first", "middle", "last" },
+                filteredItems.toArray());
     }
 
     @Test
     public void getItems_withInMemoryFilter_filteredItemsObtained() {
         dataView.setFilter("middle"::equals);
-        Stream<String> allItems = dataView.getItems();
+        Stream<String> filteredItems = dataView.getItems();
         Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "middle" }, allItems.toArray());
+                new String[] { "middle" }, filteredItems.toArray());
+
+        // Remove the filters
+        dataView.removeFilters();
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set",
+                new String[] { "first", "middle", "last" },
+                filteredItems.toArray());
     }
 
     @Test
     public void getItems_withInMemoryAndTextFilter_filteredItemsObtained() {
         ComboBox<String> comboBox = getDefaultLocaleComboBox();
-        setComboBoxTextFilter(comboBox, "ba");
         items = Arrays.asList("foo", "bar", "banana");
         ComboBoxListDataView<String> dataView = comboBox.setItems(items);
+        setClientFilter(comboBox, "ba");
         dataView.setFilter(item -> item.length() == 3);
-        Stream<String> allItems = dataView.getItems();
+        Stream<String> filteredItems = dataView.getItems();
         Assert.assertArrayEquals("Unexpected data set",
-                new String[] { "bar" }, allItems.toArray());
+                new String[] { "bar" }, filteredItems.toArray());
+
+        // Remove the filters
+        dataView.removeFilters();
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set",
+                new String[] { "bar", "banana" }, filteredItems.toArray());
+        setClientFilter(comboBox, "");
+        filteredItems = dataView.getItems();
+        Assert.assertArrayEquals("Unexpected data set",
+                new String[] { "foo", "bar", "banana" },
+                filteredItems.toArray());
     }
 
     @Test
@@ -151,9 +177,19 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         };
     }
 
-    private void setComboBoxTextFilter(ComboBox<String> comboBox,
-                                       String filter) {
-        comboBox.getElement().setProperty("filter", filter);
+    private void setClientFilter(ComboBox<String> comboBox,
+            String clientFilter) {
+        try {
+            // Reset the client filter on server side as though it's sent from
+            // client
+            Method setRequestedRangeMethod = ComboBox.class.getDeclaredMethod(
+                    "setRequestedRange", int.class, int.class, String.class);
+            setRequestedRangeMethod.setAccessible(true);
+            setRequestedRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
+                    clientFilter);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

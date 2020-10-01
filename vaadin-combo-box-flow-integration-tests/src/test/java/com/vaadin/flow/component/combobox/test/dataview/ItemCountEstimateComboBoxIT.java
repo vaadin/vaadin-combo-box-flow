@@ -16,7 +16,6 @@
 
 package com.vaadin.flow.component.combobox.test.dataview;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
@@ -28,69 +27,69 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
     public void itemCountEstimate_scrollingPastEstimate_keepsScrolling() {
         int initialEstimate = 300;
         open(initialEstimate);
-        verifyItemsSize(initialEstimate);
+        verifyItemsCount(initialEstimate);
 
         scrollToItem(comboBoxElement, initialEstimate);
 
-        verifyItemsSize(initialEstimate + 200);
+        verifyItemsCount(initialEstimate + 200);
 
         scrollToItem(comboBoxElement, initialEstimate + 200);
 
-        verifyItemsSize(initialEstimate + 400);
+        verifyItemsCount(initialEstimate + 400);
     }
 
     @Test
-    public void itemCountEstimate_reachesEndBeforeEstimate_sizeChanges() {
+    public void itemCountEstimate_reachesEndBeforeEstimate_itemCountChanges() {
         int initialEstimate = 500;
         open(initialEstimate);
-        verifyItemsSize(initialEstimate);
+        verifyItemsCount(initialEstimate);
 
-        int undefinedSizeBackendSize = 333;
-        setUnknownCountBackendSize(undefinedSizeBackendSize);
+        int undefinedCountBackendItemsCount = 333;
+        setUnknownCountBackendItemsCount(undefinedCountBackendItemsCount);
 
         scrollToItem(comboBoxElement, 400);
 
-        verifyItemsSize(undefinedSizeBackendSize);
-        scrollToItem(comboBoxElement, undefinedSizeBackendSize - 1);
-        waitUntilTextInContent("Callback Item " + (undefinedSizeBackendSize - 1));
+        verifyItemsCount(undefinedCountBackendItemsCount);
+        scrollToItem(comboBoxElement, undefinedCountBackendItemsCount - 1);
+        waitUntilTextInContent("Callback Item " + (undefinedCountBackendItemsCount - 1));
 
-        // check that new estimate is not applied after size is known
+        // check that new estimate is not applied after item count is known
         setEstimate(700);
 
-        verifyItemsSize(undefinedSizeBackendSize);
-        scrollToItem(comboBoxElement, undefinedSizeBackendSize - 1);
-        waitUntilTextInContent("Callback Item " + (undefinedSizeBackendSize - 1));
+        verifyItemsCount(undefinedCountBackendItemsCount);
+        scrollToItem(comboBoxElement, undefinedCountBackendItemsCount - 1);
+        waitUntilTextInContent("Callback Item " + (undefinedCountBackendItemsCount - 1));
     }
 
     @Test
-    public void itemCountEstimate_switchesToDefinedSize_sizeChanges() {
+    public void itemCountEstimate_switchesToDefinedCount_itemsCountChanges() {
         int initialEstimate = 500;
         open(initialEstimate);
-        verifyItemsSize(initialEstimate);
+        verifyItemsCount(initialEstimate);
 
-        setUnknownCountBackendSize(1000);
-        verifyItemsSize(initialEstimate);
+        setUnknownCountBackendItemsCount(1000);
+        verifyItemsCount(initialEstimate);
 
         setCountCallback();
 
-        verifyItemsSize(1000);
+        verifyItemsCount(1000);
     }
 
     @Test
     public void itemCountEstimate_estimateChanged_newEstimateApplied() {
         int initialEstimate = 1000;
         open(initialEstimate);
-        verifyItemsSize(initialEstimate);
+        verifyItemsCount(initialEstimate);
 
         setEstimate(2000);
 
-        verifyItemsSize(2000);
+        verifyItemsCount(2000);
 
         scrollToItem(comboBoxElement, 1999);
-        verifyItemsSize(2200);
+        verifyItemsCount(2200);
 
         setEstimate(3000);
-        verifyItemsSize(3000);
+        verifyItemsCount(3000);
     }
 
     @Test
@@ -102,25 +101,25 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
         scrollToItem(comboBoxElement, 1500);
         setEstimate(1501);
 
-        verifyItemsSize(1501);
+        verifyItemsCount(1501);
 
         setEstimate(1600);
-        verifyItemsSize(1600);
+        verifyItemsCount(1600);
 
         scrollToItem(comboBoxElement, 1100);
         setEstimate(1300);
-        verifyItemsSize(1300);
+        verifyItemsCount(1300);
     }
 
     @Test
     public void customIncrease_scrollsFarFromExactCount_countIsResolved() {
         open(3000);
-        verifyItemsSize(3000);
-        setUnknownCountBackendSize(469);
+        verifyItemsCount(3000);
+        setUnknownCountBackendItemsCount(469);
 
         scrollToItem(comboBoxElement, 1000);
 
-        verifyItemsSize(469);
+        verifyItemsCount(469);
     }
 
 }
