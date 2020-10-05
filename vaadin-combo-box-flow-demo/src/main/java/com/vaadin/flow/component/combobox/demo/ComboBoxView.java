@@ -330,12 +330,14 @@ public class ComboBoxView extends DemoView {
          * items and as the user scrolls down it automatically increases the
          * size by 200 until the backend runs out of items.
          *
-         * Both the estimated item count and its increase can be customized to
-         * allow the user to scroll down faster when the backend will have a lot
-         * of items.
+         * In case of huge number of items in the backend, combo box's text
+         * filter can be used to decrease the number of shown items and the
+         * scrolling can be customized accordingly by constraining the estimated
+         * item count and its increase.
          */
-        lazyDataView.setItemCountEstimate(1000);
-        lazyDataView.setItemCountEstimateIncrease(1000);
+        comboBox.setPageSize(10);
+        lazyDataView.setItemCountEstimate(50);
+        lazyDataView.setItemCountEstimateIncrease(50);
 
         // Showing the item count for demo purposes
         Div countText = new Div();
