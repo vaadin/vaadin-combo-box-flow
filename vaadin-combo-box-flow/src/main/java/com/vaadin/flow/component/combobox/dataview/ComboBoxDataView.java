@@ -3,12 +3,13 @@ package com.vaadin.flow.component.combobox.dataview;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
-import javax.servlet.Registration;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Implementation of generic data view for ComboBox.

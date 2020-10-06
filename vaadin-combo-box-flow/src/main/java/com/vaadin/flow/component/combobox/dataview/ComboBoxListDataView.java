@@ -19,11 +19,12 @@ package com.vaadin.flow.component.combobox.dataview;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
-import javax.servlet.Registration;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Data view implementation for ComboBox with in-memory list data. Provides

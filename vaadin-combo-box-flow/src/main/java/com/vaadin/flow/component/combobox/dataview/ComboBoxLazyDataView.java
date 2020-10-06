@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.combobox.dataview;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.provider.AbstractLazyDataView;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -9,7 +10,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
-import javax.servlet.Registration;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Data view implementation for ComboBox with lazy data fetching. Provides
