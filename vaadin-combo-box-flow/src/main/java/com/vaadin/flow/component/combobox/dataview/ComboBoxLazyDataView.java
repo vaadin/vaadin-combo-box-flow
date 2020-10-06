@@ -7,7 +7,9 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
+import javax.servlet.Registration;
 
 /**
  * Data view implementation for ComboBox with lazy data fetching. Provides
@@ -84,5 +86,18 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     @Override
     public void setItemCountUnknown() {
         super.setItemCountUnknown();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Combo box fires {@link ItemCountChangeEvent} and notifies all the
+     * listeners added by this method, if the items count changed due to combo
+     * box's client filter applied by user.
+     */
+    @Override
+    public Registration addItemCountChangeListener(
+            ComponentEventListener<ItemCountChangeEvent<?>> listener) {
+        return super.addItemCountChangeListener(listener);
     }
 }

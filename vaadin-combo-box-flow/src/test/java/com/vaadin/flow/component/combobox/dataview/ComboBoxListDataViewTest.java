@@ -17,7 +17,6 @@ import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.shared.Registration;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -131,36 +130,6 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
         dataView.setIdentifierProvider(Item::getId);
         Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
-    }
-
-    @Test
-    public void addItemCountChangeListener_serverSideFilterEnabled() {
-        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
-
-        dataView.addItemCountChangeListener(event -> {});
-
-        // Trigger refresh all event
-        dataView.setFilter(item -> true);
-
-        Assert.assertFalse(Boolean.parseBoolean(getClientSideFilter()));
-    }
-
-    @Test
-    public void addItemCountChangeListener_removeListeners_serverSideFilterDisabled() {
-        Registration registration1 =
-                dataView.addItemCountChangeListener(event -> {});
-
-        Registration registration2 =
-                dataView.addItemCountChangeListener(event -> {});
-
-        // Trigger ComboBox::refreshAllData()
-        dataView.setFilter(item -> true);
-
-        registration1.remove();
-        Assert.assertFalse(Boolean.parseBoolean(getClientSideFilter()));
-
-        registration2.remove();
-        Assert.assertTrue(Boolean.parseBoolean(getClientSideFilter()));
     }
 
     @Override

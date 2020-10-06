@@ -22,6 +22,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
+import javax.servlet.Registration;
 
 /**
  * Data view implementation for ComboBox with in-memory list data. Provides
@@ -65,5 +67,18 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
             IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
         dataCommunicator.getKeyMapper().setIdentifierGetter(identifierProvider);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Combo box fires {@link ItemCountChangeEvent} and notifies all the
+     * listeners added by this method, if the items count changed due to combo
+     * box's client filter applied by user.
+     */
+    @Override
+    public Registration addItemCountChangeListener(
+            ComponentEventListener<ItemCountChangeEvent<?>> listener) {
+        return super.addItemCountChangeListener(listener);
     }
 }

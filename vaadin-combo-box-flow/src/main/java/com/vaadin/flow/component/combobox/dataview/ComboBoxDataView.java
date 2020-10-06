@@ -7,6 +7,8 @@ import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
+import javax.servlet.Registration;
 
 /**
  * Implementation of generic data view for ComboBox.
@@ -55,5 +57,18 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
             IdentifierProvider<T> identifierProvider) {
         super.setIdentifierProvider(identifierProvider);
         dataCommunicator.getKeyMapper().setIdentifierGetter(identifierProvider);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Combo box fires {@link ItemCountChangeEvent} and notifies all the
+     * listeners added by this method, if the items count changed due to combo
+     * box's client filter applied by user.
+     */
+    @Override
+    public Registration addItemCountChangeListener(
+            ComponentEventListener<ItemCountChangeEvent<?>> listener) {
+        return super.addItemCountChangeListener(listener);
     }
 }

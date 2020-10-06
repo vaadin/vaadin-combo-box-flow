@@ -337,7 +337,10 @@ public class ComboBoxTest {
         ComboBox<Object> comboBox = new ComboBox<>();
         DataProvider<Object, ?> dataProvider = comboBox.getDataProvider();
 
-        Assert.assertNotNull(dataProvider);
+        Assert.assertNotNull(
+                "Data Communicator and Data Provider should be created "
+                        + "within combo box constructor",
+                dataProvider);
         Assert.assertEquals(DataCommunicator.EmptyDataProvider.class,
                 dataProvider.getClass());
     }
@@ -354,7 +357,10 @@ public class ComboBoxTest {
         comboBox.setDataProvider(dataProvider, filter -> null);
 
         // Verify that the data communicator and data provider have been created
-        Assert.assertNotNull(comboBox.getDataProvider());
+        Assert.assertNotNull(
+                "Data Communicator and Data Provider should be created "
+                        + "within setDataProvider()",
+                comboBox.getDataProvider());
 
         fakeClientCommunication(ui);
         Mockito.verify(dataProvider).size(Mockito.any());
@@ -371,7 +377,10 @@ public class ComboBoxTest {
 
         comboBox.setDataProvider(dataProvider, filter -> null);
         // Verify that the data communicator and data provider have been created
-        Assert.assertNotNull(comboBox.getDataProvider());
+        Assert.assertNotNull(
+                "Data Communicator and Data Provider should be created "
+                        + "within setDataProvider()",
+                comboBox.getDataProvider());
 
         fakeClientCommunication(ui);
         Mockito.verify(dataProvider, Mockito.times(0)).size(Mockito.any());

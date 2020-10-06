@@ -244,14 +244,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     // provided.
     private String lastFilter;
 
-    /*
-     * Holds the item count listeners count.
-     * If the value > 0, then the client side filter will be sent to server
-     * forcibly, in order to let the items size updated and item count change
-     * event triggered (if, of course, the size has changed).
-     */
-    private AtomicInteger itemCountListeners = new AtomicInteger(0);
-
     private DataCommunicator<T> dataCommunicator;
     private Registration lazyOpenRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
@@ -631,22 +623,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxDataView<T> getGenericDataView() {
-        return new ComboBoxDataView<T>(dataCommunicator, this) {
-            @Override
-            public Registration addItemCountChangeListener(
-                    ComponentEventListener<ItemCountChangeEvent<?>> listener) {
-
-                Registration registration =
-                        super.addItemCountChangeListener(listener);
-
-                // Client filtering is usually enabled only for in-memory case,
-                // so override 'addItemCountChangeListener' method only for
-                // in-memory data providers in order to keep server
-                // filtering until there is at least one item count change
-                // listener
-                return getItemCountChangeRegistration(registration);
-            }
-        };
+        return new ComboBoxDataView<T>(dataCommunicator, this);
     }
 
     @Override
@@ -705,23 +682,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     @Override
     public ComboBoxListDataView<T> getListDataView() {
-        return new ComboBoxListDataView<T>(dataCommunicator, this) {
-            @Override
-            public Registration addItemCountChangeListener(
-                    ComponentEventListener<ItemCountChangeEvent<?>> listener) {
-
-                Registration registration =
-                        super.addItemCountChangeListener(listener);
-
-                // Client filtering is usually enabled only for in-memory case,
-                // so override 'addItemCountChangeListener' method only for
-                // in-memory data providers in order to keep server
-                // filtering until there is at least one item count change
-                // listener
-                return getItemCountChangeRegistration(registration);
-
-            }
-        };
+        return new ComboBoxListDataView<T>(dataCommunicator, this);
     }
 
     /**
@@ -975,13 +936,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private void refreshAllData(boolean forceServerSideFiltering) {
         setClientSideFilter(!forceServerSideFiltering
-                && dataCommunicator.getItemCount() <= getPageSizeDouble()
-                // We do want to perform server side filtering (send client
-                // filter to the server) if there is at least one item count
-                // change listener added, even in case of in-memory data
-                // provider and even if the item count < page size.
-                // This allows us be always notified about size change.
-                && itemCountListeners.get() == 0);
+                && dataCommunicator.getItemCount() <= getPageSizeDouble());
 
         reset();
     }
@@ -1535,6 +1490,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataCommunicator.reset();
     }
 
+    @ClientCallable
+    private void fireItemCountEvent(int itemCount) {
+        dataCommunicator.fireItemCountEvent(itemCount);
+    }
+
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
@@ -1563,21 +1523,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 // If-statement is needed because on the first attach this
                 // JavaScript is called before initializing the connector.
                 "if($0.$connector) $0.$connector.reset();", getElement()));
-    }
-
-    private Registration getItemCountChangeRegistration(Registration registration) {
-        // Increment stored item count change listeners
-        itemCountListeners.incrementAndGet();
-
-        return Registration.combine(registration, () -> {
-            if (itemCountListeners.decrementAndGet() == 0) {
-                // Retrieve client side filter to default, because
-                // there are no item count listeners remain.
-                // For in-memory data 'UserProvidedFilter' is always NO
-                setClientSideFilter(dataCommunicator
-                        .getItemCount() <= getPageSizeDouble());
-            }
-        });
     }
 
     private void removeLazyOpenRegistration() {
