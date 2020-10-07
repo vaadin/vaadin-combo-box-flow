@@ -49,7 +49,8 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
             log.setText(fetchQueryCount + ":"
                     + Range.withLength(query.getOffset(), query.getLimit())
                             .toString());
-            Logger.getLogger(getClass().getName()).info(String.format(
+            Logger.getLogger(getClass().getName())
+                    .info(() -> String.format(
                     "DataProvider Query : limit %s offset %s", limit, offset));
             return IntStream.range(offset, offset + limit)
                     .mapToObj(index -> "DataProvider Item " + index);
@@ -57,7 +58,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
 
         @Override
         protected int sizeInBackEnd(Query<String, String> query) {
-            Logger.getLogger(getClass().getName()).info(String
+            Logger.getLogger(getClass().getName()).info(() -> String
                     .format("DataProvider Query : SIZE: %d", dataProviderSize));
             return dataProviderSize;
         }
@@ -70,6 +71,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
     public static final String ITEM_COUNT_ESTIMATE_INCREASE_INPUT = "item-count-estimate-increase-input";
     public static final String DATA_PROVIDER_SIZE_INPUT_ID = "data-provider-size-input";
     public static final String UNDEFINED_SIZE_BACKEND_SIZE_INPUT_ID = "fetchcallback";
+    public static final String SWITCH_TO_UNDEFINED_SIZE_BUTTON_ID = "fetchcallback";
     public static final int DEFAULT_DATA_PROVIDER_SIZE = 1000;
 
     private LazyLoadingProvider dataProvider;
@@ -149,7 +151,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
                 "setDataProvider(FetchCallback) -> undefined size",
                 event -> switchToUndefinedSizeCallback());
         menuBar.add(button2);
-        button2.setId("fetchcallback");
+        button2.setId(SWITCH_TO_UNDEFINED_SIZE_BUTTON_ID);
         dataProviderSizeInput = new IntegerField("Fixed size backend size");
         menuBar.add(dataProviderSizeInput, new Hr());
 
@@ -207,9 +209,8 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
     }
 
     private void initDataCommunicatorOptions() {
-        IntegerField pageSizeInput = new IntegerField("Page Size", event -> {
-            comboBox.setPageSize(event.getValue());
-        });
+        IntegerField pageSizeInput = new IntegerField("Page Size",
+                event -> comboBox.setPageSize(event.getValue()));
         pageSizeInput.setValue(comboBox.getPageSize());
         pageSizeInput.setWidthFull();
 
@@ -246,7 +247,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
                 .withLength(query.getOffset(), query.getLimit()).toString());
         fetchQueryCount++;
         logPanel.addComponentAsFirst(log);
-        Logger.getLogger(getClass().getName()).info(String
+        Logger.getLogger(getClass().getName()).info(() -> String
                 .format("Callback Query : limit %s offset %s", limit, offset));
         return IntStream.range(0, fetchCallbackSize)
                 .mapToObj(index -> "Callback Item " + index).filter(item -> {

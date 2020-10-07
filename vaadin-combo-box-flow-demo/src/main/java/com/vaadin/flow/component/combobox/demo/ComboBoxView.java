@@ -61,7 +61,7 @@ import com.vaadin.flow.router.Route;
 public class ComboBoxView extends DemoView {
 
     private static final String WIDTH_STRING = "250px";
-    private ProjectData projectData = new ProjectData();
+    private transient ProjectData projectData = new ProjectData();
 
     @Override
     public void initView() {
