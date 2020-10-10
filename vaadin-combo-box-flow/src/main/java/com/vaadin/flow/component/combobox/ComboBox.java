@@ -831,8 +831,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // is of in-memory type and it's not empty (no need to fetch from
         // empty data provider). Otherwise, the fetch will be postponed until
         // dropdown open event
-        final boolean enableFetch = InMemoryDataProvider.class
-                .isAssignableFrom(dataProvider.getClass())
+        final boolean enableFetch = dataProvider.isInMemory()
                 && !DataCommunicator.EmptyDataProvider.class
                         .isAssignableFrom(dataProvider.getClass());
 
@@ -1488,11 +1487,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @ClientCallable
     private void resetDataCommunicator() {
         dataCommunicator.reset();
-    }
-
-    @ClientCallable
-    private void fireItemCountEvent(int itemCount) {
-        dataCommunicator.fireItemCountEvent(itemCount);
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {

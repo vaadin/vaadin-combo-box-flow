@@ -107,9 +107,10 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
         waitForItems(comboBox, items -> items.size() == 1
                 && "Person 50".equals(getItemLabel(items, 0)));
 
-        // Item Count Event should be also triggered with value = 1
-        verifyDataProviderItemCount("Expected item count = 1 after applying "
-                + "the programmatic filter and text filter", 1);
+        // No item count change on server side, because the filtered items
+        // count are 2 < page size.
+        verifyDataProviderItemCount(
+                "Expected no item count change on server side", 2);
 
         // Reset client filter
         resetTextFilter(comboBox);

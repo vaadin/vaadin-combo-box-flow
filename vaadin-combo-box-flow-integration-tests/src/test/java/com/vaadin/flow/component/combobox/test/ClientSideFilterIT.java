@@ -83,7 +83,7 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void itemCountChange_clientFilterAppliedOnItemsCountLessThanPageSize_serverSideNotified() {
+    public void itemCountChange_clientFilterAppliedOnItemsCountLessThanPageSize_serverSideNotNotified() {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id(CLIENT_FILTER_COMBO_BOX);
 
@@ -102,9 +102,8 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
         waitForItems(comboBox, items -> items.size() == 3);
 
         Assert.assertEquals(
-                "Expected 3 items after filtering: 'Google Chrome', "
-                        + "'Mozilla Firefox', 'Microsoft Edge'",
-                3, getItemCount(CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID));
+                "Expected no item count change events on client filter change",
+                5, getItemCount(CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID));
     }
 
     @Test
@@ -126,6 +125,7 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         waitForItems(comboBox, items -> items.size() == 19);
 
+        // TODO: client filter should not fire the item count change event
         Assert.assertEquals("Expected 19 items after filtering", 19,
                 getItemCount(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID));
     }
@@ -149,6 +149,7 @@ public class ClientSideFilterIT extends AbstractComboBoxIT {
 
         waitForItems(comboBox, items -> items.size() == 12);
 
+        // TODO: client filter should not fire the item count change event
         Assert.assertEquals("Expected 12 items after filtering", 12,
                 getItemCount(BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID));
     }

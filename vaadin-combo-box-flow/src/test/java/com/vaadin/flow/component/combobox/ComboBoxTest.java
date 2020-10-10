@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,8 +33,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -351,8 +353,24 @@ public class ComboBoxTest {
         DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
         ui.add(comboBox);
 
-        DataProvider<Object, ?> dataProvider = Mockito
-                .spy(DataProvider.ofItems());
+        DataProvider<Object, Void> dataProvider = Mockito.spy(
+                new AbstractDataProvider<Object, Void>() {
+
+            @Override
+            public boolean isInMemory() {
+                return true;
+            }
+
+            @Override
+            public int size(Query query) {
+                return 0;
+            }
+
+            @Override
+            public Stream<Object> fetch(Query query) {
+                return Stream.empty();
+            }
+        });
 
         comboBox.setDataProvider(dataProvider, filter -> null);
 

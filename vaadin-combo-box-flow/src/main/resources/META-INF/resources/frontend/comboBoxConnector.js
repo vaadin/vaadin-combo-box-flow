@@ -21,7 +21,6 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
             const pageCallbacks = {};
             let cache = {};
             let lastFilter = '';
-            let lastItemCount = -1;
             const placeHolder = new Vaadin.ComboBoxPlaceholder();
             const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
@@ -344,22 +343,14 @@ import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-b
             // that may not reflect user's input.
             const performClientSideFilter = tryCatchWrapper(function (page, callback) {
 
-                let items = page;
+                let filteredItems = page;
 
                 if (comboBox.filter) {
-                    items = page.filter(item =>
+                    filteredItems = page.filter(item =>
                         comboBox.$connector.filter(item, comboBox.filter));
                 }
 
-                let filteredItemsCount = items.length;
-
-                // Send current filtered items count to the server, if changed
-                if (lastItemCount !== filteredItemsCount) {
-                    comboBox.$server.fireItemCountEvent(filteredItemsCount);
-                    lastItemCount = filteredItemsCount;
-                }
-
-                callback(items, filteredItemsCount);
+                callback(filteredItems, filteredItems.length);
             });
 
             // https://github.com/vaadin/vaadin-combo-box-flow/issues/232

@@ -38,7 +38,6 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -79,7 +78,6 @@ public class ComboBoxView extends DemoView {
         configurationForRequired(); // Validation
         customFiltering(); // Filtering
         filteringAndSortingWithDataView();
-        itemCountChangeNotificationWithDataView();
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
         themeVariantsTextAlign(); // Theme variants
@@ -458,32 +456,6 @@ public class ComboBoxView extends DemoView {
         personAgeFilter.setWidth(WIDTH_STRING);
         addCard("Filtering", "Filtering and Sorting with Data View", comboBox,
                 personAgeFilter, sortPersons);
-    }
-
-    private void itemCountChangeNotificationWithDataView() {
-        // begin-source-example
-        // source-example-heading: Notification of Items Count Change
-        ComboBox<String> comboBox = new ComboBox<>("Fruits");
-        comboBox.setPlaceholder("Enter a filter");
-
-        ComboBoxListDataView<String> dataView = comboBox.setItems("Apple",
-                "Orange", "Banana", "Kiwifruit", "Grapefruit");
-
-        Span fruitCountSpan = new Span(
-                "Fruits count: " + dataView.getItemCount());
-
-        // Client filter usually changes the displayed items count in combo
-        // box. With data view, one can subscribe to combo box's items count
-        // change events and get a notifications on server side.
-        dataView.addItemCountChangeListener(event -> fruitCountSpan
-                .setText("Fruits count: " + event.getItemCount()));
-
-        // end-source-example
-        HorizontalLayout layout = new HorizontalLayout(comboBox,
-                fruitCountSpan);
-        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
-
-        addCard("Filtering", "Notification of Items Count Change", layout);
     }
 
     private void customOptionsDemo() {
