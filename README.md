@@ -1,3 +1,10 @@
+[1] **Text for deprecated repos**
+
+ ⚠️ **This repository is deprecated**
+- Sources for this flow component can be found at https://github.com/vaadin/vaadin-flow-components
+- Tickets has been moved to the web component repository https://github.com/vaadin/vaadin-combo-box
+ 
+
 # ComboBox component for Vaadin Flow
 
 This project is the Component wrapper implementation of [`<vaadin-combo-box>`](https://github.com/vaadin/vaadin-combo-box) element
