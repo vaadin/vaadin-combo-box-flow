@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test;
 import java.util.List;
 import java.util.Map;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,21 +103,17 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         WebElement message = findElement(By.id("button-renderer-message"));
         Assert.assertEquals("Nothing clicked yet...", message.getText());
 
-        WebElement combo = findElement(By.id("button-renderer"));
-        WebElement textField = findInShadowRoot(combo, By.id("input")).get(0);
+        TestBenchElement combo = $("vaadin-combo-box").id("button-renderer");
+        WebElement textField = combo.$("*").id("input");
         // opens the dropdown
         clickElementWithJs(textField);
 
         // long trip to the depths of the component to find the button
-        WebElement overlay = findElement(
-                By.tagName("vaadin-combo-box-overlay"));
-        WebElement content = findInShadowRoot(overlay, By.id("content")).get(0);
-        WebElement ironList = findInShadowRoot(content, By.id("selector"))
-                .get(0);
-        WebElement item = ironList
-                .findElement(By.tagName("vaadin-combo-box-item"));
-        WebElement button = findInShadowRoot(item, By.cssSelector("button"))
-                .get(0);
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        TestBenchElement content = overlay.$("*").id("content");
+        TestBenchElement ironList = content.$("*").id("selector");
+        TestBenchElement item = ironList.$("vaadin-combo-box-item").first();
+        WebElement button = item.$("button").first();
         clickElementWithJs(button);
 
         Assert.assertEquals("Button clicked: foo", message.getText());
