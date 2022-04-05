@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -54,14 +55,11 @@ public class RefreshDataProviderIT extends AbstractComponentIT {
 
     private List<String> getItems() {
         findElement(By.tagName("vaadin-combo-box")).sendKeys(Keys.ARROW_DOWN);
-        WebElement overlay = findElement(
-                By.tagName("vaadin-combo-box-overlay"));
-        WebElement content = getInShadowRoot(overlay, By.id("content"));
-        WebElement selector = getInShadowRoot(content, By.id("selector"));
-        List<String> items = selector
-                .findElements(By.tagName("vaadin-combo-box-item")).stream()
-                .map(item -> getInShadowRoot(item,
-                        By.cssSelector("flow-component-renderer")))
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        TestBenchElement content = overlay.$("*").id("content");
+        TestBenchElement selector = content.$("*").id("selector");
+        List<String> items = selector.$("vaadin-combo-box-item").all().stream()
+                .map(item -> item.$("flow-component-renderer").first())
                 .map(WebElement::getText).collect(Collectors.toList());
         return items;
     }
